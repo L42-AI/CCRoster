@@ -1,6 +1,5 @@
 import pandas as pd
 import random
-from tqdm import tqdm
 
 """ Constraints """
 
@@ -105,7 +104,7 @@ def select_employee(av_dict):
 
     return random.choice(keys)
 
-def select_day(days_list):
+def select_day(days_list) -> str:
     return random.choice(days_list)
 
 """ Create """
