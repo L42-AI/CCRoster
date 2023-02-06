@@ -1,7 +1,6 @@
 import numpy as np
 from datetime import date
 from datetime import timedelta
-from tqdm import tqdm
 from data.assign import employee_list
 
 
@@ -14,9 +13,7 @@ class Generator:
     def __init__(self) -> None:
         self.employee_list = employee_list
         self.schedule = self.init_schedule()
-        print(self.schedule)
         self.fill_schedule()
-        print(self.schedule)
 
 
     """ INIT """
@@ -68,49 +65,40 @@ class Generator:
         """
         Find date of start of schedule
         """
-
-        # Set start date
-        start_date = self.get_date()
-
-        # Set day increase for increasing day count
-        day_increase = timedelta(1)
-
-        # Set start day
-        start_day = self.get_day(start_date)
-
-        # Find start date which must be a monday
-        # Start of the schdedule
-        while start_day != 'Monday':
-            start_date = start_date + day_increase
-            start_day = self.get_day(start_date)
-
-        return start_date
+        return self.get_schedule_boundary(start=True)
 
     def get_end_day(self) -> object:
         """
         Find date of end of schedule
         """
+        return self.get_schedule_boundary(start=False)
 
-        # Set end date
-        end_date = self.get_date()
+    def get_schedule_boundary(self, start) -> object:
+        """
+        Find date of start or end of schedule
+        """
+
+        # Set start or end date
+        schedule_date = self.get_date()
 
         # Set starting month
-        start_month = end_date.month
+        start_month = schedule_date.month
 
         # Set day increase for increasing day count
         day_increase = timedelta(1)
 
-        # Set end day
-        end_day = self.get_day(end_date)
+        # Set schedule day
+        schedule_day = self.get_day(schedule_date)
 
-        # Find end date which must be a monday
-        # End of the schdedule is the day before monday
-        # Month must be one further than start month
-        while end_day != 'Monday' or end_date.month != start_month + 1:
-            end_date = end_date + day_increase
-            end_day = self.get_day(end_date)
+        # Find start or end date
+        # Start of the schdedule: a Monday
+        # End of the schdedule: day before Monday and in next month
+        while schedule_day != 'Monday' or (not start and schedule_date.month != start_month + 1):
+            schedule_date = schedule_date + day_increase
+            schedule_day = self.get_day(schedule_date)
 
-        return end_date
+        return schedule_date
+
 
     """ METHODS """
 
