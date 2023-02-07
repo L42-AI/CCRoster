@@ -1,0 +1,5 @@
+pip install:
+timedate
+PySide6
+pandas
+numpy
