@@ -1,0 +1,19 @@
+KENNIS OPDOEN
+psite6
+daytime
+
+
+(1) opzet interface
+- werknemers toevoegen met eisen, alleen functionaliteit (naam, beschikbaarheid per dag per maand, hoeveelheid shifts)
+-- eerst prompen met welke shifts een werknemer mag draaien (begin om het uur, half uur of per halve dag)
+-- de eisen voor tijd opdelen in shifts die vast gesteld staan, waardoor eindrooster niet opgedeeld hoeft worden in benodigde shifts
+- eindoverzicht maken, alleen functionaliteit
+- werknemers verwijderen, alleen functionaliteit
+- layout tekenen op papier, juist niet praktisch nadenken maar alsof we elke optie kunnen maken
+
+- benodigde shifts in kunnen voeren, alleen functionaliteit (google calendar?)
+-- templates hiervan kunnen opslaan (koningsdag wil je miss jaar erop zelfde openingstijden)
+
+
+(2) marktonderzoek
+- nadenken welke bedrijven we willen helpen
