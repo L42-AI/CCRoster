@@ -2,18 +2,21 @@ import numpy as np
 from datetime import date
 from datetime import timedelta
 from data.assign import employee_list
+from classes.representation.maluscalc import MalusCalculator
 
 
 
 SCHEDULE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 DAILY_SHIFTS = ['730 - 1200', '1200 - 1730']
-EMPLYEE_PER_SHIFT = 1
+EMPLOYEE_PER_SHIFT = 1
 
 class Generator:
     def __init__(self) -> None:
         self.employee_list = employee_list
         self.schedule = self.init_schedule()
         self.fill_schedule()
+        self.improve()
+
 
 
     """ INIT """
@@ -117,10 +120,13 @@ class Generator:
                 av_day = availability_code[1]
                 av_shift = availability_code[2]
 
-
-                if len(self.schedule[av_week][av_day][av_shift]) == EMPLYEE_PER_SHIFT:
+                if len(self.schedule[av_week][av_day][av_shift]) == EMPLOYEE_PER_SHIFT:
                     fail_count += 1
                     continue
                 else:
                     self.schedule[av_week][av_day][av_shift].append(name)
                     continue
+
+    def improve(self) -> None:
+        MC = MalusCalculator(self.schedule)
+        MC.calc_malus()

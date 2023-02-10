@@ -4,7 +4,7 @@ import random
 
 def cra() -> list:
     av = [0,0,0]
-    av[0] = random.randint(0,3)
+    av[0] = random.randint(0,2)
     av[1] = random.randint(0,6)
     av[2] = random.randint(0,1)
     return av
