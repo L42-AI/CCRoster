@@ -3,21 +3,16 @@ from datetime import date
 from datetime import timedelta
 from data.assign import employee_list
 from classes.representation.maluscalc import MalusCalculator
-
-
-
-SCHEDULE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-DAILY_SHIFTS = ['730 - 1200', '1200 - 1730']
-EMPLOYEE_PER_SHIFT = 1
+from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
+import random
 
 class Generator:
     def __init__(self) -> None:
         self.employee_list = employee_list
         self.schedule = self.init_schedule()
         self.fill_schedule()
+        print(self.schedule)
         self.improve()
-
-
 
     """ INIT """
 
@@ -30,8 +25,12 @@ class Generator:
         start_date = self.get_start_day()
         end_date = self.get_end_day()
 
-        # Calculate the amount of days to be scheduled
-        scheduling_days = (end_date - start_date).days
+        """ Do not delete """
+        # # Calculate the amount of days to be scheduled
+        # scheduling_days = (end_date - start_date).days
+
+        # Set the amount of days for development
+        scheduling_days = 28
 
         # Set the amount of weeks, days and shifts to be scheduled
         weeks = scheduling_days // len(SCHEDULE_DAYS)
@@ -110,22 +109,40 @@ class Generator:
         Method to fill the schedule
         """
 
+        # Make set to track amount of filled timeslots
+        filled_schedule_set = set()
+        failcounter = 0
 
-        fail_count = 0
-        while fail_count <= 100000:
-            for employee in self.employee_list:
-                name = employee.get_name()
-                availability_code = employee.get_av()
-                av_week = availability_code[0]
-                av_day = availability_code[1]
-                av_shift = availability_code[2]
+        # While set is not length of filled schedule
+        while len(filled_schedule_set) < len(DAILY_SHIFTS) * len(SCHEDULE_DAYS) * 4:
 
-                if len(self.schedule[av_week][av_day][av_shift]) == EMPLOYEE_PER_SHIFT:
-                    fail_count += 1
-                    continue
-                else:
-                    self.schedule[av_week][av_day][av_shift].append(name)
-                    continue
+            # Reset schedule if too many failed tries
+            if failcounter > 100000:
+                self.schedule = self.init_schedule()
+                failcounter = 0
+
+            # Get employee name and availability
+            employee = random.choice(self.employee_list)
+            name = employee.get_name()
+            availability_code = employee.get_av()
+
+            # Skip if no availability
+            if availability_code == None:
+                continue
+
+            # Unpack code for indexing
+            av_week = availability_code[0]
+            av_day = availability_code[1]
+            av_shift = availability_code[2]
+
+            # If slot in schedule is full
+            if len(self.schedule[av_week][av_day][av_shift]) == EMPLOYEE_PER_SHIFT:
+                filled_schedule_set.add((av_week, av_day, av_shift))
+                failcounter += 1
+                continue
+            else:
+                self.schedule[av_week][av_day][av_shift].append(name)
+                continue
 
     def improve(self) -> None:
         MC = MalusCalculator(self.schedule)
