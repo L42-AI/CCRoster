@@ -1,13 +1,21 @@
 import sys
-from PySide2.QtWidgets import QApplication, QDialog, QListWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
+from PySide2.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+                               QLabel, QLineEdit, QPushButton, QWidget, QListWidget, QDialog)
 
-class TimeSlotSetupDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Employee Scheduling")
+        self.setGeometry(100, 100, 800, 600)
+
+        # Tab widget
+        self.tabs = QTabWidget()
+        self.setCentralWidget(self.tabs)
+
+        self.tab1 = QDialog()
+        self.tabs.addTab(self.tab1, "Dienst Uren")
 
         self.time_slots = []
-
-        self.setWindowTitle("Time Slot Setup")
 
         self.time_slot_list = QListWidget()
         self.time_slot_list.itemDoubleClicked.connect(self.edit_time_slot)
@@ -34,7 +42,6 @@ class TimeSlotSetupDialog(QDialog):
         button_layout.addWidget(self.edit_time_slot_button)
         button_layout.addWidget(self.delete_time_slot_button)
 
-
         layout = QVBoxLayout()
         layout.addWidget(self.time_slot_list)
         layout.addWidget(self.start_time_label)
@@ -43,7 +50,27 @@ class TimeSlotSetupDialog(QDialog):
         layout.addWidget(self.end_time_edit)
         layout.addLayout(button_layout)
 
-        self.setLayout(layout)
+        self.tab1.setLayout(layout)
+
+        # Tab 2: Assign Employees
+        self.tab2 = QWidget()
+        self.tabs.addTab(self.tab2, "Assign Employees")
+        self.tab2_layout = QVBoxLayout(self.tab2)
+
+        self.employee_grid = QGridLayout()
+        self.tab2_layout.addLayout(self.employee_grid)
+
+        self.employee_names = []
+        self.employee_availability = {}
+
+        self.add_employee_layout = QHBoxLayout()
+        self.employee_name_input = QLineEdit()
+        self.add_employee_button = QPushButton("Add Employee")
+        self.add_employee_button.clicked.connect(self.add_employee)
+        self.add_employee_layout.addWidget(QLabel("Employee Name:"))
+        self.add_employee_layout.addWidget(self.employee_name_input)
+        self.add_employee_layout.addWidget(self.add_employee_button)
+        self.tab2_layout.addLayout(self.add_employee_layout)
 
     def add_time_slot(self):
         start_time = self.start_time_edit.text()
@@ -94,8 +121,12 @@ class TimeSlotSetupDialog(QDialog):
             self.start_time_edit.setText('')
             self.end_time_edit.setText('')
 
+
+    def add_employee():
+        pass
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    dialog = TimeSlotSetupDialog()
-    dialog.show()
-    sys.exit(app.exec_())
+    window = QApplication()
+    app = MainWindow()
+    app.show()
+    sys.exit(window.exec_())
