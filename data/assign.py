@@ -1,21 +1,64 @@
 from classes.representation.employee import Employee
 import random
 
+from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS
 
 def cra() -> list:
     av = [0,0,0]
-    av[0] = random.randint(0,2)
-    av[1] = random.randint(0,6)
-    av[2] = random.randint(0,1)
+    av[0] = random.randint(0,3)
+    av[1] = random.randint(0,len(SCHEDULE_DAYS) - 1)
+    av[2] = random.randint(0,len(DAILY_SHIFTS) - 1)
     return av
 
-
-global employee_list
 employee_list = []
 
-employee_list.append(Employee('A. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
-employee_list.append(Employee('B. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
-employee_list.append(Employee('C. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
-employee_list.append(Employee('D. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
-employee_list.append(Employee('E. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
-employee_list.append(Employee('F. Becker', [cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra(),cra()], True))
+employee_list.append(Employee('E. Deckers', [[0,0,0],[0,0,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
+                                             [1,0,0],[1,0,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
+                                             [2,0,0],[2,0,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
+                                             [3,0,0],[3,0,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
+                                             {0:2, 1:2, 2:2, 3:2}, 12, True))
+
+employee_list.append(Employee('S. van Geldere', [[0,0,0],[0,0,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,5,0],[0,5,1],[0,4,0],[0,4,1],
+                                                 [1,0,0],[1,0,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,5,0],[1,5,1],[1,4,0],[1,4,1],
+                                                 [2,0,0],[2,0,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,5,0],[2,5,1],[2,4,0],[2,4,1],
+                                                 [3,0,0],[3,0,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,5,0],[3,5,1],[3,4,0],[3,4,1]],
+                                                 {0:4, 1:4, 2:4, 3:4}, 12, True))
+
+employee_list.append(Employee("S. van 't Hullenaar", [[0,4,0],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
+                                                      [1,4,0],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
+                                                      [2,4,0],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
+                                                      [3,4,0],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
+                                                      {0:2, 1:2, 2:2, 3:2}, 12, True))
+
+employee_list.append(Employee('I. Koster', [[0,4,0],[0,4,1],[0,5,0],[0,5,1],[0,6,0],
+                                            [1,4,0],[1,4,1],[1,5,0],[1,5,1],[1,6,0],
+                                            [2,4,0],[2,4,1],[2,5,0],[2,5,1],[2,6,0],
+                                            [3,4,0],[3,4,1],[3,5,0],[3,5,1],[3,6,0]],
+                                            {0:2, 1:2, 2:2, 3:2}, 12, True))
+
+employee_list.append(Employee('A. Offringa', [],
+                                             {0:0, 1:0, 2:0, 3:0}, 12, True))
+
+employee_list.append(Employee('P. Putman', [],
+                                            {0:0, 1:0, 2:0, 3:0}, 12, True))
+
+employee_list.append(Employee('D. Verstegen', [[0,1,0],[0,1,1],[0,6,0],[0,6,1],
+                                               [1,1,0],[1,1,1],[1,6,0],[1,6,1],
+                                               [2,1,0],[2,1,1],[2,6,0],[2,6,1],
+                                               [3,1,0],[3,1,1],[3,6,0],[3,6,1]],
+                                               {0:2, 1:2, 2:2, 3:2}, 12, True))
+
+employee_list.append(Employee('M. van Vuren', [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,4,0],[0,4,1],
+                                               [1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,4,0],[1,4,1],
+                                               [2,0,0],[2,0,1],[2,1,0],[2,1,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,4,0],[2,4,1],
+                                               [3,0,0],[3,0,1],[3,1,0],[3,1,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,4,0],[3,4,1]],
+                                               {0:2, 1:2, 2:2, 3:2}, 12, True))
+
+employee_list.append(Employee('L. Wolff', [],
+                                           {0:0, 1:0, 2:0, 3:0}, 12, True))
+
+employee_list.append(Employee('T. van der Zalm', [[0,0,1],[0,1,0],[0,1,1],[0,3,0],[0,3,1],[0,4,0],[0,4,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
+                                                  [1,0,1],[1,1,0],[1,1,1],[1,3,0],[1,3,1],[1,4,0],[1,4,1],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
+                                                  [2,0,1],[2,1,0],[2,1,1],[2,3,0],[2,3,1],[2,4,0],[2,4,1],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
+                                                  [3,0,1],[3,1,0],[3,1,1],[3,3,0],[3,3,1],[3,4,0],[3,4,1],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
+                                                  {0:2, 1:2, 2:2, 3:2}, 12, True))
