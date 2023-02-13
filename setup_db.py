@@ -16,9 +16,9 @@ def setup():
         passwd='rooster'
         )
 
-    mycursor = db.cursor()
+    mycursor = db.cursor() # dit is een class die te vergelijken is met hoe wij sqlite gebruikte, hierin type je je commands
     mycursor.execute('CREATE DATABASE testrooster')
-    db.commit()
+    db.commit() # commit is nodig wanneer je wat aan de db toevoegd, dus niet als je een een berekening doet of wat opvraagt
 
 
 def fill():
@@ -40,8 +40,8 @@ def fill():
     mycursor.execute("CREATE TABLE schedule (day VARCHAR(10), start SMALLINT, end SMALLINT, employeeID INT PRIMARY KEY, FOREIGN KEY(employeeID) REFERENCES Employee(id))")
     db.commit()
 
-    mycursor.execute("DESCRIBE Employee")
-    for x in mycursor:
+    mycursor.execute("DESCRIBE Employee") # hiermee haal je info op uit je db, en zet die niet in je terminal zoals wij deden met sqlite, maar je zet het in de class
+    for x in mycursor: # vandaar dat je over je cursor heen moet loopen
         print(x)
 
 def drop():
@@ -53,7 +53,7 @@ def drop():
 
     mycursor = db.cursor()
     mycursor.execute("SHOW DATABASES")
-    databases = mycursor.fetchall()
+    databases = mycursor.fetchall() 
     if ('testrooster',) in databases:
         mycursor.execute('DROP DATABASE testrooster')
         db.commit()
