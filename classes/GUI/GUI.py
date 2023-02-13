@@ -42,15 +42,13 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.edit_time_slot_button)
         button_layout.addWidget(self.delete_time_slot_button)
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self.tab1)
         layout.addWidget(self.time_slot_list)
         layout.addWidget(self.start_time_label)
         layout.addWidget(self.start_time_edit)
         layout.addWidget(self.end_time_label)
         layout.addWidget(self.end_time_edit)
         layout.addLayout(button_layout)
-
-        self.tab1.setLayout(layout)
 
         # Tab 2: Assign Employees
         self.tab2 = QWidget()
