@@ -10,6 +10,9 @@ class Employee:
 
     """ Get """
 
+    def get_full_av(self) -> list:
+        return self.availability
+
     def get_av(self) -> list:
         if len(self.availability) > 0:
             return random.choice(self.availability)
