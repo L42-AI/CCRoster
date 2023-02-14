@@ -24,4 +24,8 @@ for shift in DAILY_SHIFTS:
     DAILY_SHIFTS[shift]['datetime'] = list(shift_to_datetime(DAILY_SHIFTS[shift]['string']))
 
     # Calculate the duration of a given shift in datetime object
-    DAILY_SHIFTS[shift]['duration'] = get_duration(DAILY_SHIFTS[shift]['datetime'])
+    DAILY_SHIFTS[shift]['duration'] = get_duration(DAILY_SHIFTS[shift]['datetime']).seconds / 3600
+
+if __name__ == "__main__":
+    for key in DAILY_SHIFTS:
+        print(DAILY_SHIFTS[key]['duration'])

@@ -1,13 +1,11 @@
 from data.assign import employee_list
-from classes.representation.GUI_output import DAILY_SHIFTS_TIME
+from classes.representation.GUI_output import DAILY_SHIFTS
 
 class MalusCalculator:
     def __init__(self, schedule) -> None:
-        self.employee_list = employee_list
         self.employee_dict = self.init_employee_dict(employee_list)
         self.schedule = schedule
         self.malus = 0
-        self.costs = 0
 
     """ Init """
 
@@ -27,7 +25,14 @@ class MalusCalculator:
     def calc_malus(self):
         weekly_shift_dict = self.weekly_max()
         self.compute_weekly_malus(weekly_shift_dict)
-        print(self.malus)
+        wage_costs = self.get_wage_costs_per_week()
+
+        print(f'Malus: {self.malus}')
+
+        for i, key in enumerate(wage_costs):
+            if key.startswith('week'):
+                print(f'Week {i} Costs: {wage_costs[key]}')
+
 
 
     def weekly_max(self) -> dict:
@@ -70,12 +75,28 @@ class MalusCalculator:
                 self.malus += week_max_difference if week_max_difference > 0 else 0
 
 
-    """ Not working """
-    def get_wage_costs_per_week(self) -> float:
-        wage_costs = 0.0
+    def get_wage_costs_per_week(self) -> dict:
+        wage_costs = {'schedule': 0.0}
+
         for week_num, week in enumerate(self.schedule):
+
+            if f'week {week_num}' not in wage_costs:
+                wage_costs[f'week {week_num}'] = 0.0
+
             for day_num, day in enumerate(week):
+
+                if f'day {day_num}' not in wage_costs:
+                    wage_costs[f'day {day_num}'] = 0.0
+
                 for shift_num, shift in enumerate(day):
-                    for employee in shift:
-                        wage_costs += employee.get_wage() * DAILY_SHIFTS_TIME[shift_num]
+                    for employee_name in shift:
+
+                        employee_obj = self.get_employee_object(employee_name)
+
+                        wage_cost = employee_obj.get_wage() * DAILY_SHIFTS[f'shift {shift_num}']['duration']
+
+                        wage_costs['schedule'] += wage_cost
+                        wage_costs[f'week {week_num}'] += wage_cost
+                        wage_costs[f'day {day_num}'] += wage_cost
+
         return wage_costs
