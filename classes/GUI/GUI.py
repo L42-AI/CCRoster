@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
 
+        # Tab 1
         self.tab1 = QDialog()
         self.tabs.addTab(self.tab1, "Dienst Uren")
 
@@ -50,9 +51,9 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.end_time_edit)
         layout.addLayout(button_layout)
 
-        # Tab 2: Assign Employees
+        # Tab 2: Add Employees
         self.tab2 = QWidget()
-        self.tabs.addTab(self.tab2, "Assign Employees")
+        self.tabs.addTab(self.tab2, "Add Employees")
         self.tab2_layout = QVBoxLayout(self.tab2)
 
         self.employee_grid = QGridLayout()
@@ -69,6 +70,12 @@ class MainWindow(QMainWindow):
         self.add_employee_layout.addWidget(self.employee_name_input)
         self.add_employee_layout.addWidget(self.add_employee_button)
         self.tab2_layout.addLayout(self.add_employee_layout)
+
+        # Tab 3: Assign Employee Availability
+        self.tab3 = QWidget()
+        self.tabs.addTab(self.tab3, "Employee Availability")
+        self.tab2_layout = QVBoxLayout(self.tab3)
+        
 
     def add_time_slot(self):
         start_time = self.start_time_edit.text()
