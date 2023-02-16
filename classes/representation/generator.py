@@ -3,6 +3,7 @@ import numpy as np
 import random
 
 from classes.representation.maluscalc import MalusCalculator
+from classes.algorithms.switch import Switch
 from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
 from data.assign import employee_list
 
@@ -138,3 +139,4 @@ class Generator:
     def improve(self) -> None:
         MC = MalusCalculator(self.schedule)
         MC.calc_malus()
+        Switch.random(self.schedule)
