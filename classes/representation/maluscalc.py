@@ -28,10 +28,12 @@ class MalusCalculator:
         wage_costs = self.get_wage_costs_per_week()
 
         print(f'Malus: {self.malus}')
-
-        for i, key in enumerate(wage_costs):
+        print(wage_costs)
+        count = 0
+        for key in wage_costs:
             if key.startswith('week'):
-                print(f'Week {i} Costs: {wage_costs[key]}')
+                count += 1
+                print(f"Week {count} Costs: {wage_costs[key]['total']}")
 
 
 
@@ -81,12 +83,15 @@ class MalusCalculator:
         for week_num, week in enumerate(self.schedule):
 
             if f'week {week_num}' not in wage_costs:
-                wage_costs[f'week {week_num}'] = 0.0
+                wage_costs[f'week {week_num}'] = {}
 
             for day_num, day in enumerate(week):
 
-                if f'day {day_num}' not in wage_costs:
-                    wage_costs[f'day {day_num}'] = 0.0
+                if 'total' not in wage_costs[f'week {week_num}']:
+                    wage_costs[f'week {week_num}']['total'] = 0.0
+
+                if f'day {day_num}' not in wage_costs[f'week {week_num}']:
+                    wage_costs[f'week {week_num}'][f'day {day_num}'] = 0.0
 
                 for shift_num, shift in enumerate(day):
                     for employee_name in shift:
@@ -96,7 +101,7 @@ class MalusCalculator:
                         wage_cost = employee_obj.get_wage() * DAILY_SHIFTS[f'shift {shift_num}']['duration']
 
                         wage_costs['schedule'] += wage_cost
-                        wage_costs[f'week {week_num}'] += wage_cost
-                        wage_costs[f'day {day_num}'] += wage_cost
+                        wage_costs[f'week {week_num}'][f'day {day_num}'] += wage_cost
+                        wage_costs[f'week {week_num}']['total'] += wage_cost
 
         return wage_costs

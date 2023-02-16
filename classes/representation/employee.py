@@ -10,7 +10,7 @@ class Employee:
 
     """ Get """
 
-    def get_full_av(self) -> list:
+    def get_full_av(self) -> set:
         return self.availability
 
     def get_av(self) -> list:

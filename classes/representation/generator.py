@@ -1,10 +1,10 @@
+from datetime import date, timedelta
 import numpy as np
-from datetime import date
-from datetime import timedelta
-from data.assign import employee_list
+import random
+
 from classes.representation.maluscalc import MalusCalculator
 from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
-import random
+from data.assign import employee_list
 
 class Generator:
     def __init__(self) -> None:
@@ -25,12 +25,8 @@ class Generator:
         start_date = self.get_start_day()
         end_date = self.get_end_day()
 
-        """ Do not delete """
-        # # Calculate the amount of days to be scheduled
-        # scheduling_days = (end_date - start_date).days
-
-        # Set the amount of days for development
-        scheduling_days = 28
+        # Calculate the amount of days to be scheduled
+        scheduling_days = (end_date - start_date).days
 
         # Set the amount of weeks, days and shifts to be scheduled
         weeks = scheduling_days // len(SCHEDULE_DAYS)
@@ -65,41 +61,36 @@ class Generator:
 
     def get_start_day(self) -> object:
         """
-        Find date of start of schedule
+        Find date of start of schedule as the first Monday of the current month
         """
         return self.get_schedule_boundary(start=True)
 
     def get_end_day(self) -> object:
         """
-        Find date of end of schedule
+        Find date of end of schedule as the first Monday of the next month
         """
         return self.get_schedule_boundary(start=False)
 
-    def get_schedule_boundary(self, start) -> object:
+    def get_schedule_boundary(self, start):
         """
         Find date of start or end of schedule
         """
 
-        # Set start or end date
-        schedule_date = self.get_date()
+        # Set todays date
+        today = date.today()
 
-        # Set starting month
-        start_month = schedule_date.month
+        if start:
+            # Set date of the first day of the month
+            interest_date = date(today.year, today.month, 1)
+        else:
+            # Set date of the first day of the next month
+            next_month_date = today.replace(day=28) + timedelta(days=4)
+            interest_date = date(next_month_date.year, next_month_date.month, 1)
 
-        # Set day increase for increasing day count
-        day_increase = timedelta(1)
-
-        # Set schedule day
-        schedule_day = self.get_day(schedule_date)
-
-        # Find start or end date
-        # Start of the schdedule: a Monday
-        # End of the schdedule: day before Monday and in next month
-        while schedule_day != 'Monday' or (not start and schedule_date.month != start_month + 1):
-            schedule_date = schedule_date + day_increase
-            schedule_day = self.get_day(schedule_date)
-
-        return schedule_date
+        # Find closest Monday and set output date
+        days_to_monday = (7 - interest_date.weekday()) % 7
+        interest_date = interest_date + timedelta(days=days_to_monday)
+        return interest_date
 
 
     """ METHODS """

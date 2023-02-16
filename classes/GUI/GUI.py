@@ -79,7 +79,10 @@ class MainWindow(QMainWindow):
     def init_tab_2(self):
         self.tab2 = QWidget()
         self.tabs.addTab(self.tab2, "Werknemers")
-        self.tab2_layout = QHBoxLayout(self.tab2)
+        self.tab2_layout = QVBoxLayout(self.tab2)
+
+        self.employee_list = QListWidget()
+        self.tab2_layout.addWidget(self.employee_list)
 
         self.employee_grid = QGridLayout()
         self.tab2_layout.addLayout(self.employee_grid)
@@ -113,8 +116,6 @@ class MainWindow(QMainWindow):
         self.add_employee_layout.addWidget(self.add_employee_button)
         self.tab2_layout.addLayout(self.add_employee_layout)
 
-        self.employee_list = QListWidget()
-        self.tab2_layout.addWidget(self.employee_list)
 
     def init_tab_3(self):
 
@@ -173,7 +174,7 @@ class MainWindow(QMainWindow):
         # Create the scrollable schedule view with checkboxes
         self.schedule_scroll = QScrollArea()
         self.schedule_scroll.setWidgetResizable(True)
-        self.schedule_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        # self.schedule_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         self.weeks_layout = self.init_schedule_av()
 
