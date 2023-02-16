@@ -16,34 +16,7 @@ class ScheduleWidget(QWidget):
         self.timeslots = ["7:00-12:00", "12:00-18:00"]
         self.selected_employee = None
 
-        # Create the scrollable schedule view with checkboxes
-        self.schedule_scroll = QScrollArea()
-        self.schedule_scroll.setWidgetResizable(True)
-        self.schedule_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-
-        self.weeks_layout = QHBoxLayout()
-
-        for week_num in range(4):
-            week_layout = QHBoxLayout()
-            week_layout.setSpacing(10)
-            for day in self.days:
-                day_label = QLabel(day)
-                day_layout = QVBoxLayout()
-                day_layout.addWidget(day_label)
-                for i, timeslot in enumerate(self.timeslots):
-                    checkbox = QCheckBox(timeslot)
-                    checkbox.setChecked(False)
-                    checkbox.week = week_num
-                    checkbox.day = self.days.index(day)
-                    checkbox.timeslot = i
-                    checkbox.clicked.connect(self.checkbox_clicked)
-
-                    day_layout.addWidget(checkbox)
-                week_layout.addLayout(day_layout)
-            self.weeks_layout.addLayout(week_layout)
-        self.schedule_widget = QWidget()
-        self.schedule_widget.setLayout(self.weeks_layout)
-        self.schedule_scroll.setWidget(self.schedule_widget)
+        self.init_schedule_widget()
 
         # Create the left widget with an overview of all possible timeslots
         self.timeslots_label = QLabel("Shifts")
@@ -86,14 +59,77 @@ class ScheduleWidget(QWidget):
         self.main_layout.addLayout(self.bottom_layout)
         self.setLayout(self.main_layout)
 
+    """ Init """
+
     def init_student_object_dict(self) -> dict:
         dictionary = {}
         for employee in employee_list:
             dictionary[employee.get_name()] = employee
         return dictionary
 
+    def init_schedule_widget(self) -> None:
+        # Create the scrollable schedule view with checkboxes
+        self.schedule_scroll = QScrollArea()
+        self.schedule_scroll.setWidgetResizable(True)
+        self.schedule_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+        self.weeks_layout = self.init_schedule_av()
+
+        self.schedule_widget = QWidget()
+        self.schedule_widget.setLayout(self.weeks_layout)
+        self.schedule_scroll.setWidget(self.schedule_widget)
+
+    def init_schedule_av(self) -> object:
+        weeks_layout = QHBoxLayout()
+        for week_num in range(4):
+            week_layout = QHBoxLayout()
+            week_layout.setSpacing(10)
+
+            for day_num, day in enumerate(self.days):
+                day_label = QLabel(day)
+                day_layout = QVBoxLayout()
+                day_layout.addWidget(day_label)
+
+                for timeslot_num, timeslot in enumerate(self.timeslots):
+                    checkbox = QCheckBox(timeslot)
+                    checkbox.week = week_num
+                    checkbox.day = day_num
+                    checkbox.timeslot = timeslot_num
+                    checkbox.clicked.connect(self.checkbox_clicked)
+
+                    checkbox.setChecked(False)
+
+                    day_layout.addWidget(checkbox)
+
+                week_layout.addLayout(day_layout)
+
+            weeks_layout.addLayout(week_layout)
+        return weeks_layout
+
+    """ Get """
+
     def get_student_object(self, name: str) -> object:
         return self.student_object_dict.get(name)
+
+    """ Methods """
+
+    def update_schedule_availability(self):
+        for week_num in range(self.weeks_layout.count()):
+            child_layout = self.weeks_layout.itemAt(week_num)
+            for day_num in range(child_layout.count()):
+                second_child_layout = child_layout.itemAt(day_num)
+                for shift_num in range(second_child_layout.count()):
+                    child = second_child_layout.itemAt(shift_num).widget()
+
+                    # Exclude the labels
+                    if isinstance(child, QLabel):
+                        continue
+
+                    # Set checkbox to true if employee is available
+                    if [child.week, child.day, child.timeslot] in self.selected_employee.availability:
+                        child.setChecked(True)
+                    else:
+                        child.setChecked(False)
 
     def set_employee(self, name):
         self.selected_employee = self.get_student_object(name)
@@ -103,6 +139,8 @@ class ScheduleWidget(QWidget):
             self.employee_wage_label.setText("Wage: N/A")
         else:
             self.employee_wage_label.setText(f"Wage: €{self.selected_employee.get_wage()}")
+
+        self.update_schedule_availability()
 
     def checkbox_clicked(self):
         if self.selected_employee != None:
