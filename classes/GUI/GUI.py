@@ -2,7 +2,7 @@ import sys
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget, QDialog, QComboBox,
-                               QScrollArea, QCheckBox)
+                               QScrollArea, QCheckBox, QWidgetItem)
 
 from data.assign import employee_list
 
@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Employee Scheduling")
-        self.setGeometry(100, 100, 867, 323)
+        self.setGeometry(100, 100, 875, 625)
 
         # Define the days of the week and timeslots
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -78,28 +78,48 @@ class MainWindow(QMainWindow):
 
     def init_tab_2(self):
         self.tab2 = QWidget()
-        self.tabs.addTab(self.tab2, "Add Employees")
-        self.tab2_layout = QVBoxLayout(self.tab2)
+        self.tabs.addTab(self.tab2, "Werknemers")
+        self.tab2_layout = QHBoxLayout(self.tab2)
 
         self.employee_grid = QGridLayout()
         self.tab2_layout.addLayout(self.employee_grid)
 
         self.employee_names = []
-        self.employee_availability = {}
 
-        self.add_employee_layout = QHBoxLayout()
+        self.add_employee_layout = QVBoxLayout()
+        self.employee_extra_layout = QHBoxLayout()
+        self.employee_wage = QVBoxLayout()
+        self.employee_onboarding = QVBoxLayout()
+
         self.employee_name_input = QLineEdit()
+        self.employee_wage_input = QLineEdit()
+        self.employee_onboarding_input = QCheckBox()
         self.add_employee_button = QPushButton("Add Employee")
         self.add_employee_button.clicked.connect(self.add_employee)
+
+        self.employee_wage.addWidget(QLabel("Hourly Wage:"))
+        self.employee_wage.addWidget(self.employee_wage_input)
+
+        self.employee_onboarding.addWidget(QLabel("Onboarding:"))
+        self.employee_onboarding.addWidget(self.employee_onboarding_input)
+
+        self.employee_extra_layout.addLayout(self.employee_wage)
+        self.employee_extra_layout.addLayout(self.employee_onboarding)
+
+
         self.add_employee_layout.addWidget(QLabel("Employee Name:"))
         self.add_employee_layout.addWidget(self.employee_name_input)
+        self.add_employee_layout.addLayout(self.employee_extra_layout)
         self.add_employee_layout.addWidget(self.add_employee_button)
         self.tab2_layout.addLayout(self.add_employee_layout)
+
+        self.employee_list = QListWidget()
+        self.tab2_layout.addWidget(self.employee_list)
 
     def init_tab_3(self):
 
         self.tab3 = QWidget()
-        self.tabs.addTab(self.tab3, "Employee Availability")
+        self.tabs.addTab(self.tab3, "Beschikbaarheid")
 
         self.init_schedule_widget()
 
@@ -162,30 +182,50 @@ class MainWindow(QMainWindow):
         self.schedule_scroll.setWidget(self.schedule_widget)
 
     def init_schedule_av(self) -> object:
-        weeks_layout = QHBoxLayout()
+        """ Create content of schedule widget """
+
+        # Create layout
+        weeks_layout = QVBoxLayout()
+
+        # For each week:
         for week_num in range(4):
+
+            # Make a layout for the week
             week_layout = QHBoxLayout()
             week_layout.setSpacing(10)
 
+            # For each day:
             for day_num, day in enumerate(self.days):
+
+                # Create a label and a layout for each day
                 day_label = QLabel(day)
                 day_layout = QVBoxLayout()
                 day_layout.addWidget(day_label)
 
+                # For each timeslot
                 for timeslot_num, timeslot in enumerate(self.timeslots):
+
+                    # Make checkbox
                     checkbox = QCheckBox(timeslot)
                     checkbox.week = week_num
                     checkbox.day = day_num
                     checkbox.timeslot = timeslot_num
                     checkbox.clicked.connect(self.checkbox_clicked)
-
                     checkbox.setChecked(False)
 
+                    # Add to day layout
                     day_layout.addWidget(checkbox)
 
+                # Add each day to the week layout
                 week_layout.addLayout(day_layout)
 
+            # Add each week to the schedule
             weeks_layout.addLayout(week_layout)
+
+            # Add a seperating label in between the weeks
+            if week_num < 3:
+                weeks_layout.addWidget(QLabel('==============================================================================================='))
+
         return weeks_layout
 
     """ Get """
@@ -196,11 +236,28 @@ class MainWindow(QMainWindow):
     """ Methods """
 
     def update_schedule_availability(self):
+        """ Update the availability checkboxes based on the availability of the employee instance """
+
+        # For each week
         for week_num in range(self.weeks_layout.count()):
+
+            # Find the child layout containing all the days
             child_layout = self.weeks_layout.itemAt(week_num)
+
+            # Skip if child is not layout containing days
+            if isinstance(child_layout, QWidgetItem):
+                continue
+
+            # For each day
             for day_num in range(child_layout.count()):
+
+                # Find the child layout containing all the days
                 second_child_layout = child_layout.itemAt(day_num)
+
+                # For each shift
                 for shift_num in range(second_child_layout.count()):
+
+                    # Find the child widgets
                     child = second_child_layout.itemAt(shift_num).widget()
 
                     # Exclude the labels
@@ -214,24 +271,39 @@ class MainWindow(QMainWindow):
                         child.setChecked(False)
 
     def set_employee(self, name):
+
+        # Get student object
         self.selected_employee = self.get_student_object(name)
+
+        # Set the name
         self.employee_name_label.setText(name)
 
-        if self.selected_employee == None:
-            self.employee_wage_label.setText("Wage: N/A")
-        else:
+        # Only set wage if student is something
+        if self.selected_employee != None:
             self.employee_wage_label.setText(f"Wage: €{self.selected_employee.get_wage()}")
+        else:
+            self.employee_wage_label.setText("Wage: N/A")
 
+        # Update the availability checboxes
         self.update_schedule_availability()
 
     def checkbox_clicked(self):
+
+        # Only execute if a valid employee is selected
         if self.selected_employee != None:
+
+            # Find sending checkbox
             checkbox = self.sender()
+
+            # Extract info
             week_num = checkbox.week
             day = checkbox.day
             timeslot_num = checkbox.timeslot
+
+            # Create timeslot
             timeslot = [week_num, day, timeslot_num]
 
+            # append or remove timeslot from availability depending on checkbox state state
             if checkbox.isChecked():
                 if timeslot not in self.selected_employee.availability:
                     self.selected_employee.availability.append(timeslot)
