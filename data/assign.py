@@ -3,13 +3,6 @@ import random
 
 from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS
 
-def cra() -> list:
-    av = [0,0,0]
-    av[0] = random.randint(0,3)
-    av[1] = random.randint(0,len(SCHEDULE_DAYS) - 1)
-    av[2] = random.randint(0,len(DAILY_SHIFTS) - 1)
-    return av
-
 employee_list = []
 
 employee_list.append(Employee('E. Deckers', [[0,0,0],[0,0,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
