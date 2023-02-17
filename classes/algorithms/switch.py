@@ -15,6 +15,6 @@ class Switch:
         selected_employee_index = shift.index(selected_employee)
 
         new_employee = random.choice([emp for emp in employee_list if code in emp.availability and emp != selected_employee])
-        # schedule[random_week, random_day, random_shift][selected_employee_index] = f'!!!{new_employee.get_name()}!!!'
+        schedule[random_week, random_day, random_shift][selected_employee_index] = f'!!!{new_employee.get_name()}!!!'
 
         return selected_employee_index, selected_employee, new_employee

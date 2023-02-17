@@ -116,7 +116,6 @@ class MainWindow(QMainWindow):
         self.add_employee_layout.addWidget(self.add_employee_button)
         self.tab2_layout.addLayout(self.add_employee_layout)
 
-
     def init_tab_3(self):
 
         self.tab3 = QWidget()
@@ -163,6 +162,7 @@ class MainWindow(QMainWindow):
         self.bottom_layout.addWidget(left_widget)
         self.bottom_layout.addWidget(right_widget)
         self.tab3_layout.addLayout(self.bottom_layout)
+
 
     def init_student_object_dict(self) -> dict:
         dictionary = {}
@@ -320,6 +320,7 @@ class MainWindow(QMainWindow):
         self.time_slot_list.addItem(f"{start_time} - {end_time}")
         self.start_time_edit.clear()
         self.end_time_edit.clear()
+        print(self.time_slots)
 
     def edit_time_slot(self, item):
         index = self.time_slot_list.row(item)
@@ -328,6 +329,7 @@ class MainWindow(QMainWindow):
         self.end_time_edit.setText(end_time)
         self.edit_time_slot_button.setEnabled(True)
         self.delete_time_slot_button.setEnabled(True)
+        print(self.time_slots)
 
     def edit_selected_time_slot(self):
         selected_item = self.time_slot_list.currentItem()
@@ -340,6 +342,7 @@ class MainWindow(QMainWindow):
             self.time_slots[index] = new_start_time, new_end_time
             self.time_slot_list.takeItem(index)
             self.time_slot_list.addItem(f"{new_start_time} - {new_end_time}")
+            print(self.time_slots)
 
     def delete_selected_time_slot(self):
         selected_item = self.time_slot_list.currentItem()
@@ -361,7 +364,7 @@ class MainWindow(QMainWindow):
             # Reset text to nothing
             self.start_time_edit.setText('')
             self.end_time_edit.setText('')
-
+            print(self.time_slots)
 
     def add_employee():
         pass
