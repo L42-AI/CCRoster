@@ -23,6 +23,9 @@ class MainWindow(QMainWindow):
         # Make coversion dict from name to object
         self.student_object_dict = self.init_student_object_dict()
 
+        # Define dictionary to keep track of checkboxes in tab 3 for each timeslot
+        self.timeslot_checkboxes = {}
+
         # Tab widget
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
@@ -314,17 +317,31 @@ class MainWindow(QMainWindow):
 
 
     def add_time_slot(self):
+        # Get start and end time inputs
         start_time = self.start_time_edit.text()
         end_time = self.end_time_edit.text()
-        self.time_slots.append((start_time, end_time))
-        self.time_slot_list.addItem(f"{start_time} - {end_time}")
+
+        # Create new time slot
+        time_slot = f"{start_time} - {end_time}"
+
+        # Add to list and display widget
+        self.time_slots.append(time_slot)
+        self.time_slot_list.addItem(time_slot)
+
+        # Add new checkboxes to dict
+        for day in self.days:
+            checkbox = QCheckBox()
+            self.timeslot_checkboxes.setdefault(day, {})[time_slot] = checkbox
+        print(self.timeslot_checkboxes)
+        # Reset the text inputs
         self.start_time_edit.clear()
         self.end_time_edit.clear()
+
         print(self.time_slots)
 
     def edit_time_slot(self, item):
         index = self.time_slot_list.row(item)
-        start_time, end_time = self.time_slots[index]
+        start_time, end_time = self.time_slots[index].split(' - ')
         self.start_time_edit.setText(start_time)
         self.end_time_edit.setText(end_time)
         self.edit_time_slot_button.setEnabled(True)
@@ -339,27 +356,30 @@ class MainWindow(QMainWindow):
             new_start_time = self.start_time_edit.text()
             new_end_time = self.end_time_edit.text()
 
-            self.time_slots[index] = new_start_time, new_end_time
+            self.time_slots[index] = f'{new_start_time} - {new_end_time}'
             self.time_slot_list.takeItem(index)
             self.time_slot_list.addItem(f"{new_start_time} - {new_end_time}")
             print(self.time_slots)
 
     def delete_selected_time_slot(self):
-        selected_item = self.time_slot_list.currentItem()
-        if selected_item is not None:
+        # Get selected time slot
+        selected_time_slot = self.time_slot_list.currentItem().text()
 
-            # Find index
-            index = self.time_slot_list.row(selected_item)
+        if selected_time_slot is not None:
 
-            # Remove from list
-            del self.time_slots[index]
-
-            # Remove item from list box
-            self.time_slot_list.takeItem(index)
+            # Remove from list and widget
+            self.time_slots.remove(selected_time_slot)
+            self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
             # Disable buttons
             self.edit_time_slot_button.setEnabled(False)
             self.delete_time_slot_button.setEnabled(False)
+
+            # Remove from dict
+            for day in self.days:
+                checkbox = self.timeslot_checkboxes[day].pop(selected_time_slot)
+                del checkbox
+            print(self.timeslot_checkboxes)
 
             # Reset text to nothing
             self.start_time_edit.setText('')
