@@ -7,22 +7,18 @@ from classes.representation.maluscalc import MalusCalculator
 from classes.algorithms.switch import Switch
 from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
 from data.assign import employee_list
+from data.queries import *
 
 class Generator:
     def __init__(self) -> None:
+        self.db, self.cursor = db_cursor()
         self.employee_list = employee_list
-        self.schedule = self.init_schedule()
-        self.fill_schedule()
-        print(self.schedule)
+        self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
+        self.schedule = self.init_schedule() # array with shifts that need to be filled
+        self.availability = self.init_availability() # array with all shifts that each employee can fill
+        # self.fill_schedule()
+        print(self.available_employees)
         self.improve()
-        self.db = mysql.connector.connect(
-            host="185.224.91.162",
-            port=3308,
-            user="Jacob",
-            password="wouterisdebestehuisgenoot",
-            database="rooster" # niet veranderen
-        )
-        self.cursor = self.db.cursor()
     """ INIT """
 
     def init_schedule(self) -> object:
@@ -30,30 +26,47 @@ class Generator:
         Initiate the schedule
         """
 
-        # Set the start and end day for the schedule
-        start_date = self.get_start_day()
-        end_date = self.get_end_day()
+        # get list of tuples of shifts needed
+        shifts_needed = downloading_shifts(self.db, self.cursor)
+        schedule = np.zeros((len(shifts_needed), 5))
 
-        # Calculate the amount of days to be scheduled
-        scheduling_days = (end_date - start_date).days
+        # transfer to np.array
+        days = set()
+        shift = 0
+        for _, row in enumerate(shifts_needed):
 
-        # Set the amount of weeks, days and shifts to be scheduled
-        weeks = scheduling_days // len(SCHEDULE_DAYS)
-        days = len(SCHEDULE_DAYS)
-        shifts = len(DAILY_SHIFTS)
+            # set the day
+            week = row[0]
+            day = row[1]
 
-        # Create schedule
-        schedule = np.empty((weeks, days, shifts), dtype=list)
+            # count what shift it is
+            if (week, day) not in days:
+                shift = 0
+                days.add((week, day))
+            else:
+                shift += 1
+            task = row[4]
 
-        # Fill schedule with empty lists
-        # So that more employees can work during the same shift
-        for week_num, week in enumerate(schedule):
-            for day_num, day in enumerate(week):
-                for shift_num in range(len(day)):
-                    schedule[week_num][day_num][shift_num] = []
+            # add info to schedule
+            ## week, day, shift, task, employee_id
+            schedule[_] = (week, day, shift, task, 0)
+            self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
+
 
         return schedule
 
+    def init_availability(self):
+        availability_data = downloading_availability(self.db, self.cursor)
+        availability = np.zeros((len(availability_data), 5))
+        for _, entry in enumerate(availability_data):
+            id = entry[0]
+            week = (entry[1] + 1)
+            day = (entry[2] + 1)
+            shift = entry[3]
+            task = get_task(self.db, self.cursor, id)
+            availability[_] = (week, day, shift, task, id)
+
+        return availability
     """ GET """
 
     def get_date(self) -> object:

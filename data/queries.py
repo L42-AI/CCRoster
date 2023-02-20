@@ -27,8 +27,8 @@ def downloading_shifts(db, cursor):
     '''
     downloading the shifts that need to be filled
     '''
-    query = 'SELECT day, start, end, task FROM Shifts WHERE location = %s'
-    value = (1) # hardcoded for cc
+    query = 'SELECT week, day, start, end, task FROM Shifts WHERE location = %s'
+    value = [1] # hardcoded for cc
     cursor.execute(query, value)
     rows = cursor.fetchall()
     return rows
@@ -38,8 +38,24 @@ def downloading_availability(db, cursor):
     downloading the availability per location
     '''
     # hardcoded 1 resembling coffeecompany
-    query = 'SELECT * FROM Availability WHERE location = %s'
-    value = (1) # for now location is always 1
+    query = 'SELECT * FROM Availability WHERE employee_id IN (SELECT id from Employee WHERE location=%s)'
+    value = [1] # for now location is always 1
     cursor.execute(query, value)
     rows = cursor.fetchall() # this selects the info into a list with tuples corresponding with rows
     return rows
+
+def get_task(db, cursor, id):
+    query = 'SELECT task FROM Employee WHERE id=%s'
+    value = [id]
+    cursor.execute(query, value)
+    return cursor.fetchone()[0]
+
+def employee_per_shift(db, cursor, shift):
+    '''
+    returns all compatible employees for a shift
+    '''
+    query = 'SELECT id, hourly FROM Employee WHERE id IN (SELECT employee_id FROM Availability WHERE week = %s AND day = %s AND shift = %s AND employee_id IN (SELECT id FROM Employee WHERE task = %s))'
+    values = (shift[0], shift[1], shift[2], shift[3])
+    cursor.execute(query, values)
+    available_employees = cursor.fetchall()
+    return available_employees
