@@ -30,7 +30,7 @@ class Employee:
     """ Upload """
     def upload_employee(self):
 
-        
+
         # translate the string to a code corresponding with the location
         if self.location == 'coffee_company':
             location = 1
