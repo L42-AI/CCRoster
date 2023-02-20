@@ -308,10 +308,11 @@ class MainWindow(QMainWindow):
             if checkbox.isChecked():
                 if timeslot not in self.selected_employee.availability:
                     self.selected_employee.availability.append(timeslot)
+                    self.selected_employee.add_remove.append('add', timeslot) # Luka kan je checken of dit toevoegen moet zijn en niet verwijderen?
             else:
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
-
+                    self.selected_employee.add_remove.append('remove', timeslot)
 
     def add_time_slot(self):
         start_time = self.start_time_edit.text()

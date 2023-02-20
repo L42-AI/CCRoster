@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 import numpy as np
 import random
+import mysql.connector
 
 from classes.representation.maluscalc import MalusCalculator
 from classes.algorithms.switch import Switch
@@ -14,7 +15,14 @@ class Generator:
         self.fill_schedule()
         print(self.schedule)
         self.improve()
-
+        self.db = mysql.connector.connect(
+            host="185.224.91.162",
+            port=3308,
+            user="Jacob",
+            password="wouterisdebestehuisgenoot",
+            database="rooster" # niet veranderen
+        )
+        self.cursor = self.db.cursor()
     """ INIT """
 
     def init_schedule(self) -> object:
