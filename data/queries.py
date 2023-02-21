@@ -54,8 +54,8 @@ def employee_per_shift(db, cursor, shift):
     '''
     returns all compatible employees for a shift
     '''
+
     query = 'SELECT id, hourly FROM Employee WHERE id IN (SELECT employee_id FROM Availability WHERE week = %s AND day = %s AND shift = %s AND employee_id IN (SELECT id FROM Employee WHERE task = %s))'
     values = (shift[0], shift[1], shift[2], shift[3])
     cursor.execute(query, values)
-    available_employees = cursor.fetchall()
-    return available_employees
+    return cursor.fetchall()

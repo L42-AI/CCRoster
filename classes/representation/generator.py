@@ -33,8 +33,8 @@ class Generator:
         # transfer to np.array
         days = set()
         shift = 0
+        queries_list = []
         for _, row in enumerate(shifts_needed):
-
             # set the day
             week = row[0]
             day = row[1]
@@ -50,8 +50,9 @@ class Generator:
             # add info to schedule
             ## week, day, shift, task, employee_id
             schedule[_] = (week, day, shift, task, 0)
-            self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
 
+            # collect all employees that can work this shift
+            self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
 
         return schedule
 
