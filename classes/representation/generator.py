@@ -160,27 +160,36 @@ class Generator:
 
     def improve(self) -> None:
         for i in range(2000):
-            
             self.mutate()
 
         print('done')
         Switch.random(self.schedule)
 
-    def mutate(self):
+    def mutate(self): # this will probably be a class one day...
+        '''
+        makes mutations to the schedule but remembers original state and returns to it if
+        change is not better. So no deepcopies needed :0
+        '''
+
+        # pick a shift to replace
         shift_to_replace = random.choice(self.schedule)
 
+        # calculate the cost and find what employee previously had that shift
         MC = MalusCalculator(self.schedule, self.db, self.cursor)
         old_cost = MC.get_wage_costs_per_week(self.schedule)
         old_employee = shift_to_replace[4]
 
         # get index of the choice so we can find what employees can work
         index = int(shift_to_replace[5])
-        # print(self.available_employees)
 
+        # use available_employees dict to pick from list with employees that can work that shift
         employee_for_shift = random.choice(self.available_employees[index])
         employee, wage = employee_for_shift
+
+        # replace employee with new employee
         self.schedule[index][4] = employee
         new_cost = MC.get_wage_costs_per_week(self.schedule)
 
+        # check if improvement worked, if not, place old employee back
         if new_cost['schedule'] > old_cost['schedule']:
             self.schedule[index][4] = old_employee
