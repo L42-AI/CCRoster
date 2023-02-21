@@ -59,3 +59,21 @@ def employee_per_shift(db, cursor, shift):
     values = (shift[0], shift[1], shift[2], shift[3])
     cursor.execute(query, values)
     return cursor.fetchall()
+
+def download_wages(db, cursor, location):
+    '''
+    method generates a dictionary with employee id as key and their wage as value.
+    can be used in malus calc to quickly get wages per employee, independend of local data but
+    directly from server
+    '''
+
+    wage_dict = {}
+    query = 'SELECT id, hourly FROM Employee WHERE location = %s'
+    values = ([location])
+    cursor.execute(query, values)
+
+    # fill the dictionary
+    for x in cursor:
+        id, wage = x
+        wage_dict[id] = wage
+    return wage_dict

@@ -17,7 +17,7 @@ class Generator:
         self.schedule = self.init_schedule() # array with shifts that need to be filled
         self.availability = self.init_availability() # array with all shifts that each employee can fill
         # self.fill_schedule()
-        print(self.available_employees)
+        # print(self.available_employees)
         self.improve()
     """ INIT """
 
@@ -28,7 +28,7 @@ class Generator:
 
         # get list of tuples of shifts needed
         shifts_needed = downloading_shifts(self.db, self.cursor)
-        schedule = np.zeros((len(shifts_needed), 5))
+        schedule = np.zeros((len(shifts_needed), 6))
 
         # transfer to np.array
         days = set()
@@ -48,8 +48,8 @@ class Generator:
             task = row[4]
 
             # add info to schedule
-            ## week, day, shift, task, employee_id
-            schedule[_] = (week, day, shift, task, 0)
+            ## week, day, shift, task, employee_id, index
+            schedule[_] = (week, day, shift, task, 0, int(_))
 
             # collect all employees that can work this shift
             self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
@@ -159,6 +159,28 @@ class Generator:
                 continue
 
     def improve(self) -> None:
-        MC = MalusCalculator(self.schedule)
-        MC.calc_malus()
+        for i in range(2000):
+            
+            self.mutate()
+
+        print('done')
         Switch.random(self.schedule)
+
+    def mutate(self):
+        shift_to_replace = random.choice(self.schedule)
+
+        MC = MalusCalculator(self.schedule, self.db, self.cursor)
+        old_cost = MC.get_wage_costs_per_week(self.schedule)
+        old_employee = shift_to_replace[4]
+
+        # get index of the choice so we can find what employees can work
+        index = int(shift_to_replace[5])
+        # print(self.available_employees)
+
+        employee_for_shift = random.choice(self.available_employees[index])
+        employee, wage = employee_for_shift
+        self.schedule[index][4] = employee
+        new_cost = MC.get_wage_costs_per_week(self.schedule)
+
+        if new_cost['schedule'] > old_cost['schedule']:
+            self.schedule[index][4] = old_employee
