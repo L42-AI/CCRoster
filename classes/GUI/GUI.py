@@ -6,6 +6,8 @@ from PySide2.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayou
 
 from data.assign import employee_list
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -15,6 +17,8 @@ class MainWindow(QMainWindow):
         # Define the days of the week and timeslots
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.timeslots = ["7:00-12:00", "12:00-18:00"]
+        self.amount_of_weeks = 4
+        self.task_types = ['Allround']
         self.selected_employee = None
 
         # List for tab 1
@@ -66,17 +70,77 @@ class MainWindow(QMainWindow):
         self.delete_time_slot_button.clicked.connect(self.delete_selected_time_slot)
         self.delete_time_slot_button.setEnabled(False)
 
+        # Create the weekday checkboxes
+        weekdays_layout = QHBoxLayout()
+        for day in self.days:
+            if day not in ['Friday', 'Saturday', 'Sunday']:
+                label = QLabel(day[0])
+                box = QCheckBox()
+                box.day = day
+
+                self.day_layout = QVBoxLayout()
+                self.day_layout.addWidget(label)
+                self.day_layout.addWidget(box)
+
+                weekdays_layout.addLayout(self.day_layout)
+
+
+        # Create the weekend checkboxes
+        weekends_layout = QHBoxLayout()
+        for day in self.days:
+            if day in ['Friday', 'Saturday', 'Sunday']:
+                label = QLabel(day[0])
+                box = QCheckBox()
+                box.day = day
+
+                self.day_layout = QVBoxLayout()
+                self.day_layout.addWidget(label)
+                self.day_layout.addWidget(box)
+
+                weekends_layout.addLayout(self.day_layout)
+
+        # Create the week selector
+        self.week_layout = QVBoxLayout()
+        self.all_weeks_checkbox = QCheckBox('Uniform')
+        self.all_weeks_checkbox.setChecked(True)
+        self.all_weeks_checkbox.clicked.connect(self.all_weeks_checkbox_clicked)
+        self.week_layout.addWidget(self.all_weeks_checkbox)
+
+        self.task_type_box = QComboBox()
+        for task_type in self.task_types:
+            self.task_type_box.addItem(task_type)
+
+        """ Layout """
+
+        # Create the time widgets layout
+        times_layout = QVBoxLayout()
+        times_layout.addWidget(self.start_time_label)
+        times_layout.addWidget(self.start_time_edit)
+        times_layout.addWidget(self.end_time_label)
+        times_layout.addWidget(self.end_time_edit)
+
+        # Add the day layouts
+        self.day_layout = QVBoxLayout()
+        self.day_layout.addLayout(weekdays_layout)
+        self.day_layout.addLayout(weekends_layout)
+
+        # Create the time set layout
+        timeset_layout = QHBoxLayout()
+        timeset_layout.addLayout(times_layout)
+        timeset_layout.addLayout(self.day_layout)
+        timeset_layout.addLayout(self.week_layout)
+        timeset_layout.addWidget(self.task_type_box)
+
+        # Create the button layout
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.add_time_slot_button)
         button_layout.addWidget(self.edit_time_slot_button)
         button_layout.addWidget(self.delete_time_slot_button)
 
+        # Create the main layout
         layout = QVBoxLayout(self.tab1)
         layout.addWidget(self.time_slot_list)
-        layout.addWidget(self.start_time_label)
-        layout.addWidget(self.start_time_edit)
-        layout.addWidget(self.end_time_label)
-        layout.addWidget(self.end_time_edit)
+        layout.addLayout(timeset_layout)
         layout.addLayout(button_layout)
 
     def init_tab_2(self):
@@ -214,7 +278,7 @@ class MainWindow(QMainWindow):
                     checkbox.week = week_num
                     checkbox.day = day_num
                     checkbox.timeslot = timeslot_num
-                    checkbox.clicked.connect(self.checkbox_clicked)
+                    checkbox.clicked.connect(self.availability_checkbox_clicked)
                     checkbox.setChecked(False)
 
                     # Add to day layout
@@ -274,7 +338,7 @@ class MainWindow(QMainWindow):
                     else:
                         child.setChecked(False)
 
-    def set_employee(self, name):
+    def set_employee(self, name: str):
 
         # Get student object
         self.selected_employee = self.get_student_object(name)
@@ -291,7 +355,7 @@ class MainWindow(QMainWindow):
         # Update the availability checboxes
         self.update_schedule_availability()
 
-    def checkbox_clicked(self):
+    def availability_checkbox_clicked(self):
 
         # Only execute if a valid employee is selected
         if self.selected_employee != None:
@@ -315,6 +379,29 @@ class MainWindow(QMainWindow):
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
 
+    def all_weeks_checkbox_clicked(self):
+        checkbox = self.sender()
+
+        children_widgets = []
+
+        if checkbox.isChecked():
+            for week_num in range(self.week_layout.count()):
+                child_widget = self.week_layout.itemAt(week_num).widget()
+                children_widgets.append(child_widget)
+
+            for child in children_widgets[1:]:
+                self.week_layout.removeWidget(child)
+                child.deleteLater()
+            self.week_layout.update()
+        else:
+            self.__add_week_selection(self.week_layout)
+            self.week_layout.update()
+
+    def __add_week_selection(self, widget_layout: object):
+        for week_num in range(1, self.amount_of_weeks + 1):
+            box = QCheckBox(f'Week {week_num}')
+            box.week = week_num
+            widget_layout.addWidget(box)
 
     def add_time_slot(self):
         # Get start and end time inputs
@@ -324,9 +411,38 @@ class MainWindow(QMainWindow):
         # Create new time slot
         time_slot = f"{start_time} - {end_time}"
 
+        days = ''
+        for layout_num in range(self.day_layout.count()):
+            child_layout = self.day_layout.itemAt(layout_num)
+            for child_layout_num in range(child_layout.count()):
+                second_child_layout = child_layout.itemAt(child_layout_num)
+                for widget_num in range(second_child_layout.count()):
+                    child = second_child_layout.itemAt(widget_num).widget()
+
+
+
+                    if isinstance(child, QLabel):
+                        day = child.text()
+
+                    if not isinstance(child, QLabel):
+                        if child.isChecked():
+                            days = days + ', ' + day
+
+
+        if self.all_weeks_checkbox.isChecked():
+            week = 'All'
+        else:
+            for box_num, box in enumerate(self.week_layout[1:]):
+                if box.isChecked():
+                    week = box_num + 1
+
+        task_type = self.task_type_box.currentText()
+
+        info_string = f"TIME: {time_slot}, DAYS: {days}, WEEK: {week}, TYPE: {task_type}"
+
         # Add to list and display widget
         self.time_slots.append(time_slot)
-        self.time_slot_list.addItem(time_slot)
+        self.time_slot_list.addItem(info_string)
 
         # Add new checkboxes to dict
         for day in self.days:
