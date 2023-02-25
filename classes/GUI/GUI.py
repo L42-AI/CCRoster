@@ -1,14 +1,11 @@
-import sys
-from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget, QDialog, QComboBox,
-                               QScrollArea, QCheckBox, QWidgetItem)
-
+                               QScrollArea, QCheckBox, QWidgetItem, QSpacerItem, QSizePolicy)
+from PySide2.QtCore import Qt
+import sys
 import re
 
 from data.assign import employee_list
-
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -23,14 +20,14 @@ class MainWindow(QMainWindow):
         self.task_types = ['Allround']
         self.selected_employee = None
 
-        # List for tab 1
+        # Dict for tab 1
         self.time_slots = {}
+
+        # Dict for tab 2
+        self.employees = {}
 
         # Make coversion dict from name to object
         self.student_object_dict = self.init_student_object_dict()
-
-        # Define dictionary to keep track of checkboxes in tab 3 for each timeslot
-        self.timeslot_checkboxes = {}
 
         # Tab widget
         self.tabs = QTabWidget()
@@ -151,32 +148,39 @@ class MainWindow(QMainWindow):
 
         self.employee_names = []
 
-        self.add_employee_layout = QVBoxLayout()
-        self.employee_extra_layout = QHBoxLayout()
-        self.employee_wage = QVBoxLayout()
-        self.employee_onboarding = QVBoxLayout()
-
         self.employee_name_input = QLineEdit()
         self.employee_wage_input = QLineEdit()
         self.employee_onboarding_input = QCheckBox()
         self.add_employee_button = QPushButton("Add Employee")
         self.add_employee_button.clicked.connect(self.add_employee)
 
+        self.employee_wage = QVBoxLayout()
         self.employee_wage.addWidget(QLabel("Hourly Wage:"))
         self.employee_wage.addWidget(self.employee_wage_input)
 
+        self.employee_onboarding = QVBoxLayout()
         self.employee_onboarding.addWidget(QLabel("Onboarding:"))
         self.employee_onboarding.addWidget(self.employee_onboarding_input)
 
+        self.employee_extra_layout = QHBoxLayout()
         self.employee_extra_layout.addLayout(self.employee_wage)
         self.employee_extra_layout.addLayout(self.employee_onboarding)
 
-
+        self.add_employee_layout = QVBoxLayout()
         self.add_employee_layout.addWidget(QLabel("Employee Name:"))
         self.add_employee_layout.addWidget(self.employee_name_input)
         self.add_employee_layout.addLayout(self.employee_extra_layout)
         self.add_employee_layout.addWidget(self.add_employee_button)
-        self.tab2_layout.addLayout(self.add_employee_layout)
+
+        self.add_employee_role_layout = QVBoxLayout()
+        for role in self.task_types:
+            self.add_employee_role_layout.addWidget(QCheckBox(role))
+
+        self.total_employee_layout = QHBoxLayout()
+        self.total_employee_layout.addLayout(self.add_employee_layout)
+        self.total_employee_layout.addLayout(self.add_employee_role_layout)
+
+        self.tab2_layout.addLayout(self.total_employee_layout)
 
     def init_tab_3(self):
 
@@ -194,35 +198,65 @@ class MainWindow(QMainWindow):
         self.left_widget_layout = QVBoxLayout()
         self.left_widget_layout.addWidget(self.timeslots_label)
         self.left_widget_layout.addLayout(self.timeslots_layout)
-        left_widget = QWidget()
-        left_widget.setLayout(self.left_widget_layout)
 
         # Create the right widget with employee information
-        self.employee_label = QLabel("Employee:")
-        self.employee_name_label = QLabel("No employee selected")
-        self.employee_wage_label = QLabel("Wage: N/A")
+
         self.employee_combo = QComboBox()
+        self.employee_combo.currentIndexChanged.connect(self.set_employee)
+
+        name_lengths = []
+
         self.employee_combo.addItem('Geen Werknemer')
-
-
+        name_lengths.append(len('Geen Werknemer'))
         for employee in employee_list:
-            self.employee_combo.addItem(employee.get_name())
+            name = employee.get_name()
+            self.employee_combo.addItem(name)
+            name_lengths.append(len(name))
 
-        self.employee_combo.currentIndexChanged.connect(lambda: self.set_employee(self.employee_combo.currentText()))
-        self.right_widget_layout = QVBoxLayout()
-        self.right_widget_layout.addWidget(self.employee_label)
-        self.right_widget_layout.addWidget(self.employee_combo)
-        self.right_widget_layout.addWidget(self.employee_name_label)
-        self.right_widget_layout.addWidget(self.employee_wage_label)
-        right_widget = QWidget()
-        right_widget.setLayout(self.right_widget_layout)
+        width = max(name_lengths) * 10
+        self.employee_combo.setFixedWidth(width)
+
+        self.employee_wage_label = QLabel("Wage: N/A")
+
+        work_frequency_layout = QGridLayout()
+
+        spacer = QSpacerItem(0, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        work_frequency_layout.addItem(spacer, 0, 0, 4, 1)
+
+        work_frequency_layout.addWidget(QLabel('Diensten Per Week'), 0, 1, 1, 3)
+
+
+        for week in range(4):
+
+            label = QLabel(f'Week {week + 1}')
+
+            editor = QLineEdit()
+            editor.setFixedWidth(18)
+            editor.week = week
+
+            info_button = QPushButton('i')
+            info_button.setFixedWidth(30)
+
+            work_frequency_layout.addWidget(label, week + 1, 1)
+            work_frequency_layout.addWidget(editor, week + 1, 2)
+            work_frequency_layout.addWidget(info_button, week + 1, 3)
+
+
+
+        employee_info_layout = QVBoxLayout()
+        employee_info_layout.setAlignment(Qt.AlignHCenter)
+        employee_info_layout.setAlignment(Qt.AlignVCenter)
+        employee_info_layout.addWidget(self.employee_combo)
+        employee_info_layout.addWidget(self.employee_wage_label)
 
         # Add the schedule view and two widgets to the main layout
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_layout.addLayout(self.left_widget_layout)
+        self.bottom_layout.addLayout(employee_info_layout)
+        self.bottom_layout.addLayout(work_frequency_layout)
+
         self.tab3_layout = QVBoxLayout(self.tab3)
         self.tab3_layout.addWidget(self.schedule_scroll)
-        self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addWidget(left_widget)
-        self.bottom_layout.addWidget(right_widget)
         self.tab3_layout.addLayout(self.bottom_layout)
 
 
@@ -333,22 +367,23 @@ class MainWindow(QMainWindow):
                     else:
                         child.setChecked(False)
 
-    def set_employee(self, name: str):
+    def set_employee(self):
 
-        # Get student object
-        self.selected_employee = self.get_student_object(name)
+        combobox = self.sender()
 
-        # Set the name
-        self.employee_name_label.setText(name)
+        name = combobox.currentText()
+        if name != 'Geen Werknemer':
+            # Get student object
+            self.selected_employee = self.get_student_object(name)
 
-        # Only set wage if student is something
-        if self.selected_employee != None:
-            self.employee_wage_label.setText(f"Wage: €{self.selected_employee.get_wage()}")
-        else:
-            self.employee_wage_label.setText("Wage: N/A")
+            # Only set wage if student is something
+            if self.selected_employee != None:
+                self.employee_wage_label.setText(f"Wage: €{self.selected_employee.get_wage()}")
+            else:
+                self.employee_wage_label.setText("Wage: N/A")
 
-        # Update the availability checboxes
-        self.update_schedule_availability()
+            # Update the availability checboxes
+            self.update_schedule_availability()
 
     def availability_checkbox_clicked(self):
 
@@ -414,11 +449,6 @@ class MainWindow(QMainWindow):
         self.time_slots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
-        # Add new checkboxes to dict
-        for day in self.days:
-            checkbox = QCheckBox()
-            self.timeslot_checkboxes.setdefault(day, {})[timeslot] = checkbox
-
         # Reset the text inputs
         self.start_time_edit.clear()
         self.end_time_edit.clear()
@@ -479,22 +509,22 @@ class MainWindow(QMainWindow):
             self.edit_time_slot_button.setEnabled(False)
             self.delete_time_slot_button.setEnabled(False)
 
-            # Remove from dict
-            for day in self.days:
-                checkbox = self.timeslot_checkboxes[day].pop(item)
-                del checkbox
-
             # Reset text to nothing
             self.start_time_edit.clear()
             self.end_time_edit.clear()
 
 
-    def add_employee():
-        pass
+    def add_employee(self):
+        name, wage, onboarding, roles = self.__get_employee_input_options()
 
+        self.employees[name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
 
+        self.employee_list.addItem(f'{name, wage, onboarding, roles}')
 
-    def __check_correct_time(timeslot: str) -> bool:
+        self.employee_name_input.clear()
+        self.employee_wage_input.clear()
+
+    def __check_correct_time(self, timeslot: str) -> bool:
         start_time, end_time = timeslot.split(' - ')
 
         if not all(re.match("^(?!2[4-9])(([01][0-9])|(2[0-3]))(?!6)[0-5][0-9]$", time) for time in [start_time, end_time]):
@@ -553,6 +583,22 @@ class MainWindow(QMainWindow):
         info_string = f"TIME: {time_slot}, DAYS: {days}, WEEK: {weeks}, TYPE: {task_type}"
 
         return time_slot, days, weeks, task_type, info_string
+
+    def __get_employee_input_options(self) -> tuple:
+        # Get start and end time inputs
+        name = self.employee_name_input.text()
+        wage = self.employee_wage_input.text()
+        onboarding = self.employee_onboarding_input.isChecked()
+
+        roles = []
+        for role_widget_num in range(self.add_employee_role_layout.count()):
+            role_widget = self.add_employee_role_layout.itemAt(role_widget_num).widget()
+            role = role_widget.text()
+            if role_widget.isChecked():
+                roles.append(role)
+
+        return name, wage, onboarding, roles
+
 
     def __get_timeslot(self, item: object) -> str:
         # Extract text of selected item
