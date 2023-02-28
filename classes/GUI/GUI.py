@@ -1,11 +1,12 @@
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget, QDialog, QComboBox,
-                               QScrollArea, QCheckBox, QWidgetItem, QSpacerItem, QSizePolicy)
+                               QScrollArea, QCheckBox, QWidgetItem, QSpacerItem, QSizePolicy, QStackedWidget, QFrame)
 from PySide6.QtCore import Qt
 import sys
 import re
 
 from data.assign import employee_list
+from classes.GUI.GUI_utility import SetNullMargin
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -187,7 +188,8 @@ class MainWindow(QMainWindow):
         self.tab3 = QWidget()
         self.tabs.addTab(self.tab3, "Beschikbaarheid")
 
-        self.init_schedule_widget()
+        # self.init_schedule_widget()
+        self.init_schedule_widget2()
 
         # Create the left widget with an overview of all possible timeslots
         self.timeslots_label = QLabel("Shifts")
@@ -220,10 +222,9 @@ class MainWindow(QMainWindow):
 
         work_frequency_layout = QGridLayout()
 
-        spacer = QSpacerItem(0, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        work_frequency_layout.addItem(spacer, 0, 0, 4, 1)
-
-        work_frequency_layout.addWidget(QLabel('Diensten Per Week'), 0, 1, 1, 3)
+        work_frequency_label = QLabel('Diensten Per Week')
+        work_frequency_label.setAlignment(Qt.AlignHCenter)
+        work_frequency_layout.addWidget(work_frequency_label, 0, 1, 1, 3)
 
 
         for week in range(4):
@@ -235,13 +236,16 @@ class MainWindow(QMainWindow):
             editor.week = week
 
             info_button = QPushButton('i')
-            info_button.setFixedWidth(30)
+            info_button.setFixedWidth(25)
 
             work_frequency_layout.addWidget(label, week + 1, 1)
             work_frequency_layout.addWidget(editor, week + 1, 2)
             work_frequency_layout.addWidget(info_button, week + 1, 3)
 
-
+        work_frequency_widget = QWidget()
+        work_frequency_widget.setLayout(work_frequency_layout)
+        work_frequency_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        work_frequency_widget.setMinimumSize(work_frequency_widget.sizeHint())
 
         employee_info_layout = QVBoxLayout()
         employee_info_layout.setAlignment(Qt.AlignHCenter)
@@ -253,10 +257,10 @@ class MainWindow(QMainWindow):
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addLayout(self.left_widget_layout)
         self.bottom_layout.addLayout(employee_info_layout)
-        self.bottom_layout.addLayout(work_frequency_layout)
+        self.bottom_layout.addWidget(work_frequency_widget)
 
         self.tab3_layout = QVBoxLayout(self.tab3)
-        self.tab3_layout.addWidget(self.schedule_scroll)
+        self.tab3_layout.addLayout(self.schedule_viewer)
         self.tab3_layout.addLayout(self.bottom_layout)
 
 
@@ -265,6 +269,75 @@ class MainWindow(QMainWindow):
         for employee in employee_list:
             dictionary[employee.get_name()] = employee
         return dictionary
+
+    def init_schedule_widget2(self) -> None:
+
+        self.schedule_widget = QStackedWidget()
+
+        # For each week:
+        for week_num in range(self.amount_of_weeks):
+
+            # Make a layout for the week
+            week_layout = QHBoxLayout()
+            week_layout = SetNullMargin(week_layout)
+
+            # For each day:
+            for day_num, day in enumerate(self.days):
+
+                # Create a label and a layout for each day
+                day_label = QLabel(day)
+                day_label.setAlignment(Qt.AlignHCenter)
+                day_layout = QVBoxLayout()
+                day_layout.addWidget(day_label)
+
+                # For each timeslot
+                for timeslot_num, timeslot in enumerate(self.timeslots):
+
+                    # Make checkbox
+                    checkbox = QCheckBox(timeslot)
+                    checkbox.week = week_num
+                    checkbox.day = day_num
+                    checkbox.timeslot = timeslot_num
+                    checkbox.clicked.connect(self.availability_checkbox_clicked)
+                    checkbox.setChecked(False)
+
+                    # Add to day layout
+                    day_layout.addWidget(checkbox)
+
+                day_widget = QWidget()
+                day_widget.setLayout(day_layout)
+                day_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                day_widget.setMinimumSize(day_widget.sizeHint())
+
+                # Add each day to the week layout
+                week_layout.addWidget(day_widget)
+
+
+            week_label = QLabel(f'Week: {week_num + 1}')
+
+            week_layout_with_label = QVBoxLayout()
+            week_layout_with_label.addWidget(week_label)
+            week_layout_with_label.addLayout(week_layout)
+
+
+            # Add each week to the schedule
+            week_widget = QWidget()
+            week_widget.setLayout(week_layout_with_label)
+
+            self.schedule_widget.addWidget(week_widget)
+
+        forward_button = QPushButton('>')
+        backward_button = QPushButton('<')
+
+        forward_button.clicked.connect(lambda: self.schedule_scroller(forward=True))
+        backward_button.clicked.connect(lambda: self.schedule_scroller(forward=False))
+
+        self.schedule_viewer = QHBoxLayout()
+        self.schedule_viewer.addWidget(backward_button)
+        self.schedule_viewer.addWidget(self.schedule_widget)
+        self.schedule_viewer.addWidget(forward_button)
+
+
 
     def init_schedule_widget(self) -> None:
         # Create the scrollable schedule view with checkboxes
@@ -332,40 +405,55 @@ class MainWindow(QMainWindow):
 
     """ Methods """
 
+    def schedule_scroller(self, forward: bool) -> None:
+        if forward:
+            index = (self.schedule_widget.currentIndex() + 1) % self.schedule_widget.count()
+        else:
+            index = (self.schedule_widget.currentIndex() - 1) % self.schedule_widget.count()
+
+        self.schedule_widget.setCurrentIndex(index)
+
     def update_schedule_availability(self):
         """ Update the availability checkboxes based on the availability of the employee instance """
 
         # For each week
-        for week_num in range(self.weeks_layout.count()):
+        for week_num in range(self.schedule_widget.count()):
 
             # Find the child layout containing all the days
-            child_layout = self.weeks_layout.itemAt(week_num)
+            week_widget = self.schedule_widget.widget(week_num)
+            widget_layout = week_widget.layout()
 
-            # Skip if child is not layout containing days
-            if isinstance(child_layout, QWidgetItem):
-                continue
+            for child in range(widget_layout.count()):
+
+                child = widget_layout.itemAt(child)
+
+                # Skip if child is not layout containing days
+                if not isinstance(child, QHBoxLayout):
+                    continue
 
             # For each day
-            for day_num in range(child_layout.count()):
+            for day_num in range(child.count()):
 
                 # Find the child layout containing all the days
-                second_child_layout = child_layout.itemAt(day_num)
+                second_child = child.itemAt(day_num).widget()
+                second_child_layout = second_child.layout()
+
 
                 # For each shift
                 for shift_num in range(second_child_layout.count()):
 
                     # Find the child widgets
-                    child = second_child_layout.itemAt(shift_num).widget()
+                    third_child = second_child_layout.itemAt(shift_num).widget()
 
                     # Exclude the labels
-                    if isinstance(child, QLabel):
+                    if isinstance(third_child, QLabel):
                         continue
 
                     # Set checkbox to true if employee is available
-                    if [child.week, child.day, child.timeslot] in self.selected_employee.availability:
-                        child.setChecked(True)
+                    if [third_child.week, third_child.day, third_child.timeslot] in self.selected_employee.availability:
+                        third_child.setChecked(True)
                     else:
-                        child.setChecked(False)
+                        third_child.setChecked(False)
 
     def set_employee(self):
 

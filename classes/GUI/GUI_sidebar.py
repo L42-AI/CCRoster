@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QFrame, QTabWidget, QV
 from PySide6.QtCore import Qt
 import sys
 
-from QUI_utility import SetNullMargin
+from GUI_utility import SetNullMargin
 
 class MainWindow(QMainWindow):
     def __init__(self):
