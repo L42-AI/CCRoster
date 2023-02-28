@@ -1,7 +1,7 @@
-from PySide2.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget, QDialog, QComboBox,
                                QScrollArea, QCheckBox, QWidgetItem, QSpacerItem, QSizePolicy)
-from PySide2.QtCore import Qt
+from PySide6.QtCore import Qt
 import sys
 import re
 
@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    window = QApplication()
+    window = QApplication(sys.argv)
     app = MainWindow()
     app.show()
-    sys.exit(window.exec_())
+    sys.exit(window.exec())
