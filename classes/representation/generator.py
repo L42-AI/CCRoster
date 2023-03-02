@@ -26,7 +26,8 @@ class Generator:
 
         # get list of tuples of shifts needed
         shifts_needed = downloading_shifts(self.db, self.cursor)
-        schedule = np.zeros((len(shifts_needed), 6))
+        columns = len(shifts_needed[1]) + 1 # from shifts needed we do not need start and end but we add 3 new 
+        schedule = np.zeros((len(shifts_needed), columns))
 
         # transfer to np.array
         days = set()
