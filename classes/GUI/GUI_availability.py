@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
 from PySide6.QtCore import Qt
 
 from data.assign import employee_list
-from classes.GUI.GUI_utility import SetNullMargin
 
 class Availability(QWidget):
     def __init__(self, parent=None) -> None:
@@ -119,7 +118,8 @@ class Availability(QWidget):
 
             # Make a layout for the week
             week_layout = QHBoxLayout()
-            week_layout = SetNullMargin(week_layout)
+            week_layout.setSpacing(0)
+            week_layout.setContentsMargins(0,0,0,0)
 
             # For each day:
             for day_num, day in enumerate(self.days):
@@ -128,7 +128,8 @@ class Availability(QWidget):
                 day_label = QLabel(day)
                 day_label.setAlignment(Qt.AlignHCenter)
                 day_layout = QVBoxLayout()
-                day_layout = SetNullMargin(day_layout)
+                day_layout.setSpacing(0)
+                day_layout.setContentsMargins(0,0,0,0)
                 day_layout.addWidget(day_label)
 
                 # For each timeslot

@@ -2,11 +2,11 @@ import random
 
 class Employee:
     def __init__(self, name, av, maximum, wage, onboarding) -> None:
-        self.name = name
-        self.availability = av
-        self.wage = wage
-        self.weekly_max = maximum
-        self.onboarding = onboarding
+        self.name: str = name
+        self.availability: list[set] = av
+        self.wage: float = wage
+        self.weekly_max: int = maximum
+        self.onboarding: bool = onboarding
 
     """ Get """
 
