@@ -13,14 +13,14 @@ def db_cursor():
 
 datalist = [] # this is the list like we discussed
 
-def uploading_shifts(db, cursor):
+def uploading_shifts(db, cursor, entry):
     '''
     uploading shifts needed
     '''
-    for entry in datalist:
-        query = 'INSERT INTO Shifts (day, start, end, task, location) VALUES (%s, %s, %s, %s, %s)'
-        values = (entry[0], entry[1], entry[2], entry[3], entry[4])
-        cursor.execute(query, values)
+
+    query = 'INSERT INTO Shifts (day, start, end, task, location) VALUES (%s, %s, %s, %s, %s)'
+    values = (entry[0], entry[1], entry[2], entry[3], entry[4])
+    cursor.execute(query, values)
     db.commit()
 
 def downloading_shifts(db, cursor):

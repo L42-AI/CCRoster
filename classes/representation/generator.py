@@ -56,7 +56,10 @@ class Generator:
 
         return schedule
 
-    def init_availability(self):
+    def init_availability(self): # not being used right now!!!
+        '''
+        returns a list of availability per employee
+        '''
         availability_data = downloading_availability(self.db, self.cursor)
         availability = np.zeros((len(availability_data), 5))
         for _, entry in enumerate(availability_data):
@@ -159,7 +162,7 @@ class Generator:
                 continue
 
     def improve(self) -> None:
-        for i in range(2000):
+        for i in range(500):
             self.mutate()
 
         print('done')
