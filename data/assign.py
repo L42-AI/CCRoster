@@ -1,7 +1,4 @@
 from classes.representation.employee import Employee
-import random
-
-from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS
 
 employee_list = []
 
