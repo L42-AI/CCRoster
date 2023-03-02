@@ -2,9 +2,14 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
                                QCheckBox, QWidgetItem)
 
+from classes.representation.communicator import Communicator
+
+
 class AddEmployee(QWidget):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, Com, parent=None) -> None:
         super().__init__(parent)
+
+        self.Com: Communicator = Com
 
         self.employees = {}
         self.employee_names = []
