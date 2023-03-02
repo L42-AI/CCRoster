@@ -7,12 +7,10 @@ class Employee:
         self.id = None
         self.availability = av
         self.wage = wage
-        self.weekly_max = maximum
+        self.weekly_max_employee = maximum
         self.level = level
         self.task = task
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
-        self.employee_queries = []
-        self.availability_queries = []
         self.add_remove_timeslot = []
 
         self.db = mysql.connector.connect(
@@ -51,9 +49,9 @@ class Employee:
         But when making changes, first everything must be deleted.
         '''
         # uploads the availability given in assign
-        query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"
+        query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max_employee) VALUES (%s, %s, %s, %s, %s)"
         for entry in self.availability:
-            values = (self.id, entry[0], entry[1], entry[2], self.weekly_max[entry[0]])
+            values = (self.id, entry[0], entry[1], entry[2], self.weekly_max_employee[entry[0]])
             self.cursor.execute(query, values)
         self.db.commit()
 
@@ -63,8 +61,8 @@ class Employee:
         '''
         for change in self.add_remove_timeslot:
             if change[0] == 'add':
-                query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"
-                values = (self.id, change[1][0], change[1][1], change[1][2], self.weekly_max[change[1][0]])
+                query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max_employee) VALUES (%s, %s, %s, %s, %s)"
+                values = (self.id, change[1][0], change[1][1], change[1][2], self.weekly_max_employee[change[1][0]])
                 self.cursor.execute(query, values)
             else:
                 query = "DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "
@@ -94,7 +92,7 @@ class Employee:
         return self.onboarding
 
     def get_week_max_dict(self) -> dict:
-        return self.weekly_max
+        return self.weekly_max_employee
 
     def get_week_max(self, week) -> int:
-        return self.weekly_max.get(week)
+        return self.weekly_max_employee.get(week)
