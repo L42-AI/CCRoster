@@ -27,9 +27,10 @@ class Controller:
     """ Methods """
 
     def create_employee(self, first_name, last_name, hourly_wage, level, tasks):
+        name = self.get_name(first_name, last_name)
+
         employee = Employee(
-            first_name = first_name,
-            last_name = last_name,
+            name = name,
             av = [],
             maximum={},
             wage = hourly_wage,
@@ -88,3 +89,6 @@ class Controller:
     def communicate_server(self, method, input):
         """ Function that gets called all the time to send the new data to the server """
         pass
+
+    def get_name(self, first_name, last_name):
+        return f'{first_name} {last_name}'
