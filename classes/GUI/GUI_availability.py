@@ -1,23 +1,23 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget,
                                QComboBox, QCheckBox, QSizePolicy, QStackedWidget)
 
-from PySide6.QtCore import Qt
 
-from data.assign import employee_list
+from classes.representation.communicator import Communicator
+from classes.representation.employee import Employee
 
 class Availability(QWidget):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, Com, parent=None) -> None:
         super().__init__(parent)
+
+        self.Com: Communicator = Com
 
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.tasktypes = ['Allround']
         self.timeslots = ["7:00-12:00", "12:00-18:00"]
-        self.selected_employee = None
+        self.selected_employee: Employee = None
         self.amount_of_weeks = 4
-
-        # Make coversion dict from name to object
-        self.employee_object_dict = self.init_employee_object_dict()
 
         self.init_schedule_widget()
 
@@ -48,8 +48,8 @@ class Availability(QWidget):
 
         self.employee_combo.addItem('Geen Werknemer')
         name_lengths.append(len('Geen Werknemer'))
-        for employee in employee_list:
-            name = employee.get_name()
+        for employee in self.Com.get_employee_list():
+            name = employee.name
             self.employee_combo.addItem(name)
             name_lengths.append(len(name))
 
@@ -102,12 +102,6 @@ class Availability(QWidget):
         self.tab3_layout.addLayout(self.bottom_layout)
 
     """ Init """
-
-    def init_employee_object_dict(self) -> dict:
-        dictionary = {}
-        for employee in employee_list:
-            dictionary[employee.get_name()] = employee
-        return dictionary
 
     def init_schedule_widget(self) -> None:
 
@@ -186,8 +180,15 @@ class Availability(QWidget):
 
     """ Get """
 
-    def get_employee_object(self, name: str) -> object:
-        return self.employee_object_dict.get(name)
+    def get_employee_object(self, name: str) -> Employee:
+        found_employee = [employee for employee in self.Com.get_employee_list() if employee.name == name]
+
+        if len(found_employee) == 1:
+            return found_employee[0]
+        elif len(found_employee) < 1:
+            return None
+        else:
+            raise NameError('Two employees with exact same name')
 
     """ Methods """
 
@@ -279,6 +280,8 @@ class Availability(QWidget):
             if checkbox.isChecked():
                 if timeslot not in self.selected_employee.availability:
                     self.selected_employee.availability.append(timeslot)
+                    self.Com.edit_employee_availability(timeslot, add=True)
             else:
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
+                    self.Com.edit_employee_availability(timeslot, add=False)

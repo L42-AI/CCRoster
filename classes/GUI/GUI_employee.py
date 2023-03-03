@@ -80,8 +80,8 @@ class AddEmployee(QWidget):
     def add_employee(self):
         name, wage, onboarding, roles = self.__get_employee_input_options()
 
+        self.Com.create_employee(name, name, wage, onboarding, roles)
         self.employees[name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
-
         self.employee_list.addItem(f'{name, wage, onboarding, roles}')
 
         self.__clear_input_fields()
@@ -120,10 +120,12 @@ class AddEmployee(QWidget):
 
             new_name, wage, onboarding, roles = self.__get_employee_input_options()
 
+            self.Com.delete_employee(old_name, old_name)
             del self.employees[old_name]
-            self.employees[new_name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
-
             self.employee_list.takeItem(index)
+
+            self.Com.create_employee(new_name, new_name, wage, onboarding, roles)
+            self.employees[new_name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
             self.employee_list.addItem(f'{new_name, wage, onboarding, roles}')
 
             self.__clear_input_fields()
@@ -140,6 +142,7 @@ class AddEmployee(QWidget):
             old_name, _, _, _ = self.__get_info(item)
 
             # Remove from list and widget
+            self.Com.delete_employee(old_name, old_name)
             del self.employees[old_name]
             self.employee_list.takeItem(index)
 
