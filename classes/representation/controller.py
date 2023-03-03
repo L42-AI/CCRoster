@@ -1,7 +1,7 @@
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
 
-class Communicator:
+class Controller:
     def __init__(self, location) -> None:
         self.employee_list: list[Employee] = []
         self.shift_list: list[Shift] = []
@@ -62,7 +62,7 @@ class Communicator:
 
         self.communicate_server()
 
-    def create_shift(self, time: str, day: str, week: str, role: str) -> None:
+    def create_shift(self, time: str, day: str, week: str, task: str) -> None:
         start_time, end_time = self.get_start_and_finish_time(time)
 
         self.shift_list.append(
@@ -71,7 +71,7 @@ class Communicator:
             end_time = end_time,
             day = day,
             week = week,
-            role = role,
+            task = task,
             location = self.location
             )
         )
