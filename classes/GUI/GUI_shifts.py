@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
                                QCheckBox)
 import re
-from classes.representation.communicator import Communicator
+from classes.representation.controller import Communicator
 
 class Shifts(QWidget):
     def __init__(self, Com, parent=None) -> None:

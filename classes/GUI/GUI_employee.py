@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
                                QCheckBox, QWidgetItem)
 
-from classes.representation.communicator import Communicator
+from classes.representation.controller import Communicator
 
 
 class AddEmployee(QWidget):

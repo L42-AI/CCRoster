@@ -13,7 +13,7 @@ from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
 
-from classes.representation.communicator import Communicator
+from classes.representation.controller import Communicator
 
 class MainWindow(QMainWindow):
     def __init__(self):
