@@ -78,11 +78,11 @@ class AddEmployee(QWidget):
         layout.addWidget(save_button)
 
     def add_employee(self):
-        name, wage, level, tasks = self.__get_employee_input_options()
+        name, wage, level, task = self.__get_employee_input_options()
 
-        self.Controller.create_employee(name, name, wage, level, tasks)
-        self.employees[name] = {'wage': wage, 'level': level, 'tasks': tasks}
-        self.employee_list.addItem(f'{name, wage, level, tasks}')
+        self.Controller.create_employee(name, name, wage, level, task)
+        self.employees[name] = {'wage': wage, 'level': level, 'task': task}
+        self.employee_list.addItem(f'{name, wage, level, task}')
 
         self.__clear_input_fields()
 
@@ -118,15 +118,15 @@ class AddEmployee(QWidget):
 
             old_name, _, _, _ = self.__get_info(item)
 
-            new_name, wage, level, tasks = self.__get_employee_input_options()
+            new_name, wage, level, task = self.__get_employee_input_options()
 
             self.Controller.delete_employee(old_name, old_name)
             del self.employees[old_name]
             self.employee_list.takeItem(index)
 
-            self.Controller.create_employee(new_name, new_name, wage, level, tasks)
-            self.employees[new_name] = {'wage': wage, 'level': level, 'tasks': tasks}
-            self.employee_list.addItem(f'{new_name, wage, level, tasks}')
+            self.Controller.create_employee(new_name, new_name, wage, level, task)
+            self.employees[new_name] = {'wage': wage, 'level': level, 'task': task}
+            self.employee_list.addItem(f'{new_name, wage, level, task}')
 
             self.__clear_input_fields()
 
@@ -172,10 +172,10 @@ class AddEmployee(QWidget):
 
         # Find timeslot
         info = selected_str.strip("(").strip(")").replace("'", '').replace(" ", '')
-        name, wage, level, tasks = info.split(',')
+        name, wage, level, task = info.split(',')
 
-        tasks = tasks[1:-1].split(", ")
-        return name, wage, level, tasks
+        task = task[1:-1].split(", ")
+        return name, wage, level, task
 
     def __get_employee_input_options(self) -> tuple:
         # Get start and end time inputs
@@ -183,14 +183,14 @@ class AddEmployee(QWidget):
         wage = self.employee_wage_input.text()
         level = self.employee_level_input.isChecked()
 
-        tasks = []
+        task = []
         for task_widget_num in range(self.add_employee_task_layout.count()):
             task_widget = self.add_employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
-                tasks.append(task)
+                task.append(task)
 
-        return name, wage, level, tasks
+        return name, wage, level, task
 
     def save(self) -> None:
         print(self.employees)

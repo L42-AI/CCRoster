@@ -36,8 +36,8 @@ class Shifts(QWidget):
         self.weeks_layout = QHBoxLayout()
         self.init_week_checkboxes()
 
-        self.role_box = QComboBox()
-        self.fill_role_box()
+        self.task_box = QComboBox()
+        self.fill_task_box()
 
         """ Layout """
 
@@ -66,7 +66,7 @@ class Shifts(QWidget):
 
         # Create the main layout
         layout = QVBoxLayout(self)
-        layout.addWidget(self.role_box)
+        layout.addWidget(self.task_box)
         layout.addWidget(self.time_slot_list)
         layout.addLayout(timeset_layout)
         layout.addLayout(button_layout)
@@ -117,9 +117,9 @@ class Shifts(QWidget):
         # Create the week selector
         self.weeks_layout.addLayout(all_weeks_layout)
 
-    def fill_role_box(self) -> None:
+    def fill_task_box(self) -> None:
         for task_type in self.tasktypes:
-            self.role_box.addItem(task_type)
+            self.task_box.addItem(task_type)
 
     """ Methods """
 
@@ -131,7 +131,7 @@ class Shifts(QWidget):
             return
 
         # Add to list and display widget
-        self.__export_shift_to_communicator(timeslot, days, week, task_type)
+        self.__export_shift_to_connector(timeslot, days, week, task_type)
         self.timeslots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
@@ -174,7 +174,7 @@ class Shifts(QWidget):
             del self.timeslots[old_timeslot]
             self.time_slot_list.takeItem(index)
 
-            self.__export_shift_to_communicator(new_timeslot, days, week, task_type)
+            self.__export_shift_to_connector(new_timeslot, days, week, task_type)
             self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
             self.time_slot_list.addItem(info_string)
 
@@ -280,15 +280,17 @@ class Shifts(QWidget):
 
                 if isinstance(child_widget, QLabel):
                     day = child_widget.text()
+                   
 
                 else:
                     if child_widget.isChecked():
-                        days.append(day)
+
+                        days.append(layout_num)
 
 
         weeks = []
         if self.all_weeks_checkbox.isChecked():
-            weeks = ['All']
+            weeks = [0,1,2,3]
         else:
             for week_num in range(1, self.weeks_layout.count()):
                 week_layout = self.weeks_layout.itemAt(week_num)
@@ -299,13 +301,13 @@ class Shifts(QWidget):
                     if box.isChecked():
                         weeks.append(week_num)
 
-        task_type = self.role_box.currentText()
-
+        task_type = self.task_box.currentIndex() + 1 # default is 1 ipv 0
+        # task_type = self.task_box.currentText() oude versie luka, miss wil je dit weer terugzetten
         info_string = f"TIME: {time_slot}, DAYS: {days}, WEEK: {weeks}, TYPE: {task_type}"
 
         return time_slot, days, weeks, task_type, info_string
 
-    def __export_shift_to_communicator(self, timeslot, days, weeks, role) -> None:
+    def __export_shift_to_connector(self, timeslot, days, weeks, task) -> None:
         for week in weeks:
             for day in days:
-                self.Controller.create_shift(time=timeslot, day=day, week=week, role=role)
+                self.Controller.create_shift(time=timeslot, day=day, week=week, task=task)

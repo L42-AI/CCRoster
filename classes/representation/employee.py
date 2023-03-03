@@ -2,8 +2,10 @@ import random
 import mysql.connector
 
 class Employee:
-    def __init__(self, name, av, maximum, wage, level, task, location) -> None:
-        self.name = name
+    def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
+        self.fname = fname
+        self.lname = lname
+        self.name= fname + " " + lname
         self.id = None
         self.availability = av
         self.wage = wage
@@ -36,8 +38,8 @@ class Employee:
             task = 1
 
         # add the employee to the database
-        query = "INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)"
-        values = (self.name, self.wage, self.level, task, location)
+        query = "INSERT INTO Employee (lname, fname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)"
+        values = (self.lname, self.fname, self.wage, self.level, task, location)
         self.cursor.execute(query, values)
         self.id = self.cursor.lastrowid
         print(self.id)
@@ -99,3 +101,4 @@ class Employee:
 
     def get_week_max(self, week) -> int:
         return self.weekly_max_employee.get(week)
+
