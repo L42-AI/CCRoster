@@ -39,18 +39,10 @@ class Controller:
         self.communicate_server()
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
-        for employee_instance in self.employee_list:
-            if employee_instance == employee:
-                print(len(employee_instance.availability))
-
         if add:
             employee.availability.append(availability_slot)
         else:
             employee.availability.remove(availability_slot)
-
-        for employee_instance in self.employee_list:
-            if employee_instance == employee:
-                print(len(employee_instance.availability))
 
         self.communicate_server()
 
@@ -95,6 +87,3 @@ class Controller:
     def communicate_server(self):
         """ Function that gets called all the time to send the new data to the server """
         pass
-
-from classes.representation.employee import Employee
-from classes.representation.shift import Shift

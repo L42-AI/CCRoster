@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
-                               QCheckBox, QWidgetItem)
+                               QCheckBox, QWidgetItem, QComboBox)
 
 from classes.representation.controller import Controller
 
@@ -14,14 +14,19 @@ class AddEmployee(QWidget):
         self.employees = {}
         self.employee_names = []
         self.tasktypes = ['Allround']
+        self.levels = ['Stagair', 'Manager', 'Lead']
 
         self.employee_list = QListWidget()
         self.employee_list.itemDoubleClicked.connect(self.edit_employee)
 
-        self.employee_grid = QGridLayout()
-        self.employee_name_input = QLineEdit()
-        self.employee_wage_input = QLineEdit()
-        self.employee_onboarding_input = QCheckBox()
+        self.employee_first_name_input = QLineEdit()
+        self.employee_last_name_input = QLineEdit()
+
+        self.employee_name_layout = QVBoxLayout()
+        self.employee_name_layout.addWidget(QLabel("First Name:"))
+        self.employee_name_layout.addWidget(self.employee_first_name_input)
+        self.employee_name_layout.addWidget(QLabel("Last Name:"))
+        self.employee_name_layout.addWidget(self.employee_last_name_input)
 
 
         self.add_employee_button = QPushButton("Add Employee")
@@ -35,17 +40,6 @@ class AddEmployee(QWidget):
         self.delete_employee_button.clicked.connect(self.delete_selected_employee)
         self.delete_employee_button.setEnabled(False)
 
-        self.employee_wage = QVBoxLayout()
-        self.employee_wage.addWidget(QLabel("Hourly Wage:"))
-        self.employee_wage.addWidget(self.employee_wage_input)
-
-        self.employee_onboarding = QVBoxLayout()
-        self.employee_onboarding.addWidget(QLabel("Onboarding:"))
-        self.employee_onboarding.addWidget(self.employee_onboarding_input)
-
-        self.employee_extra_layout = QHBoxLayout()
-        self.employee_extra_layout.addLayout(self.employee_wage)
-        self.employee_extra_layout.addLayout(self.employee_onboarding)
 
         # Create the button layout
         button_layout = QHBoxLayout()
@@ -53,24 +47,43 @@ class AddEmployee(QWidget):
         button_layout.addWidget(self.edit_employee_button)
         button_layout.addWidget(self.delete_employee_button)
 
-        self.add_employee_layout = QVBoxLayout()
-        self.add_employee_layout.addWidget(QLabel("Employee Name:"))
-        self.add_employee_layout.addWidget(self.employee_name_input)
-        self.add_employee_layout.addLayout(self.employee_extra_layout)
-        self.add_employee_layout.addLayout(button_layout)
 
-        self.add_employee_role_layout = QVBoxLayout()
+        self.employee_wage_input = QLineEdit()
+        self.employee_wage_input.setFixedWidth(50)
+
+        self.employee_wage_layout = QHBoxLayout()
+        self.employee_wage_layout.addWidget(QLabel("Hourly Wage:"))
+        self.employee_wage_layout.addWidget(self.employee_wage_input)
+
+        self.employee_level_input = QComboBox()
+        [self.employee_level_input.addItem(level) for level in self.levels]
+
+        self.employee_onboarding = QVBoxLayout()
+        self.employee_onboarding.addWidget(QLabel("Level:"))
+        self.employee_onboarding.addWidget(self.employee_level_input)
+
+        self.employee_role_layout = QVBoxLayout()
         for role in self.tasktypes:
-            self.add_employee_role_layout.addWidget(QCheckBox(role))
+            self.employee_role_layout.addWidget(QCheckBox(role))
 
-        self.total_employee_layout = QHBoxLayout()
-        self.total_employee_layout.addLayout(self.add_employee_layout)
-        self.total_employee_layout.addLayout(self.add_employee_role_layout)
+        self.employee_info_layout = QGridLayout()
+        self.employee_info_layout.addLayout(self.employee_onboarding,2,0,2,2)
+        self.employee_info_layout.addLayout(self.employee_wage_layout,0,0,2,2)
+        self.employee_info_layout.addLayout(self.employee_role_layout,0,2,4,2)
+
+
+        self.employee_layout = QHBoxLayout()
+        self.employee_layout.addLayout(self.employee_name_layout)
+        self.employee_layout.addLayout(self.employee_info_layout)
+
+        self.add_employee_layout = QVBoxLayout()
+        self.add_employee_layout.addLayout(self.employee_layout)
+        self.add_employee_layout.addLayout(button_layout)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.employee_list)
-        layout.addLayout(self.employee_grid)
-        layout.addLayout(self.total_employee_layout)
+        layout.addLayout(self.add_employee_layout)
+        layout.addLayout(self.employee_layout)
 
         save_button = QPushButton('Save')
         save_button.clicked.connect(self.save)
@@ -99,8 +112,8 @@ class AddEmployee(QWidget):
             self.employee_onboarding_input.setChecked(True)
 
         for role in roles:
-            for checkbox_num in range(self.add_employee_role_layout.count()):
-                checkbox = self.add_employee_role_layout.itemAt(checkbox_num).widget()
+            for checkbox_num in range(self.employee_role_layout.count()):
+                checkbox = self.employee_role_layout.itemAt(checkbox_num).widget()
                 if checkbox.text() == role:
                     checkbox.setChecked(True)
 
@@ -160,8 +173,8 @@ class AddEmployee(QWidget):
             if self.employee_onboarding_input.isChecked():
                 self.employee_onboarding_input.setChecked(False)
 
-            for checkbox_num in range(self.add_employee_role_layout.count()):
-                checkbox = self.add_employee_role_layout.itemAt(checkbox_num).widget()
+            for checkbox_num in range(self.employee_role_layout.count()):
+                checkbox = self.employee_role_layout.itemAt(checkbox_num).widget()
                 if checkbox.isChecked():
                     checkbox.setChecked(False)
 
@@ -184,8 +197,8 @@ class AddEmployee(QWidget):
         onboarding = self.employee_onboarding_input.isChecked()
 
         roles = []
-        for role_widget_num in range(self.add_employee_role_layout.count()):
-            role_widget = self.add_employee_role_layout.itemAt(role_widget_num).widget()
+        for role_widget_num in range(self.employee_role_layout.count()):
+            role_widget = self.employee_role_layout.itemAt(role_widget_num).widget()
             role = role_widget.text()
             if role_widget.isChecked():
                 roles.append(role)

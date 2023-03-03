@@ -3,7 +3,9 @@ import mysql.connector
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
-        self.name = str(fname + lname)
+        self.first_name = fname
+        self.last_name = lname
+        self.name = self.get_full_name(fname, lname)
         self.id = None
         self.availability = av
         self.wage = wage
@@ -83,7 +85,7 @@ class Employee:
             return random.choice(self.availability)
 
     def get_full_name(self, first_name, last_name) -> str:
-        return f'{first_name}{last_name}'
+        return f'{first_name} {last_name}'
 
     def get_abreviated_name(self) -> str:
         return f'{self.first_name[0]}. {self.last_name}'
