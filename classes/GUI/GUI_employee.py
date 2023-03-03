@@ -2,14 +2,14 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
                                QCheckBox, QWidgetItem)
 
-from classes.representation.controller import Communicator
+from classes.representation.controller import Controller
 
 
 class AddEmployee(QWidget):
-    def __init__(self, Com, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
-        self.Com: Communicator = Com
+        self.Controller: Controller = Con
 
         self.employees = {}
         self.employee_names = []
@@ -80,7 +80,7 @@ class AddEmployee(QWidget):
     def add_employee(self):
         name, wage, onboarding, roles = self.__get_employee_input_options()
 
-        self.Com.create_employee(name, name, wage, onboarding, roles)
+        self.Controller.create_employee(name, name, wage, onboarding, roles)
         self.employees[name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
         self.employee_list.addItem(f'{name, wage, onboarding, roles}')
 
@@ -120,11 +120,11 @@ class AddEmployee(QWidget):
 
             new_name, wage, onboarding, roles = self.__get_employee_input_options()
 
-            self.Com.delete_employee(old_name, old_name)
+            self.Controller.delete_employee(old_name, old_name)
             del self.employees[old_name]
             self.employee_list.takeItem(index)
 
-            self.Com.create_employee(new_name, new_name, wage, onboarding, roles)
+            self.Controller.create_employee(new_name, new_name, wage, onboarding, roles)
             self.employees[new_name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
             self.employee_list.addItem(f'{new_name, wage, onboarding, roles}')
 
@@ -142,7 +142,7 @@ class AddEmployee(QWidget):
             old_name, _, _, _ = self.__get_info(item)
 
             # Remove from list and widget
-            self.Com.delete_employee(old_name, old_name)
+            self.Controller.delete_employee(old_name, old_name)
             del self.employees[old_name]
             self.employee_list.takeItem(index)
 

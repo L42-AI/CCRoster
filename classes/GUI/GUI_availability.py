@@ -4,14 +4,14 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QComboBox, QCheckBox, QSizePolicy, QStackedWidget)
 
 
-from classes.representation.communicator import Communicator
+from classes.representation.controller import Controller
 from classes.representation.employee import Employee
 
 class Availability(QWidget):
-    def __init__(self, Com, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
-        self.Com: Communicator = Com
+        self.Controller: Controller = Con
 
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.tasktypes = ['Allround']
@@ -48,7 +48,7 @@ class Availability(QWidget):
 
         self.employee_combo.addItem('Geen Werknemer')
         name_lengths.append(len('Geen Werknemer'))
-        for employee in self.Com.get_employee_list():
+        for employee in self.Controller.get_employee_list():
             name = employee.name
             self.employee_combo.addItem(name)
             name_lengths.append(len(name))
@@ -181,7 +181,7 @@ class Availability(QWidget):
     """ Get """
 
     def get_employee_object(self, name: str) -> Employee:
-        found_employee = [employee for employee in self.Com.get_employee_list() if employee.name == name]
+        found_employee = [employee for employee in self.Controller.get_employee_list() if employee.name == name]
 
         if len(found_employee) == 1:
             return found_employee[0]
@@ -280,8 +280,8 @@ class Availability(QWidget):
             if checkbox.isChecked():
                 if timeslot not in self.selected_employee.availability:
                     self.selected_employee.availability.append(timeslot)
-                    self.Com.edit_employee_availability(timeslot, add=True)
+                    self.Controller.edit_employee_availability(timeslot, add=True)
             else:
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
-                    self.Com.edit_employee_availability(timeslot, add=False)
+                    self.Controller.edit_employee_availability(timeslot, add=False)

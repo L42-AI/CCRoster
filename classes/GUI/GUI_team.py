@@ -4,14 +4,14 @@ from PySide6.QtWidgets import (QApplication, QWidget,
                                QLabel, QPushButton, QHBoxLayout,
                                QSizePolicy)
 import sys
-from classes.representation.communicator import Communicator
+from classes.representation.controller import Controller
 from data.assign import employee_list
 
 class EmployeeMatch(QWidget):
-    def __init__(self, Com, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
-        self.Com: Communicator = Com
+        self.Controller: Controller = Con
 
         self.employee_1_combobox = QComboBox()
         self.employee_2_combobox = QComboBox()

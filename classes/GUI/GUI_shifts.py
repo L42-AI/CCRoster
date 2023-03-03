@@ -2,13 +2,13 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
                                QCheckBox)
 import re
-from classes.representation.controller import Communicator
+from classes.representation.controller import Controller
 
 class Shifts(QWidget):
-    def __init__(self, Com, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
-        self.Com: Communicator = Com
+        self.Controller: Controller = Con
 
         # Set mutable object
         self.timeslots = {}
@@ -170,7 +170,7 @@ class Shifts(QWidget):
             if self.__check_correct_time(new_timeslot) is False:
                 return
 
-            self.Com.delete_shift(old_timeslot)
+            self.Controller.delete_shift(old_timeslot)
             del self.timeslots[old_timeslot]
             self.time_slot_list.takeItem(index)
 
@@ -190,7 +190,7 @@ class Shifts(QWidget):
             timeslot = self.__get_timeslot(item)
 
             # Remove from list and widget
-            self.Com.delete_shift(timeslot)
+            self.Controller.delete_shift(timeslot)
             del self.timeslots[timeslot]
             self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
@@ -308,4 +308,4 @@ class Shifts(QWidget):
     def __export_shift_to_communicator(self, timeslot, days, weeks, role) -> None:
         for week in weeks:
             for day in days:
-                self.Com.create_shift(time=timeslot, day=day, week=week, role=role)
+                self.Controller.create_shift(time=timeslot, day=day, week=week, role=role)
