@@ -34,7 +34,7 @@ class Controller:
             maximum={},
             wage = hourly_wage,
             level = level,
-            task = task
+            task = tasks
             )
         self.employee_list.append(employee)
         self.threads.append(("INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)", ))
