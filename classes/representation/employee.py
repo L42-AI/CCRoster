@@ -2,8 +2,8 @@ import random
 import mysql.connector
 
 class Employee:
-    def __init__(self, name, av, maximum, wage, level, task, location) -> None:
-        self.name = name
+    def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
+        self.name = str(fname + lname)
         self.id = None
         self.availability = av
         self.wage = wage

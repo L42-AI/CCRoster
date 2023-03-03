@@ -26,10 +26,10 @@ employee_list.append(Employee('Isabel', 'Koster', [[0,4,0],[0,4,1],[0,5,0],[0,5,
                                             [3,4,0],[3,4,1],[3,5,0],[3,5,1],[3,6,0]],
                                             {0:2, 1:2, 2:2, 3:2}, 11, 1, 'everything', 'coffee_company'))
 
-employee_list.append(Employee('A. Offringa', [],
+employee_list.append(Employee('A.',  'Offringa', [],
                                              {0:0, 1:0, 2:0, 3:0}, 15.5, 1, 'everything', 'coffee_company'))
 
-employee_list.append(Employee('P. Putman', [],
+employee_list.append(Employee('P.', 'Putman', [],
                                             {0:0, 1:0, 2:0, 3:0}, 16.60, 1, 'everything', 'coffee_company'))
 
 employee_list.append(Employee('Danaë', 'Verstegen', [[0,1,0],[0,1,1],[0,6,0],[0,6,1],
@@ -44,7 +44,7 @@ employee_list.append(Employee('Miranda', 'van Vuren', [[0,0,0],[0,0,1],[0,1,0],[
                                                [3,0,0],[3,0,1],[3,1,0],[3,1,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,4,0],[3,4,1]],
                                                {0:2, 1:2, 2:2, 3:2}, 18, 1, 'everything', 'coffee_company'))
 
-employee_list.append(Employee('L. Wolff', [],
+employee_list.append(Employee('L.',  'Wolff', [],
                                            {0:0, 1:0, 2:0, 3:0}, 11, 1, 'everything', 'coffee_company'))
 
 employee_list.append(Employee('Tamar', 'van der Zalm', [[0,0,1],[0,1,0],[0,1,1],[0,3,0],[0,3,1],[0,4,0],[0,4,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
