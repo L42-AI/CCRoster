@@ -26,26 +26,31 @@ class Controller:
 
     """ Methods """
 
-    def create_employee(self, first_name, last_name, hourly_wage, level, tasks):
+    def create_employee(self, name, hourly_wage, level, tasks):
         employee = Employee(
-            first_name = first_name,
-            last_name = last_name,
+            name = name
             av = [],
             maximum={},
             wage = hourly_wage,
             level = level,
             task = tasks
+            location = self.location
             )
         self.employee_list.append(employee)
-        self.threads.append(("INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)", ))
+        self.threads.append(("INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)", (name, hourly_wage, level, tasks, self.location), 0))
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
         for employee_instance in self.employee_list:
             if employee_instance == employee:
                 print(len(employee_instance.availability))
+        id = employee.id
+        week = availability_slot[0]
+        day = availability_slot[1]
+        shift =availability_slot[2]
 
         if add:
             employee.availability.append(availability_slot)
+            self.threads.append(("INSERT INTO Availability (employee_id, week, day, shift, weekly_max_employee) VALUES (%s, %s, %s, %s, %s)", ))
         else:
             employee.availability.remove(availability_slot)
 
@@ -90,7 +95,7 @@ class Controller:
 
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
-        
+
         self.communicate_server()
 
     def communicate_server(self, method, input):
