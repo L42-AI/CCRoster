@@ -13,7 +13,7 @@ from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
 
-from classes.representation.controller import Communicator
+from classes.representation.controller import Controller
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Consilium")
         self.setGeometry(100, 100, 875, 625)
 
-        self.Com = Communicator(1)
+        self.Com = Controller(1)
 
         self.shifts_button = NavigationOptions()
         self.shifts_button.clicked.connect(self.change_page)
