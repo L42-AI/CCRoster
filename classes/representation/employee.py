@@ -78,17 +78,20 @@ class Employee:
     def get_full_av(self) -> set:
         return self.availability
 
-    def get_av(self) -> list:
+    def get_av(self) -> list[int]:
         if len(self.availability) > 0:
             return random.choice(self.availability)
 
-    def get_name(self) -> str:
-        return self.name
+    def get_full_name(self, first_name, last_name) -> str:
+        return f'{first_name}{last_name}'
+
+    def get_abreviated_name(self) -> str:
+        return f'{self.first_name[0]}. {self.last_name}'
 
     def get_wage(self) -> float:
         return float(self.wage)
 
-    def get_onboarding(self) -> bool:
+    def get_onboarding(self) -> int:
         return self.onboarding
 
     def get_week_max_dict(self) -> dict:

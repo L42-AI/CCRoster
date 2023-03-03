@@ -2,10 +2,13 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
                                QCheckBox)
 import re
+from classes.representation.controller import Controller
 
 class Shifts(QWidget):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
+
+        self.Controller: Controller = Con
 
         # Set mutable object
         self.timeslots = {}
@@ -128,6 +131,7 @@ class Shifts(QWidget):
             return
 
         # Add to list and display widget
+        self.__export_shift_to_communicator(timeslot, days, week, task_type)
         self.timeslots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
@@ -166,10 +170,12 @@ class Shifts(QWidget):
             if self.__check_correct_time(new_timeslot) is False:
                 return
 
+            self.Controller.delete_shift(old_timeslot)
             del self.timeslots[old_timeslot]
-            self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
-
             self.time_slot_list.takeItem(index)
+
+            self.__export_shift_to_communicator(new_timeslot, days, week, task_type)
+            self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
             self.time_slot_list.addItem(info_string)
 
             self.start_time_edit.clear()
@@ -184,6 +190,7 @@ class Shifts(QWidget):
             timeslot = self.__get_timeslot(item)
 
             # Remove from list and widget
+            self.Controller.delete_shift(timeslot)
             del self.timeslots[timeslot]
             self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
@@ -223,6 +230,7 @@ class Shifts(QWidget):
             self.weeks_layout.update()
 
     def save(self) -> None:
+
         print(self.timeslots)
 
     """ Helpers """
@@ -280,7 +288,7 @@ class Shifts(QWidget):
 
         weeks = []
         if self.all_weeks_checkbox.isChecked():
-            weeks = 'All'
+            weeks = ['All']
         else:
             for week_num in range(1, self.weeks_layout.count()):
                 week_layout = self.weeks_layout.itemAt(week_num)
@@ -296,3 +304,8 @@ class Shifts(QWidget):
         info_string = f"TIME: {time_slot}, DAYS: {days}, WEEK: {weeks}, TYPE: {task_type}"
 
         return time_slot, days, weeks, task_type, info_string
+
+    def __export_shift_to_communicator(self, timeslot, days, weeks, role) -> None:
+        for week in weeks:
+            for day in days:
+                self.Controller.create_shift(time=timeslot, day=day, week=week, role=role)

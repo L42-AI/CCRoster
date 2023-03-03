@@ -4,17 +4,19 @@ from PySide6.QtWidgets import (QApplication, QWidget,
                                QLabel, QPushButton, QHBoxLayout,
                                QSizePolicy)
 import sys
-
+from classes.representation.controller import Controller
 from data.assign import employee_list
 
 class EmployeeMatch(QWidget):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
+
+        self.Controller: Controller = Con
 
         self.employee_1_combobox = QComboBox()
         self.employee_2_combobox = QComboBox()
 
-        for employee in sorted([employee.get_name() for employee in employee_list]):
+        for employee in sorted([employee.name for employee in employee_list]):
             self.employee_1_combobox.addItem(employee)
             self.employee_2_combobox.addItem(employee)
 

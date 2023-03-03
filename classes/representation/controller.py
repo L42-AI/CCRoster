@@ -1,8 +1,7 @@
-
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
 
-class Communicator:
+class Controller:
     def __init__(self, location) -> None:
         self.employee_list: list[Employee] = []
         self.shift_list: list[Shift] = []
@@ -24,17 +23,46 @@ class Communicator:
 
     """ Methods """
 
-    def create_employee(self, *kwargs):
-        print(kwargs)
+    def create_employee(self, first_name, last_name, hourly_wage, level, roles):
         self.employee_list.append(
             Employee(
+            first_name = first_name,
+            last_name = last_name,
+            av = [],
+            maximum={},
+            wage = hourly_wage,
+            onboarding = level,
+            roles = roles
             )
         )
 
-    def delete_employee(self, *kwargs):
-        pass
+        self.communicate_server()
 
-    def create_shift(self, time: str, day: str, week: str, role: str) -> None:
+    def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
+        for employee_instance in self.employee_list:
+            if employee_instance == employee:
+                print(len(employee_instance.availability))
+
+        if add:
+            employee.availability.append(availability_slot)
+        else:
+            employee.availability.remove(availability_slot)
+
+        for employee_instance in self.employee_list:
+            if employee_instance == employee:
+                print(len(employee_instance.availability))
+
+        self.communicate_server()
+
+    def delete_employee(self, first_name, last_name):
+        for employee_instance in self.employee_list:
+            if employee_instance.name == employee_instance.get_full_name(first_name, last_name):
+                self.employee_list.remove(employee_instance)
+                break
+
+        self.communicate_server()
+
+    def create_shift(self, time: str, day: str, week: str, task: str) -> None:
         start_time, end_time = self.get_start_and_finish_time(time)
 
         self.shift_list.append(
@@ -43,14 +71,30 @@ class Communicator:
             end_time = end_time,
             day = day,
             week = week,
-            role = role, # is role task of level?
+            task = task,
             location = self.location
             )
         )
 
-    def delete_shift(self, time: str) -> None: #is een shift te onderscheiden aan start en eind tijd? gaat toch ook om dag en week?
+        self.communicate_server()
+
+
+    def delete_shift(self, time: str) -> None:
+        self.to_delete: list[Shift] = []
         start_time, end_time = self.get_start_and_finish_time(time)
 
         for shift_instance in self.shift_list:
             if shift_instance.start_time == start_time and shift_instance.end_time == end_time:
-                self.shift_list.remove(shift_instance)
+                self.to_delete.append(shift_instance)
+
+        for i in range(len(self.to_delete)):
+            self.shift_list.remove(self.to_delete[i])
+        
+        self.communicate_server()
+
+    def communicate_server(self):
+        """ Function that gets called all the time to send the new data to the server """
+        pass
+
+from classes.representation.employee import Employee
+from classes.representation.shift import Shift

@@ -13,12 +13,15 @@ from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
 
+from classes.representation.controller import Communicator
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Consilium")
         self.setGeometry(100, 100, 875, 625)
+
+        self.Com = Communicator(1)
 
         self.shifts_button = NavigationOptions()
         self.shifts_button.clicked.connect(self.change_page)
@@ -57,10 +60,10 @@ class MainWindow(QMainWindow):
         self.navigation_bar.addWidget(self.settings_button)
 
         self.welcome_widget = Welcome()
-        self.shift_widget = Shifts()
-        self.employee_widget = AddEmployee()
-        self.availability_widget = Availability()
-        self.relation_widget = EmployeeMatch()
+        self.shift_widget = Shifts(self.Com)
+        self.employee_widget = AddEmployee(self.Com)
+        self.availability_widget = Availability(self.Com)
+        self.relation_widget = EmployeeMatch(self.Com)
         self.weight_widget = Weight()
         self.settings_widget = Settings()
 
