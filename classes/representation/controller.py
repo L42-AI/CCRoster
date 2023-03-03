@@ -36,6 +36,8 @@ class Communicator:
             )
         )
 
+        self.communicate_server()
+
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
         for employee_instance in self.employee_list:
             if employee_instance == employee:
@@ -50,11 +52,15 @@ class Communicator:
             if employee_instance == employee:
                 print(len(employee_instance.availability))
 
+        self.communicate_server()
+
     def delete_employee(self, first_name, last_name):
         for employee_instance in self.employee_list:
             if employee_instance.name == employee_instance.get_full_name(first_name, last_name):
                 self.employee_list.remove(employee_instance)
                 break
+
+        self.communicate_server()
 
     def create_shift(self, time: str, day: str, week: str, role: str) -> None:
         start_time, end_time = self.get_start_and_finish_time(time)
@@ -70,8 +76,11 @@ class Communicator:
             )
         )
 
+        self.communicate_server()
+
+
     def delete_shift(self, time: str) -> None:
-        self.to_delete: list[object] = []
+        self.to_delete: list[Shift] = []
         start_time, end_time = self.get_start_and_finish_time(time)
 
         for shift_instance in self.shift_list:
@@ -80,3 +89,9 @@ class Communicator:
 
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
+        
+        self.communicate_server()
+
+    def communicate_server(self):
+        """ Function that gets called all the time to send the new data to the server """
+        pass
