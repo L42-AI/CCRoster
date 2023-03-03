@@ -89,7 +89,7 @@ class Controller:
 
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
-        
+
         self.communicate_server()
 
     def communicate_server(self):
