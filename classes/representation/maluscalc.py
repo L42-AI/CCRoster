@@ -1,11 +1,15 @@
 from data.assign import employee_list
 from classes.representation.GUI_output import DAILY_SHIFTS
+from data.queries import *
 
 class MalusCalculator:
-    def __init__(self, schedule) -> None:
+    def __init__(self, schedule, db, cursor) -> None:
         self.employee_dict = self.init_employee_dict(employee_list)
         self.schedule = schedule
         self.malus = 0
+        self.db = db
+        self.cursor = cursor
+        self.get_wage_costs_per_week(self.schedule)
 
     """ Init """
 
@@ -77,31 +81,51 @@ class MalusCalculator:
                 self.malus += week_max_difference if week_max_difference > 0 else 0
 
 
-    def get_wage_costs_per_week(self) -> dict:
+    def get_wage_costs_per_week(self, schedule) -> dict:
+        ''''
+        JACOBS VERSION
+        '''
+        location = 1 # coffeecompany
+        wage_employees = download_wages(self.db, self.cursor, location) # dictionary with id as key and wage as value
+        wage_employees[0] = 100000
         wage_costs = {'schedule': 0.0}
+        for shift in schedule:
+            wage = wage_employees[shift[4]]
+            if f'week {shift[0]}' not in wage_costs:
+                wage_costs[f'week {shift[0]}'] = wage
 
-        for week_num, week in enumerate(self.schedule):
-
-            if f'week {week_num}' not in wage_costs:
-                wage_costs[f'week {week_num}'] = {}
-
-            for day_num, day in enumerate(week):
-
-                if 'total' not in wage_costs[f'week {week_num}']:
-                    wage_costs[f'week {week_num}']['total'] = 0.0
-
-                if f'day {day_num}' not in wage_costs[f'week {week_num}']:
-                    wage_costs[f'week {week_num}'][f'day {day_num}'] = 0.0
-
-                for shift_num, shift in enumerate(day):
-                    for employee_name in shift:
-
-                        employee_obj = self.get_employee_object(employee_name)
-
-                        wage_cost = employee_obj.get_wage() * DAILY_SHIFTS[f'shift {shift_num}']['duration']
-
-                        wage_costs['schedule'] += wage_cost
-                        wage_costs[f'week {week_num}'][f'day {day_num}'] += wage_cost
-                        wage_costs[f'week {week_num}']['total'] += wage_cost
-
+            else:
+                wage_costs[f'week {shift[0]}']+= wage
+            wage_costs['schedule'] += wage
+        print(wage_costs['schedule'])
         return wage_costs
+        # '''
+        # LUKAS VERSION
+        # '''
+        # wage_costs = {'schedule': 0.0}
+
+        # for week_num, week in enumerate(self.schedule):
+
+        #     if f'week {week_num}' not in wage_costs:
+        #         wage_costs[f'week {week_num}'] = {}
+
+        #     for day_num, day in enumerate(week):
+
+        #         if 'total' not in wage_costs[f'week {week_num}']:
+        #             wage_costs[f'week {week_num}']['total'] = 0.0
+
+        #         if f'day {day_num}' not in wage_costs[f'week {week_num}']:
+        #             wage_costs[f'week {week_num}'][f'day {day_num}'] = 0.0
+
+        #         for shift_num, shift in enumerate(day):
+        #             for employee_name in shift:
+
+        #                 employee_obj = self.get_employee_object(employee_name)
+
+        #                 wage_cost = employee_obj.get_wage() * DAILY_SHIFTS[f'shift {shift_num}']['duration']
+
+        #                 wage_costs['schedule'] += wage_cost
+        #                 wage_costs[f'week {week_num}'][f'day {day_num}'] += wage_cost
+        #                 wage_costs[f'week {week_num}']['total'] += wage_cost
+
+        # return wage_costs

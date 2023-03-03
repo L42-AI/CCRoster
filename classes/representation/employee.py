@@ -1,15 +1,77 @@
 import random
+import mysql.connector
 
 class Employee:
-    def __init__(self, first_name, last_name, av, maximum, wage, onboarding, roles) -> None:
-        self.first_name: str = first_name
-        self.last_name: str = last_name
-        self.name: str = self.get_full_name(self.first_name, self.last_name)
-        self.availability: list[list] = av
-        self.weekly_max: dict = maximum
-        self.wage: float = wage
-        self.onboarding: int = onboarding
-        self.roles: list[str] = roles
+    def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
+        self.name = str(fname + lname)
+        self.id = None
+        self.availability = av
+        self.wage = wage
+        self.weekly_max_employee = maximum
+        self.level = level
+        self.task = task
+        self.location = location # where does this employee work? coffecompany, bagels and beans or google?
+        self.add_remove_timeslot = []
+
+        self.db = mysql.connector.connect(
+            host="185.224.91.162",
+            port=3308,
+            user="Jacob",
+            password="wouterisdebestehuisgenoot",
+            database="rooster" # niet veranderen
+        )
+        self.cursor = self.db.cursor()
+
+        # self.upload_employee()
+        # self.upload_availability()
+
+    """ Upload """
+    def upload_employee(self):
+
+
+        # translate the string to a code corresponding with the location
+        if self.location == 'coffee_company':
+            location = 1
+        if self.task == 'everything':
+            task = 1
+
+        # add the employee to the database
+        query = "INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)"
+        values = (self.name, self.wage, self.level, task, location)
+        self.cursor.execute(query, values)
+        self.id = self.cursor.lastrowid
+        print(self.id)
+        self.db.commit()
+
+    def upload_availability(self):
+        '''
+        removes current availability and replaces it with new one. if there is nothing, it just uploads the availibility. 
+        But when making changes, first everything must be deleted.
+        '''
+        # uploads the availability given in assign
+        query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max_employee) VALUES (%s, %s, %s, %s, %s)"
+        for entry in self.availability:
+            values = (self.id, entry[0], entry[1], entry[2], self.weekly_max_employee[entry[0]])
+            self.cursor.execute(query, values)
+        self.db.commit()
+
+    def change_availability(self):
+        '''
+        goes trough a list of changes and applies them to the database
+        '''
+        for change in self.add_remove_timeslot:
+            if change[0] == 'add':
+                query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max_employee) VALUES (%s, %s, %s, %s, %s)"
+                values = (self.id, change[1][0], change[1][1], change[1][2], self.weekly_max_employee[change[1][0]])
+                self.cursor.execute(query, values)
+            else:
+                query = "DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "
+                values = (self.id, change[1][0], change[1][1], change[1][2])
+                self.cursor.execute(query, values)
+
+        # clear the list, we do not want to run old commands
+        self.add_remove_timeslot = []
+
 
     """ Get """
 
@@ -33,7 +95,7 @@ class Employee:
         return self.onboarding
 
     def get_week_max_dict(self) -> dict:
-        return self.weekly_max
+        return self.weekly_max_employee
 
     def get_week_max(self, week) -> int:
-        return self.weekly_max.get(week)
+        return self.weekly_max_employee.get(week)

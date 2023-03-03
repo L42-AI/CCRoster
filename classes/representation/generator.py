@@ -1,20 +1,22 @@
 from datetime import date, timedelta
 import numpy as np
 import random
+import mysql.connector
 
 from classes.representation.maluscalc import MalusCalculator
 from classes.algorithms.switch import Switch
 from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
-from data.assign import employee_list
+from data.queries import *
 
 class Generator:
     def __init__(self) -> None:
-        self.employee_list = employee_list
-        self.schedule = self.init_schedule()
-        self.fill_schedule()
-        print(self.schedule)
-        self.improve()
+        self.db, self.cursor = db_cursor()
+        self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
+        self.schedule = self.init_schedule() # array with shifts that need to be filled
+        self.availability = self.init_availability() # array with all shifts that each employee can fill
 
+        # print(self.available_employees)
+        self.improve()
     """ INIT """
 
     def init_schedule(self) -> object:
@@ -22,30 +24,51 @@ class Generator:
         Initiate the schedule
         """
 
-        # Set the start and end day for the schedule
-        start_date = self.get_start_day()
-        end_date = self.get_end_day()
+        # get list of tuples of shifts needed
+        shifts_needed = downloading_shifts(self.db, self.cursor)
+        columns = len(shifts_needed[1]) + 1 # from shifts needed we do not need start and end but we add 3 new
+        schedule = np.zeros((len(shifts_needed), columns))
 
-        # Calculate the amount of days to be scheduled
-        scheduling_days = (end_date - start_date).days
+        # transfer to np.array
+        days = set()
+        shift = 0
+        for _, row in enumerate(shifts_needed):
+            # set the day
+            week = row[0]
+            day = row[1]
 
-        # Set the amount of weeks, days and shifts to be scheduled
-        weeks = scheduling_days // len(SCHEDULE_DAYS)
-        days = len(SCHEDULE_DAYS)
-        shifts = len(DAILY_SHIFTS)
+            # count what shift it is
+            if (week, day) not in days:
+                shift = 0
+                days.add((week, day))
+            else:
+                shift += 1
+            task = row[4]
 
-        # Create schedule
-        schedule = np.empty((weeks, days, shifts), dtype=list)
+            # add info to schedule
+            ## week, day, shift, task, employee_id, index
+            schedule[_] = (week, day, shift, task, 0, int(_))
 
-        # Fill schedule with empty lists
-        # So that more employees can work during the same shift
-        for week_num, week in enumerate(schedule):
-            for day_num, day in enumerate(week):
-                for shift_num in range(len(day)):
-                    schedule[week_num][day_num][shift_num] = []
+            # collect all employees that can work this shift
+            self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
 
         return schedule
 
+    def init_availability(self): # not being used right now!!!
+        '''
+        returns a list of availability per employee
+        '''
+        availability_data = downloading_availability(self.db, self.cursor)
+        availability = np.zeros((len(availability_data), 5))
+        for _, entry in enumerate(availability_data):
+            id = entry[0]
+            week = (entry[1] + 1)
+            day = (entry[2] + 1)
+            shift = entry[3]
+            task = get_task(self.db, self.cursor, id)
+            availability[_] = (week, day, shift, task, id)
+
+        return availability
     """ GET """
 
     def get_date(self) -> object:
@@ -96,47 +119,39 @@ class Generator:
 
     """ METHODS """
 
-    def fill_schedule(self) -> None:
-        """
-        Method to fill the schedule
-        """
-
-        # Make set to track amount of filled timeslots
-        filled_schedule_set = set()
-        failcounter = 0
-
-        # While set is not length of filled schedule
-        while len(filled_schedule_set) < len(DAILY_SHIFTS) * len(SCHEDULE_DAYS) * 4:
-
-            # Reset schedule if too many failed tries
-            if failcounter > 100000:
-                self.schedule = self.init_schedule()
-                failcounter = 0
-
-            # Get employee name and availability
-            employee = random.choice(self.employee_list)
-            name = employee.get_name()
-            availability_code = employee.get_av()
-
-            # Skip if no availability
-            if availability_code == None:
-                continue
-
-            # Unpack code for indexing
-            av_week = availability_code[0]
-            av_day = availability_code[1]
-            av_shift = availability_code[2]
-
-            # If slot in schedule is full
-            if len(self.schedule[av_week][av_day][av_shift]) == EMPLOYEE_PER_SHIFT:
-                filled_schedule_set.add((av_week, av_day, av_shift))
-                failcounter += 1
-                continue
-            else:
-                self.schedule[av_week][av_day][av_shift].append(name)
-                continue
 
     def improve(self) -> None:
-        MC = MalusCalculator(self.schedule)
-        MC.calc_malus()
-        Switch.random(self.schedule)
+        for i in range(500):
+            self.mutate()
+
+        print('done')
+        # Switch.random(self.schedule)
+
+    def mutate(self): # this will probably be a class one day...
+        '''
+        makes mutations to the schedule but remembers original state and returns to it if
+        change is not better. So no deepcopies needed :0
+        '''
+
+        # pick a shift to replace
+        shift_to_replace = random.choice(self.schedule)
+
+        # calculate the cost and find what employee previously had that shift
+        MC = MalusCalculator(self.schedule, self.db, self.cursor)
+        old_cost = MC.get_wage_costs_per_week(self.schedule)
+        old_employee = shift_to_replace[4]
+
+        # get index of the choice so we can find what employees can work
+        index = int(shift_to_replace[5])
+
+        # use available_employees dict to pick from list with employees that can work that shift
+        employee_for_shift = random.choice(self.available_employees[index])
+        employee, wage = employee_for_shift
+
+        # replace employee with new employee
+        self.schedule[index][4] = employee
+        new_cost = MC.get_wage_costs_per_week(self.schedule)
+
+        # check if improvement worked, if not, place old employee back
+        if new_cost['schedule'] > old_cost['schedule']:
+            self.schedule[index][4] = old_employee

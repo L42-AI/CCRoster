@@ -89,9 +89,12 @@ class Controller:
 
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
-
+        
         self.communicate_server()
 
     def communicate_server(self):
         """ Function that gets called all the time to send the new data to the server """
         pass
+
+from classes.representation.employee import Employee
+from classes.representation.shift import Shift
