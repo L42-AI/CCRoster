@@ -21,7 +21,7 @@ class AddEmployee(QWidget):
         self.employee_grid = QGridLayout()
         self.employee_name_input = QLineEdit()
         self.employee_wage_input = QLineEdit()
-        self.employee_onboarding_input = QCheckBox()
+        self.employee_level_input = QCheckBox()
 
 
         self.add_employee_button = QPushButton("Add Employee")
@@ -39,13 +39,13 @@ class AddEmployee(QWidget):
         self.employee_wage.addWidget(QLabel("Hourly Wage:"))
         self.employee_wage.addWidget(self.employee_wage_input)
 
-        self.employee_onboarding = QVBoxLayout()
-        self.employee_onboarding.addWidget(QLabel("Onboarding:"))
-        self.employee_onboarding.addWidget(self.employee_onboarding_input)
+        self.employee_level = QVBoxLayout()
+        self.employee_level.addWidget(QLabel("level:"))
+        self.employee_level.addWidget(self.employee_level_input)
 
         self.employee_extra_layout = QHBoxLayout()
         self.employee_extra_layout.addLayout(self.employee_wage)
-        self.employee_extra_layout.addLayout(self.employee_onboarding)
+        self.employee_extra_layout.addLayout(self.employee_level)
 
         # Create the button layout
         button_layout = QHBoxLayout()
@@ -59,13 +59,13 @@ class AddEmployee(QWidget):
         self.add_employee_layout.addLayout(self.employee_extra_layout)
         self.add_employee_layout.addLayout(button_layout)
 
-        self.add_employee_role_layout = QVBoxLayout()
-        for role in self.tasktypes:
-            self.add_employee_role_layout.addWidget(QCheckBox(role))
+        self.add_employee_task_layout = QVBoxLayout()
+        for task in self.tasktypes:
+            self.add_employee_task_layout.addWidget(QCheckBox(task))
 
         self.total_employee_layout = QHBoxLayout()
         self.total_employee_layout.addLayout(self.add_employee_layout)
-        self.total_employee_layout.addLayout(self.add_employee_role_layout)
+        self.total_employee_layout.addLayout(self.add_employee_task_layout)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.employee_list)
@@ -78,30 +78,30 @@ class AddEmployee(QWidget):
         layout.addWidget(save_button)
 
     def add_employee(self):
-        name, wage, onboarding, roles = self.__get_employee_input_options()
+        name, wage, level, tasks = self.__get_employee_input_options()
 
-        self.Controller.create_employee(name, name, wage, onboarding, roles)
-        self.employees[name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
-        self.employee_list.addItem(f'{name, wage, onboarding, roles}')
+        self.Controller.create_employee(name, name, wage, level, tasks)
+        self.employees[name] = {'wage': wage, 'level': level, 'tasks': tasks}
+        self.employee_list.addItem(f'{name, wage, level, tasks}')
 
         self.__clear_input_fields()
 
     def edit_employee(self, item: object) -> None:
 
         # Get timeslot
-        name, wage, onboarding, roles = self.__get_info(item)
+        name, wage, level, tasks = self.__get_info(item)
 
         # Find start and end times
         self.employee_name_input.setText(name)
         self.employee_wage_input.setText(wage)
 
-        if onboarding == True:
-            self.employee_onboarding_input.setChecked(True)
+        if level == True:
+            self.employee_level_input.setChecked(True)
 
-        for role in roles:
-            for checkbox_num in range(self.add_employee_role_layout.count()):
-                checkbox = self.add_employee_role_layout.itemAt(checkbox_num).widget()
-                if checkbox.text() == role:
+        for task in tasks:
+            for checkbox_num in range(self.add_employee_task_layout.count()):
+                checkbox = self.add_employee_task_layout.itemAt(checkbox_num).widget()
+                if checkbox.text() == task:
                     checkbox.setChecked(True)
 
         # Enable buttons
@@ -118,15 +118,15 @@ class AddEmployee(QWidget):
 
             old_name, _, _, _ = self.__get_info(item)
 
-            new_name, wage, onboarding, roles = self.__get_employee_input_options()
+            new_name, wage, level, tasks = self.__get_employee_input_options()
 
             self.Controller.delete_employee(old_name, old_name)
             del self.employees[old_name]
             self.employee_list.takeItem(index)
 
-            self.Controller.create_employee(new_name, new_name, wage, onboarding, roles)
-            self.employees[new_name] = {'wage': wage, 'onboarding': onboarding, 'roles': roles}
-            self.employee_list.addItem(f'{new_name, wage, onboarding, roles}')
+            self.Controller.create_employee(new_name, new_name, wage, level, tasks)
+            self.employees[new_name] = {'wage': wage, 'level': level, 'tasks': tasks}
+            self.employee_list.addItem(f'{new_name, wage, level, tasks}')
 
             self.__clear_input_fields()
 
@@ -157,11 +157,11 @@ class AddEmployee(QWidget):
             self.employee_name_input.clear()
             self.employee_wage_input.clear()
 
-            if self.employee_onboarding_input.isChecked():
-                self.employee_onboarding_input.setChecked(False)
+            if self.employee_level_input.isChecked():
+                self.employee_level_input.setChecked(False)
 
-            for checkbox_num in range(self.add_employee_role_layout.count()):
-                checkbox = self.add_employee_role_layout.itemAt(checkbox_num).widget()
+            for checkbox_num in range(self.add_employee_task_layout.count()):
+                checkbox = self.add_employee_task_layout.itemAt(checkbox_num).widget()
                 if checkbox.isChecked():
                     checkbox.setChecked(False)
 
@@ -172,25 +172,25 @@ class AddEmployee(QWidget):
 
         # Find timeslot
         info = selected_str.strip("(").strip(")").replace("'", '').replace(" ", '')
-        name, wage, onboarding, roles = info.split(',')
+        name, wage, level, tasks = info.split(',')
 
-        roles = roles[1:-1].split(", ")
-        return name, wage, onboarding, roles
+        tasks = tasks[1:-1].split(", ")
+        return name, wage, level, tasks
 
     def __get_employee_input_options(self) -> tuple:
         # Get start and end time inputs
         name = self.employee_name_input.text()
         wage = self.employee_wage_input.text()
-        onboarding = self.employee_onboarding_input.isChecked()
+        level = self.employee_level_input.isChecked()
 
-        roles = []
-        for role_widget_num in range(self.add_employee_role_layout.count()):
-            role_widget = self.add_employee_role_layout.itemAt(role_widget_num).widget()
-            role = role_widget.text()
-            if role_widget.isChecked():
-                roles.append(role)
+        tasks = []
+        for task_widget_num in range(self.add_employee_task_layout.count()):
+            task_widget = self.add_employee_task_layout.itemAt(task_widget_num).widget()
+            task = task_widget.text()
+            if task_widget.isChecked():
+                tasks.append(task)
 
-        return name, wage, onboarding, roles
+        return name, wage, level, tasks
 
     def save(self) -> None:
         print(self.employees)
