@@ -24,9 +24,9 @@ class Availability(QWidget):
         # Create the left widget with an overview of all possible timeslots
         self.timeslots_label = QLabel("Shifts")
 
-        self.role_combobox = QComboBox()
-        for role in self.tasktypes:
-            self.role_combobox.addItem(role)
+        self.task_combobox = QComboBox()
+        for task in self.tasktypes:
+            self.task_combobox.addItem(task)
 
         self.timeslots_layout = QVBoxLayout()
         for timeslot in self.timeslots:
@@ -36,7 +36,7 @@ class Availability(QWidget):
 
         self.left_widget_layout = QVBoxLayout()
         self.left_widget_layout.addWidget(self.timeslots_label)
-        self.left_widget_layout.addWidget(self.role_combobox)
+        self.left_widget_layout.addWidget(self.task_combobox)
         self.left_widget_layout.addLayout(self.timeslots_layout)
 
         # Create the right widget with employee information
