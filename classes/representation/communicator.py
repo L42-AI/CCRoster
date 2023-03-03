@@ -1,4 +1,3 @@
-
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
 
@@ -24,15 +23,38 @@ class Communicator:
 
     """ Methods """
 
-    def create_employee(self, *kwargs):
-        print(kwargs)
+    def create_employee(self, first_name, last_name, hourly_wage, level, roles):
         self.employee_list.append(
             Employee(
+            first_name = first_name,
+            last_name = last_name,
+            av = [],
+            maximum={},
+            wage = hourly_wage,
+            onboarding = level,
+            roles = roles
             )
         )
 
-    def delete_employee(self, *kwargs):
-        pass
+    def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
+        for employee_instance in self.employee_list:
+            if employee_instance == employee:
+                print(len(employee_instance.availability))
+
+        if add:
+            employee.availability.append(availability_slot)
+        else:
+            employee.availability.remove(availability_slot)
+
+        for employee_instance in self.employee_list:
+            if employee_instance == employee:
+                print(len(employee_instance.availability))
+
+    def delete_employee(self, first_name, last_name):
+        for employee_instance in self.employee_list:
+            if employee_instance.name == employee_instance.get_full_name(first_name, last_name):
+                self.employee_list.remove(employee_instance)
+                break
 
     def create_shift(self, time: str, day: str, week: str, role: str) -> None:
         start_time, end_time = self.get_start_and_finish_time(time)
@@ -49,8 +71,12 @@ class Communicator:
         )
 
     def delete_shift(self, time: str) -> None:
+        self.to_delete: list[object] = []
         start_time, end_time = self.get_start_and_finish_time(time)
 
         for shift_instance in self.shift_list:
             if shift_instance.start_time == start_time and shift_instance.end_time == end_time:
-                self.shift_list.remove(shift_instance)
+                self.to_delete.append(shift_instance)
+
+        for i in range(len(self.to_delete)):
+            self.shift_list.remove(self.to_delete[i])

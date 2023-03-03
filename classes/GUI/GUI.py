@@ -62,8 +62,8 @@ class MainWindow(QMainWindow):
         self.welcome_widget = Welcome()
         self.shift_widget = Shifts(self.Com)
         self.employee_widget = AddEmployee(self.Com)
-        self.availability_widget = Availability()
-        self.relation_widget = EmployeeMatch()
+        self.availability_widget = Availability(self.Com)
+        self.relation_widget = EmployeeMatch(self.Com)
         self.weight_widget = Weight()
         self.settings_widget = Settings()
 
