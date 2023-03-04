@@ -6,5 +6,5 @@ class Shift:
     end_time: str
     day: int
     week: int
-    role: int
+    task: int
     location: int

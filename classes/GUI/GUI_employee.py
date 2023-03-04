@@ -193,7 +193,7 @@ class AddEmployee(QWidget):
             task_widget: QCheckBox = self.employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
-                tasks.append(task)
+                task.append(task)
 
         return first_name, last_name, wage, level, tasks
 
