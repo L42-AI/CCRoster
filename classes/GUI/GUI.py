@@ -67,6 +67,8 @@ class MainWindow(QMainWindow):
         self.weight_widget = Weight()
         self.settings_widget = Settings()
 
+        self.shift_widget.update_signal.connect(self.availability_widget.init_timeslot_dict)
+
         self.pages = QStackedWidget()
         self.pages.addWidget(self.welcome_widget)
         self.pages.addWidget(self.shift_widget)
