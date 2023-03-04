@@ -1,17 +1,18 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
-                               QCheckBox)
+                               QCheckBox, QListWidgetItem)
 import re
 from classes.representation.controller import Controller
 
 class Shifts(QWidget):
+    update_signal = Signal()
     def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
         self.Controller: Controller = Con
 
         # Set mutable object
-        self.timeslots = {}
         self.tasktypes = ['Allround', 'Begels', 'Koffie', 'Kassa']
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.amount_of_weeks = 4
@@ -71,11 +72,6 @@ class Shifts(QWidget):
         layout.addLayout(timeset_layout)
         layout.addLayout(button_layout)
 
-        save_button = QPushButton('Save')
-        save_button.clicked.connect(self.save)
-
-        layout.addWidget(save_button)
-
     """ Init """
 
     def init_timeslot_buttons(self) -> None:
@@ -132,14 +128,15 @@ class Shifts(QWidget):
 
         # Add to list and display widget
         self.__export_shift_to_connector(timeslot, days, week, task_type)
-        self.timeslots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
         # Reset the text inputs
         self.start_time_edit.clear()
         self.end_time_edit.clear()
 
-    def edit_time_slot(self, item: object) -> None:
+        self.update_signal.emit()
+
+    def edit_time_slot(self, item: QListWidgetItem) -> None:
 
         # Get timeslot
         timeslot = self.__get_timeslot(item)
@@ -171,15 +168,15 @@ class Shifts(QWidget):
                 return
 
             self.Controller.delete_shift(old_timeslot)
-            del self.timeslots[old_timeslot]
             self.time_slot_list.takeItem(index)
 
             self.__export_shift_to_connector(new_timeslot, days, week, task_type)
-            self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
             self.time_slot_list.addItem(info_string)
 
             self.start_time_edit.clear()
             self.end_time_edit.clear()
+
+            self.update_signal.emit
 
     def delete_selected_time_slot(self) -> None:
         # Get selected time slot
@@ -191,7 +188,6 @@ class Shifts(QWidget):
 
             # Remove from list and widget
             self.Controller.delete_shift(timeslot)
-            del self.timeslots[timeslot]
             self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
             # Disable buttons
@@ -202,6 +198,8 @@ class Shifts(QWidget):
             self.start_time_edit.clear()
             self.end_time_edit.clear()
 
+            self.update_signal.emit
+
     def all_weeks_checkbox_clicked(self) -> None:
         checkbox = self.sender()
 
@@ -210,7 +208,7 @@ class Shifts(QWidget):
         if checkbox.isChecked():
 
             for week_num in range(1, self.weeks_layout.count()):
-                child_layout = self.weeks_layout.itemAt(week_num).layout()
+                child_layout = self.weeks_layout.itemAt(week_num)
                 children_layouts.append(child_layout)
 
             for child_layout in children_layouts:
@@ -228,10 +226,6 @@ class Shifts(QWidget):
         else:
             self.__add_week_selection(self.weeks_layout)
             self.weeks_layout.update()
-
-    def save(self) -> None:
-
-        print(self.timeslots)
 
     """ Helpers """
 
@@ -275,17 +269,11 @@ class Shifts(QWidget):
         for layout_num in range(self.days_layout.count()):
             day_layout = self.days_layout.itemAt(layout_num)
 
-            for widget_num in range(day_layout.count()):
+            for widget_num in range(1, day_layout.count()):
                 child_widget = day_layout.itemAt(widget_num).widget()
 
-                if isinstance(child_widget, QLabel):
-                    day = child_widget.text()
-                   
-
-                else:
-                    if child_widget.isChecked():
-
-                        days.append(layout_num)
+                if child_widget.isChecked():
+                    days.append(layout_num)
 
 
         weeks = []
