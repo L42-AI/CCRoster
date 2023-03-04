@@ -6,6 +6,9 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
 
 from classes.representation.controller import Controller
 from classes.representation.employee import Employee
+from classes.representation.shift import Shift
+
+DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 class Availability(QWidget):
     def __init__(self, Con, parent=None) -> None:
@@ -13,19 +16,60 @@ class Availability(QWidget):
 
         self.Controller: Controller = Con
 
-        self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        self.tasktypes = ['Allround']
+
+        self.tasktypes = {'Allround': 1}
         self.timeslots = ["7:00-12:00", "12:00-18:00"]
         self.selected_employee: Employee = None
         self.amount_of_weeks = 4
 
-        self.init_schedule_widget()
 
-        # Create the left widget with an overview of all possible timeslots
-        self.timeslots_label = QLabel("Shifts")
+        # Create timeslot_dict
+        self.init_timeslot_dict()
 
+        # Create schedule widget
+        self.schedule_widget = self.init_schedule_widget()
+        self.schedule_layout = self.init_schedule_layout(self.schedule_widget)
+
+        # Create bottom layouts
+        self.left_layout = self.init_left_layout()
+        self.mid_layout = self.init_mid_layout()
+        self.right_layout = self.init_right_layout()
+
+        # Create a widget for the right layout
+        work_frequency_widget = QWidget()
+        work_frequency_widget.setLayout(self.right_layout)
+        work_frequency_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        work_frequency_widget.setMinimumSize(work_frequency_widget.sizeHint())
+
+        # Stack info layouts horizontally
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_layout.addLayout(self.left_layout)
+        self.bottom_layout.addLayout(self.mid_layout)
+        self.bottom_layout.addWidget(work_frequency_widget)
+
+        # Add to total layout
+        layout = QVBoxLayout(self)
+        layout.addLayout(self.schedule_layout)
+        layout.addLayout(self.bottom_layout)
+
+    """ Init """
+
+    def init_timeslot_dict(self) -> dict:
+        self.timeslots_dict = {}
+        shift_list: list[Shift] = self.Controller.get_shift_list()
+
+        for shift in shift_list:
+
+            if shift.task not in self.timeslots_dict:
+                self.timeslots_dict[shift.task] = []
+
+            self.timeslots_dict[shift.task].append(shift)
+
+    def init_left_layout(self) -> QVBoxLayout:
         self.task_combobox = QComboBox()
-        for task in self.tasktypes:
+        self.task_combobox.setFixedWidth(150)
+        self.task_combobox.activated.connect(self.update_shift_display)
+        for task in self.tasktypes.keys():
             self.task_combobox.addItem(task)
 
         self.timeslots_layout = QVBoxLayout()
@@ -33,14 +77,14 @@ class Availability(QWidget):
             timeslot_label = QLabel(timeslot)
             self.timeslots_layout.addWidget(timeslot_label)
 
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Shifts"))
+        layout.addWidget(self.task_combobox)
+        layout.addLayout(self.timeslots_layout)
 
-        self.left_widget_layout = QVBoxLayout()
-        self.left_widget_layout.addWidget(self.timeslots_label)
-        self.left_widget_layout.addWidget(self.task_combobox)
-        self.left_widget_layout.addLayout(self.timeslots_layout)
+        return layout
 
-        # Create the right widget with employee information
-
+    def init_mid_layout(self) -> QVBoxLayout:
         self.employee_combo = QComboBox()
         self.employee_combo.currentIndexChanged.connect(self.set_employee)
 
@@ -53,16 +97,25 @@ class Availability(QWidget):
             self.employee_combo.addItem(name)
             name_lengths.append(len(name))
 
-        width = max(name_lengths) * 10
+        width = max(name_lengths) * 12
         self.employee_combo.setFixedWidth(width)
 
         self.employee_wage_label = QLabel("Wage: N/A")
 
-        work_frequency_layout = QGridLayout()
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignHCenter)
+        layout.setAlignment(Qt.AlignVCenter)
+        layout.addWidget(self.employee_combo)
+        layout.addWidget(self.employee_wage_label)
 
-        work_frequency_label = QLabel('Diensten Per Week')
-        work_frequency_label.setAlignment(Qt.AlignHCenter)
-        work_frequency_layout.addWidget(work_frequency_label, 0, 1, 1, 3)
+        return layout
+
+    def init_right_layout(self) -> QGridLayout:
+        layout = QGridLayout()
+
+        label = QLabel('Diensten Per Week')
+        label.setAlignment(Qt.AlignHCenter)
+        layout.addWidget(label, 0, 1, 1, 3)
 
 
         for week in range(4):
@@ -76,91 +129,69 @@ class Availability(QWidget):
             info_button = QPushButton('i')
             info_button.setFixedWidth(25)
 
-            work_frequency_layout.addWidget(label, week + 1, 1)
-            work_frequency_layout.addWidget(editor, week + 1, 2)
-            work_frequency_layout.addWidget(info_button, week + 1, 3)
+            layout.addWidget(label, week + 1, 1)
+            layout.addWidget(editor, week + 1, 2)
+            layout.addWidget(info_button, week + 1, 3)
 
-        work_frequency_widget = QWidget()
-        work_frequency_widget.setLayout(work_frequency_layout)
-        work_frequency_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        work_frequency_widget.setMinimumSize(work_frequency_widget.sizeHint())
+        return layout
 
-        employee_info_layout = QVBoxLayout()
-        employee_info_layout.setAlignment(Qt.AlignHCenter)
-        employee_info_layout.setAlignment(Qt.AlignVCenter)
-        employee_info_layout.addWidget(self.employee_combo)
-        employee_info_layout.addWidget(self.employee_wage_label)
+    def init_schedule_widget(self) -> QStackedWidget:
+        schedule_widget = QStackedWidget()
+        schedule_widget.setContentsMargins(0,0,0,0)
 
-        # Add the schedule view and two widgets to the main layout
-        self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addLayout(self.left_widget_layout)
-        self.bottom_layout.addLayout(employee_info_layout)
-        self.bottom_layout.addWidget(work_frequency_widget)
-
-        self.tab3_layout = QVBoxLayout(self)
-        self.tab3_layout.addLayout(self.schedule_viewer)
-        self.tab3_layout.addLayout(self.bottom_layout)
-
-    """ Init """
-
-    def init_schedule_widget(self) -> None:
-
-        self.schedule_widget = QStackedWidget()
-
-        # For each week:
         for week_num in range(self.amount_of_weeks):
+            week_widget = self.init_week_widget(week_num)
+            schedule_widget.addWidget(week_widget)
 
-            # Make a layout for the week
-            week_layout = QHBoxLayout()
-            week_layout.setSpacing(0)
-            week_layout.setContentsMargins(0,0,0,0)
+        return schedule_widget
 
-            # For each day:
-            for day_num, day in enumerate(self.days):
+    def init_week_widget(self, week_num: int) -> QWidget:
+        week_layout = QHBoxLayout()
+        week_layout.setContentsMargins(0,0,0,0)
+        week_layout.setSpacing(0)
 
-                # Create a label and a layout for each day
-                day_label = QLabel(day)
-                day_label.setAlignment(Qt.AlignHCenter)
-                day_layout = QVBoxLayout()
-                day_layout.setSpacing(0)
-                day_layout.setContentsMargins(0,0,0,0)
-                day_layout.addWidget(day_label)
+        for day_num, day in enumerate(DAYS):
+            day_widget = self.init_day_widget(week_num, day_num, day)
+            week_layout.addWidget(day_widget)
 
-                # For each timeslot
-                for timeslot_num, timeslot in enumerate(self.timeslots):
+        week_widget = QWidget()
+        week_widget.setContentsMargins(0,0,0,0)
+        week_widget.setLayout(week_layout)
 
-                    # Make checkbox
-                    checkbox = QCheckBox(timeslot)
-                    checkbox.week = week_num
-                    checkbox.day = day_num
-                    checkbox.timeslot = timeslot_num
-                    checkbox.clicked.connect(self.availability_checkbox_clicked)
-                    checkbox.setChecked(False)
+        return week_widget
 
-                    # Add to day layout
-                    day_layout.addWidget(checkbox)
+    def init_day_widget(self, week_num: int, day_num: int, day: str) -> QWidget:
+        day_label = QLabel(day)
+        day_label.setAlignment(Qt.AlignHCenter)
 
-                day_widget = QWidget()
-                day_widget.setLayout(day_layout)
-                day_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-                day_widget.setMinimumSize(day_widget.sizeHint())
+        day_layout = QVBoxLayout()
+        day_layout.setContentsMargins(0,0,0,0)
+        day_layout.addWidget(day_label)
 
-                # Add each day to the week layout
-                week_layout.addWidget(day_widget)
+        for timeslot_num, timeslot in enumerate(self.timeslots):
+            checkbox = self.init_checkbox(week_num, day_num, timeslot_num, timeslot)
+            day_layout.addWidget(checkbox)
 
+        day_widget = QWidget()
+        day_widget.setLayout(day_layout)
+        day_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        day_widget.setMinimumSize(day_widget.sizeHint())
 
-            week_label = QLabel(f'Week: {week_num + 1}')
+        return day_widget
 
-            week_layout_with_label = QVBoxLayout()
-            week_layout_with_label.addWidget(week_label)
-            week_layout_with_label.addLayout(week_layout)
+    def init_checkbox(self, week_num: int, day_num: int, timeslot_num: int, timeslot: str) -> QCheckBox:
+        checkbox = QCheckBox(timeslot)
+        checkbox.week = week_num
+        checkbox.day = day_num
+        checkbox.timeslot = timeslot_num
+        checkbox.clicked.connect(self.availability_checkbox_clicked)
+        checkbox.setChecked(False)
 
+        return checkbox
 
-            # Add each week to the schedule
-            week_widget = QWidget()
-            week_widget.setLayout(week_layout_with_label)
+    def init_schedule_layout(self, schedule_widget: QStackedWidget) -> QGridLayout:
 
-            self.schedule_widget.addWidget(week_widget)
+        self.week_label = QLabel(f'Week: 1')
 
         forward_button = QPushButton('>')
         forward_button.setFixedHeight(100)
@@ -173,10 +204,13 @@ class Availability(QWidget):
         forward_button.clicked.connect(lambda: self.schedule_scroller(forward=True))
         backward_button.clicked.connect(lambda: self.schedule_scroller(forward=False))
 
-        self.schedule_viewer = QHBoxLayout()
-        self.schedule_viewer.addWidget(backward_button)
-        self.schedule_viewer.addWidget(self.schedule_widget)
-        self.schedule_viewer.addWidget(forward_button)
+        layout = QGridLayout()
+        layout.addWidget(self.week_label, 0, 0, 1, 3, Qt.AlignHCenter)
+        layout.addWidget(backward_button, 1, 0, 2, 1)
+        layout.addWidget(schedule_widget, 1, 1, 2, 1)
+        layout.addWidget(forward_button, 1, 2, 2, 1)
+
+        return layout
 
     """ Get """
 
@@ -199,6 +233,8 @@ class Availability(QWidget):
             index = (self.schedule_widget.currentIndex() - 1) % self.schedule_widget.count()
 
         self.schedule_widget.setCurrentIndex(index)
+
+        self.week_label.setText(f'Week: {index + 1}')
 
     def update_schedule_availability(self):
         """ Update the availability checkboxes based on the availability of the employee instance """
@@ -285,3 +321,9 @@ class Availability(QWidget):
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
                     self.Controller.edit_employee_availability(timeslot, add=False)
+
+    def update_shift_display(self):
+        selected_task = self.task_combobox.currentText()
+        tasknum = self.tasktypes[selected_task]
+        self.timeslots = self.timeslots_dict[tasknum]
+        print(self.timeslots)
