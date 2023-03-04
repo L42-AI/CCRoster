@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
-                               QCheckBox, QWidgetItem, QComboBox)
+                               QCheckBox, QListWidgetItem, QComboBox)
 
 from classes.representation.controller import Controller
 
@@ -98,19 +98,18 @@ class AddEmployee(QWidget):
     def edit_employee(self, item: object) -> None:
 
         # Get timeslot
-        name, wage, level, tasks = self.__get_info(item)
+        first_name, last_name, wage, level, tasks = self.__get_info(item)
 
         # Find start and end times
-        self.employee_first_name_input.setText(name)
-        self.employee_last_name_input.setText(name)
+        self.employee_first_name_input.setText(first_name)
+        self.employee_last_name_input.setText(last_name)
         self.employee_wage_input.setText(wage)
 
-        if level == True:
-            self.employee_level_input.setChecked(True)
+        self.employee_level_input.setCurrentText(level)
 
         for task in tasks:
             for checkbox_num in range(self.employee_task_layout.count()):
-                checkbox = self.employee_task_layout.itemAt(checkbox_num).widget()
+                checkbox: QCheckBox = self.employee_task_layout.itemAt(checkbox_num).widget()
                 if checkbox.text() == task:
                     checkbox.setChecked(True)
 
@@ -126,11 +125,11 @@ class AddEmployee(QWidget):
 
             index = self.employee_list.row(item)
 
-            old_name, _, _, _ = self.__get_info(item)
+            old_first_name, old_last_name, _, _, _ = self.__get_info(item)
 
             new_first_name, new_last_name, wage, level, tasks = self.__get_employee_input_options()
 
-            self.Controller.delete_employee(old_name, old_name)
+            self.Controller.delete_employee(old_first_name, old_last_name)
             self.employee_list.takeItem(index)
 
             self.Controller.create_employee(new_first_name, new_last_name, wage, level, tasks)
@@ -147,10 +146,10 @@ class AddEmployee(QWidget):
 
             index = self.employee_list.row(item)
 
-            old_name, _, _, _ = self.__get_info(item)
+            old_first_name, old_last_name, _, _, _ = self.__get_info(item)
 
             # Remove from list and widget
-            self.Controller.delete_employee(old_name, old_name)
+            self.Controller.delete_employee(old_first_name, old_last_name)
             self.employee_list.takeItem(index)
 
             # Disable buttons
@@ -165,36 +164,33 @@ class AddEmployee(QWidget):
             self.employee_last_name_input.clear()
             self.employee_wage_input.clear()
 
-            if self.employee_level_input.isChecked():
-                self.employee_level_input.setChecked(False)
-
             for checkbox_num in range(self.employee_task_layout.count()):
-                task_checkbox = self.employee_task_layout.itemAt(checkbox_num).widget()
+                task_checkbox: QCheckBox = self.employee_task_layout.itemAt(checkbox_num).widget()
                 if task_checkbox.isChecked():
                     task_checkbox.setChecked(False)
 
-    def __get_info(self, item: QWidgetItem) -> tuple:
+    def __get_info(self, item: QListWidgetItem) -> tuple:
 
         # Extract text of selected item
         selected_str = item.text()
 
         # Find timeslot
         info = selected_str.strip("(").strip(")").replace("'", '').replace(" ", '')
-        name, wage, level, tasks = info.split(',')
+        first_name, last_name, wage, level, tasks = info.split(',')
 
         tasks = tasks[1:-1].split(", ")
-        return name, wage, level, tasks
+        return first_name, last_name, wage, level, tasks
 
     def __get_employee_input_options(self) -> tuple:
         # Get start and end time inputs
         first_name = self.employee_first_name_input.text()
         last_name = self.employee_last_name_input.text()
         wage = self.employee_wage_input.text()
-        level = self.employee_level_input.isChecked()
+        level = self.employee_level_input.currentText()
 
         tasks = []
         for task_widget_num in range(self.employee_task_layout.count()):
-            task_widget = self.employee_task_layout.itemAt(task_widget_num).widget()
+            task_widget: QCheckBox = self.employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
                 tasks.append(task)

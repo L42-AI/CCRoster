@@ -35,7 +35,8 @@ class Controller:
             maximum={},
             wage = hourly_wage,
             level = level,
-            task = tasks
+            task = tasks,
+            location = self.location
             )
         self.employee_list.append(employee)
         self.threads.append(("INSERT INTO Employee (name, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s)", ))
@@ -50,7 +51,7 @@ class Controller:
 
     def delete_employee(self, first_name, last_name):
         for employee_instance in self.employee_list:
-            if employee_instance.name == employee_instance.get_full_name(first_name, last_name):
+            if employee_instance.name == employee_instance.get_name(first_name, last_name):
                 self.employee_list.remove(employee_instance)
                 break
 
