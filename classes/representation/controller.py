@@ -29,11 +29,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-<<<<<<< HEAD
-    def get_start_and_finish_time(self, time: str) -> tuple:
-=======
     def get_start_and_finish_time(self, time: str):
->>>>>>> dev
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
@@ -122,36 +118,46 @@ class Controller:
             self.shift_list.remove(self.to_delete[i])
 
     def update_employee_availability(self, new_av):
+        ''''
+        updates the availability of the LOCAL employee instance that the GUI uses 
+        '''
         for employee in self.employee_list:
             mask = [x[0] == employee.id for x in new_av]
             employee.availability = [x for x, i in enumerate(new_av) if mask[i]]
 
     def store_availability(self, new_availability, lock):
+        '''
+        stores new availability LOCAL in controller class. Uses lock to prevent GUI and controller writing to availability at the same time
+        '''
         lock.acquire()
         self.availability = new_availability
         lock.release()
 
 
     def communicate_server(self):
-        return
-        """ Function that gets called all the time to send the new data to the server and download data"""
+        """ Function that gets runs all the time to send the new data to the server and download data"""
         cursor = self.cursor
         connection = self.db
+
+        # stop when GUI.py stops, turning self.close to True
         while not self.close:
 
+            # program freezes is queue is empty so check before entering queue
             if not queue.Empty():
                 query, data = self.queue.get()
 
                 cursor.execute(query, data)
+
+            # perform check to see if employees changed their availability remotely
             av = downloading_availability(connection, cursor, self.location)
 
             connection.commit()
 
+            # update controller availability
             if av != self.availability:
                 self.store_availability(av, LOCK)
                 self.update_employee_availability(av)
-                print(av)
 
-            # if self.employee_list !=
+
 
 

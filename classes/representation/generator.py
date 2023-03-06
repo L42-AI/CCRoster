@@ -1,8 +1,6 @@
 from datetime import date, timedelta
 import numpy as np
 import random
-import mysql.connector
-import threading
 
 from classes.representation.maluscalc import MalusCalculator
 from classes.algorithms.switch import Switch
@@ -17,7 +15,6 @@ class Generator:
 
         self.location = None
         self.availability =  0
-        self.availability = [] # array with all shifts that each employee can fill, gets filled trough the GUI
 
         # print(self.available_employees)
         # self.improve()
