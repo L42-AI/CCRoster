@@ -11,7 +11,7 @@ class Employee:
         self.wage = wage
         self.weekly_max_employee = maximum
         self.level = level
-        self.task = task
+        self.tasks = task
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
 
@@ -34,7 +34,7 @@ class Employee:
         # translate the string to a code corresponding with the location
         if self.location == 'coffee_company':
             location = 1
-        if self.task == 'everything':
+        if self.tasks == 'everything':
             task = 1
 
         # add the employee to the database
@@ -86,17 +86,17 @@ class Employee:
         if len(self.availability) > 0:
             return random.choice(self.availability)
 
-    def get_full_name(self, first_name, last_name) -> str:
-        return f'{first_name}{last_name}'
-
-    def get_abreviated_name(self) -> str:
-        return f'{self.first_name[0]}. {self.last_name}'
+    def get_name(self, name) -> str:
+        return name
 
     def get_wage(self) -> float:
         return float(self.wage)
 
-    def get_onboarding(self) -> int:
-        return self.onboarding
+    def get_level(self) -> int:
+        return self.level
+
+    def get_tasks(self) -> int:
+        return self.tasks
 
     def get_week_max_dict(self) -> dict:
         return self.weekly_max_employee
