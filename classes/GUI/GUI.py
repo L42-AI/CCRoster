@@ -16,12 +16,13 @@ from classes.GUI.GUI_settings import Settings
 from classes.representation.controller import Controller
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
-        self.setWindowTitle("Consilium")
+        self.setWindowTitle("Shifter")
         self.setGeometry(100, 100, 875, 625)
 
-        self.Com = Controller(1)
+        self.Com = controller
+        self.Com.location = 1 # HARDCODE!
 
         self.shifts_button = NavigationOptions()
         self.shifts_button.clicked.connect(self.change_page)
@@ -101,6 +102,7 @@ class MainWindow(QMainWindow):
         """
         pass
     def aboutToQuit(self):
+        print('close me pls')
         Controller.close = True
 
 if __name__ == "__main__":

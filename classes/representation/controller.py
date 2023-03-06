@@ -9,10 +9,11 @@ from classes.representation.generator import Generator
 
 
 class Controller:
-    def __init__(self, location) -> None:
+    def __init__(self, generator) -> None:
+        self.generator = generator
         self.employee_list: list[Employee] = []
         self.shift_list: list[Shift] = []
-        self.location = location
+        self.location = None
         self.db, self.cursor = db_cursor()
         self.queue = queue.Queue()
         self.name_to_id = {}
@@ -28,7 +29,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str) -> tuple(str, str):
+    def get_start_and_finish_time(self, time: str):
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
@@ -131,7 +132,7 @@ class Controller:
 
             connection.commit()
 
-            if av != Generator.availability:
+            if av != self.generator.availability:
                 print('different!')
             # if self.employee_list != 
 
