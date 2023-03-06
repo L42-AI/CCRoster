@@ -2,6 +2,7 @@ from datetime import date, timedelta
 import numpy as np
 import random
 import mysql.connector
+import threading
 
 from classes.representation.maluscalc import MalusCalculator
 from classes.algorithms.switch import Switch
@@ -14,9 +15,10 @@ class Generator:
         self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
         self.schedule = self.init_schedule() # array with shifts that need to be filled
 
+        self.location = None
         self.availability =  0
-        self.availability = self.init_availability() # array with all shifts that each employee can fill
-        print('init!')
+        self.availability = [] # array with all shifts that each employee can fill, gets filled trough the GUI
+
         # print(self.available_employees)
         # self.improve()
     """ INIT """
@@ -56,21 +58,6 @@ class Generator:
 
         return schedule
 
-    def init_availability(self): # not being used right now!!!
-        '''
-        returns a list of availability per employee
-        '''
-        availability_data = downloading_availability(self.db, self.cursor)
-        availability = np.zeros((len(availability_data), 5))
-        for _, entry in enumerate(availability_data):
-            id = entry[0]
-            week = (entry[1] + 1)
-            day = (entry[2] + 1)
-            shift = entry[3]
-            task = get_task(self.db, self.cursor, id)
-            availability[_] = (week, day, shift, task, id)
-
-        return availability
     """ GET """
 
     def get_date(self) -> object:

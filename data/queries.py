@@ -27,25 +27,26 @@ def uploading_shifts(db, cursor, entry):
     cursor.execute(query, values)
     db.commit()
 
-def downloading_shifts(db, cursor):
+def downloading_shifts(db, cursor, location):
     '''
     downloading the shifts that need to be filled
     '''
     query = 'SELECT week, day, start, end, task FROM Shifts WHERE location = %s'
-    value = [1] # hardcoded for cc
+    value = (location,) # hardcoded for cc
     cursor.execute(query, value)
     rows = cursor.fetchall()
     return rows
 
-def downloading_availability(db, cursor):
+def downloading_availability(db, cursor, location):
     '''
     downloading the availability per location
     '''
     # hardcoded 1 resembling coffeecompany
     query = 'SELECT * FROM Availability WHERE employee_id IN (SELECT id from Employee WHERE location=%s)'
-    value = [1] # for now location is always 1
+    value = (location,) # for now location is always 1
     cursor.execute(query, value)
     rows = cursor.fetchall() # this selects the info into a list with tuples corresponding with rows
+    # print(f'rows: {rows}')
     return rows
 
 def get_task(db, cursor, id):
