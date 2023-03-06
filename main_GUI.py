@@ -4,7 +4,7 @@ import sys
 from classes.representation.generator import Generator
 
 if __name__ == "__main__":
-    Generator()
+    # Generator()
     window = QApplication(sys.argv)
     app = MainWindow()
     app.show()

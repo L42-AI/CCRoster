@@ -28,7 +28,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str) -> tuple(str, str):
+    def get_start_and_finish_time(self, time: str) -> tuple:
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
@@ -117,6 +117,7 @@ class Controller:
             self.shift_list.remove(self.to_delete[i])
 
     def communicate_server(self):
+        return
         """ Function that gets called all the time to send the new data to the server and download data"""
         cursor = self.cursor
         connection = self.db
