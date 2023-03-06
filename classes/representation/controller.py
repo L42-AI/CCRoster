@@ -1,9 +1,12 @@
 import queue
+import threading
 
 
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
-from data.queries import db_cursor
+from data.queries import db_cursor, downloading_availability
+from classes.representation.generator import Generator
+
 
 class Controller:
     def __init__(self, location) -> None:
@@ -13,6 +16,9 @@ class Controller:
         self.db, self.cursor = db_cursor()
         self.queue = queue.Queue()
         self.name_to_id = {}
+        self.close = False
+        self.threading()
+
 
     """ Get """
 
@@ -29,6 +35,15 @@ class Controller:
         return info['day'], info['week'], info['type']
 
     """ Methods """
+    def threading(self):
+        t = threading.Thread(target=self.communicate_server)
+        t.start()
+        if self.close:
+            print('close')
+            self.cursor.close()
+            self.db.close()
+            return
+
 
     def create_employee(self, lname, fname, hourly_wage, level, tasks):
         employee = Employee(
@@ -41,7 +56,7 @@ class Controller:
             task = tasks,
             location = self.location
             )
-        
+
         # add employee locally
         self.employee_list.append(employee)
         self.name_to_id[fname+lname] = employee.id
@@ -111,8 +126,23 @@ class Controller:
         self.communicate_server()
 
     def communicate_server(self):
-        """ Function that gets called all the time to send the new data to the server """
+        """ Function that gets called all the time to send the new data to the server and download data"""
+        cursor = self.cursor
+        connection = self.db
+        print(1)
+        while True:
+            print(self.close)
+            if not queue.Empty():
+                query, data = self.queue.get()
+                print('1')
+                cursor.execute(query, data)
+                print('2')
+            av = downloading_availability(connection, cursor)
+            print('3')
+            connection.commit()
+            print('4')
+            if av != Generator.availability:
+                print('different!')
+            if self.employee_list != 
 
 
-from classes.representation.employee import Employee
-from classes.representation.shift import Shift
