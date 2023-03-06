@@ -100,6 +100,8 @@ class MainWindow(QMainWindow):
         Function to upload all queries that are put in the queue and download all new info
         """
         pass
+    def aboutToQuit(self):
+        Controller.close = True
 
 if __name__ == "__main__":
     window = QApplication(sys.argv)

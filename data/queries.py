@@ -1,5 +1,5 @@
 import mysql
-
+# http://wouterverdegaal.com:8080/
 def db_cursor():
     db = mysql.connector.connect(
                 host="185.224.91.162",
@@ -12,7 +12,11 @@ def db_cursor():
     return db, cursor
 
 datalist = [] # this is the list like we discussed
-
+def downloading_employees(db, cursor):
+    '''
+    downloading all active employees from one location
+    '''
+    query = 'SELECT FROM Employee'
 def uploading_shifts(db, cursor, entry):
     '''
     uploading shifts needed

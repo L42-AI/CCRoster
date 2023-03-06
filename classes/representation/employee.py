@@ -76,6 +76,8 @@ class Employee:
 
 
     """ Get """
+    def get_name(self):
+        return self.name
 
     def get_full_av(self) -> set:
         return self.availability

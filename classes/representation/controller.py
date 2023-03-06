@@ -1,9 +1,12 @@
 import queue
+import threading
 
 
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
-from data.queries import db_cursor
+from data.queries import db_cursor, downloading_availability
+from classes.representation.generator import Generator
+
 
 class Controller:
     def __init__(self, location) -> None:
@@ -13,6 +16,9 @@ class Controller:
         self.db, self.cursor = db_cursor()
         self.queue = queue.Queue()
         self.name_to_id = {}
+        self.close = False
+        self.threading()
+
 
     """ Get """
 
@@ -22,13 +28,22 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str) -> tuple:
+    def get_start_and_finish_time(self, time: str) -> tuple(str, str):
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
         return info['day'], info['week'], info['type']
 
     """ Methods """
+    def threading(self):
+        t = threading.Thread(target=self.communicate_server)
+        t.start()
+        if self.close:
+            print('close')
+            self.cursor.close()
+            self.db.close()
+            return
+
 
     def create_employee(self, lname, fname, hourly_wage, level, tasks):
         employee = Employee(
@@ -47,7 +62,7 @@ class Controller:
         self.name_to_id[fname+lname] = employee.id
 
         # add employee in database
-        self.queue.put(("INSERT INTO Employee (lname, fname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, tasks, self.location)))
+        self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, tasks, self.location)))
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
 
@@ -101,8 +116,23 @@ class Controller:
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
 
-        self.communicate_server()
-
     def communicate_server(self):
-        """ Function that gets called all the time to send the new data to the server """
-        pass
+        """ Function that gets called all the time to send the new data to the server and download data"""
+        cursor = self.cursor
+        connection = self.db
+        while True:
+            print(self.close)
+            if not queue.Empty():
+                query, data = self.queue.get()
+
+                cursor.execute(query, data)
+
+            av = downloading_availability(connection, cursor)
+
+            connection.commit()
+
+            if av != Generator.availability:
+                print('different!')
+            # if self.employee_list != 
+
+
