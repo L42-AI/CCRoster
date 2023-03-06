@@ -8,6 +8,7 @@ from data.queries import db_cursor, downloading_availability, downloading_shifts
 from classes.representation.generator import Generator
 
 LOCK = threading.Lock()
+SLEEP = 10 # timer in seconds to slow down the background loading of the program
 
 class Controller:
     def __init__(self, generator, location) -> None:
@@ -38,10 +39,11 @@ class Controller:
 
     """ Methods """
     def threading(self):
+
+        # deamon condition to indicate it should close when main thread closes too
         t = threading.Thread(target=self.communicate_server, daemon=True)
         t.start()
         if self.close:
-            print('close')
             self.cursor.close()
             self.db.close()
             return
@@ -49,7 +51,6 @@ class Controller:
 
     def create_employee(self, lname: str, fname: str, hourly_wage: int, level: int, tasks: int):
         for task in tasks:
-            print(task)
             employee = Employee(
                 lname = lname,
                 fname = fname,
@@ -67,9 +68,11 @@ class Controller:
 
             # add employee in database
             self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, task, self.location)))
-            print('done')
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
+        '''
+        method that changes the availability from an employee both locally and online
+        '''
 
         # collect info for queries
         id = employee.id
@@ -77,6 +80,7 @@ class Controller:
         day = availability_slot[1]
         shift =availability_slot[2]
 
+        # add or remove employee both locally and in the database
         if add:
             employee.availability.append(availability_slot)
             self.queue.put(("INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"), (id, week, day, shift, employee.weekly_max[week]))
@@ -85,15 +89,23 @@ class Controller:
             self.queue.put(("DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "), (id, week, day, shift))
 
     def delete_employee(self, fname, lname):
+        '''
+        method to delete an employee both locally and from the server
+        '''
         id = self.name_to_id[fname+lname]
         for employee_instance in self.employee_list:
             if employee_instance.id == id:
                 self.employee_list.remove(employee_instance)
+
+                # delete employee from the database
                 self.queue.put(("DELETE FROM Employee WHERE id=%s", (id,)))
                 break
 
 
     def create_shift(self, time: str, day: int, week: int, task: int) -> None:
+        '''
+        method to create locally and online a shift instance
+        '''
         start_time, end_time = self.get_start_and_finish_time(time)
 
         self.shift_list.append(
@@ -107,6 +119,7 @@ class Controller:
             )
         )
 
+        # upload the shift to the database
         self.queue.put(("INSERT INTO Shifts (location, week, day, start, end, task) VALUES (%s, %s, %s, %s, %s, %s)", (self.location, week, day, start_time, end_time, task)))
 
     def delete_shift(self, time: str) -> None:
@@ -116,14 +129,16 @@ class Controller:
         for shift_instance in self.shift_list:
             if shift_instance.start_time == start_time and shift_instance.end_time == end_time:
                 self.to_delete.append(shift_instance)
-                self.queue.put(("DELETE FROM Shifts WHERE start = %s AND end = %s", (start_time, end_time)))
+
+                # delete shift from database
+                self.queue.put(("DELETE FROM Shifts WHERE start = %s AND end = %s AND location = %s", (start_time, end_time, self.location)))
 
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
 
-    def update_employee_availability(self, new_av):
+    def update_employee_availability_local(self, new_av):
         ''''
-        updates the availability of the LOCAL employee instance that the GUI uses 
+        updates the availability of the LOCAL employee instance that the GUI uses
         '''
         for employee in self.employee_list:
             mask = [x[0] == employee.id for x in new_av]
@@ -131,7 +146,8 @@ class Controller:
 
     def store_availability(self, new_availability, lock):
         '''
-        stores new availability LOCAL in controller class. Uses lock to prevent GUI and controller writing to availability at the same time
+        stores new availability LOCAL in controller class. Uses lock to prevent GUI
+        and controller writing to availability at the same time
         '''
         lock.acquire()
         self.availability = new_availability
@@ -139,7 +155,7 @@ class Controller:
 
 
     def communicate_server(self):
-        """ Function that gets runs all the time to send the new data to the server and download data"""
+        """ Function that runs all the time to send the new data to the server and download data"""
         cursor = self.cursor
         connection = self.db
 
@@ -160,8 +176,10 @@ class Controller:
             # update controller availability
             if av != self.availability:
                 self.store_availability(av, LOCK)
-                self.update_employee_availability(av)
-            time.sleep(10)
+                self.update_employee_availability_local(av)
+
+            # do not run at full speed
+            time.sleep(SLEEP)
 
 
 
