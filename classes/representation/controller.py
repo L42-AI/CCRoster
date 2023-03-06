@@ -1,5 +1,6 @@
 import queue
 import threading
+import time
 
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
@@ -46,24 +47,27 @@ class Controller:
             return
 
 
-    def create_employee(self, lname, fname, hourly_wage, level, tasks):
-        employee = Employee(
-            lname = lname,
-            fname = fname,
-            av = [],
-            maximum = {},
-            wage = hourly_wage,
-            level = level,
-            task = tasks,
-            location = self.location
-            )
+    def create_employee(self, lname: str, fname: str, hourly_wage: int, level: int, tasks: int):
+        for task in tasks:
+            print(task)
+            employee = Employee(
+                lname = lname,
+                fname = fname,
+                av = [],
+                maximum = {},
+                wage = hourly_wage,
+                level = level,
+                task = task,
+                location = self.location
+                )
 
-        # add employee locally
-        self.employee_list.append(employee)
-        self.name_to_id[fname+lname] = employee.id
+            # add employee locally
+            self.employee_list.append(employee)
+            self.name_to_id[fname+lname] = employee.id
 
-        # add employee in database
-        self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, tasks, self.location)))
+            # add employee in database
+            self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, task, self.location)))
+            print('done')
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
 
@@ -143,9 +147,9 @@ class Controller:
         while not self.close:
 
             # program freezes is queue is empty so check before entering queue
-            if not queue.Empty():
+            if not self.queue.empty():
                 query, data = self.queue.get()
-
+                print(data)
                 cursor.execute(query, data)
 
             # perform check to see if employees changed their availability remotely
@@ -157,6 +161,7 @@ class Controller:
             if av != self.availability:
                 self.store_availability(av, LOCK)
                 self.update_employee_availability(av)
+            time.sleep(10)
 
 
 

@@ -11,7 +11,7 @@ class Generator:
     def __init__(self) -> None:
         self.db, self.cursor = db_cursor()
         self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
-        self.schedule = self.init_schedule() # array with shifts that need to be filled
+        self.schedule = [] # array with shifts that need to be filled
 
         self.location = None
         self.availability =  0
@@ -26,7 +26,7 @@ class Generator:
         """
 
         # get list of tuples of shifts needed
-        shifts_needed = downloading_shifts(self.db, self.cursor)
+        shifts_needed = downloading_shifts(self.db, self.cursor, self.location)
         columns = len(shifts_needed[1]) + 1 # from shifts needed we do not need start and end but we add 3 new
         schedule = np.zeros((len(shifts_needed), columns))
 

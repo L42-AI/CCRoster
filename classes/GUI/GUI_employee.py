@@ -11,8 +11,8 @@ class AddEmployee(QWidget):
 
         self.Controller: Controller = Con
 
-        self.tasktypes = ['Allround']
-        self.levels = ['Stagair', 'Manager', 'Lead']
+        self.tasktypes = {'Allround': 1}
+        self.levels = {'Stagair': 0, 'Manager': 1, 'Lead':2}
 
         self.employee_list = QListWidget()
         self.employee_list.itemDoubleClicked.connect(self.edit_employee)
@@ -54,14 +54,14 @@ class AddEmployee(QWidget):
         self.employee_wage_layout.addWidget(self.employee_wage_input)
 
         self.employee_level_input = QComboBox()
-        [self.employee_level_input.addItem(level) for level in self.levels]
+        [self.employee_level_input.addItem(level) for level in self.levels.keys()]
 
         self.employee_level_layout = QVBoxLayout()
         self.employee_level_layout.addWidget(QLabel("Level:"))
         self.employee_level_layout.addWidget(self.employee_level_input)
 
         self.employee_task_layout = QVBoxLayout()
-        for task in self.tasktypes:
+        for task in self.tasktypes.keys():
             self.employee_task_layout.addWidget(QCheckBox(task))
 
         self.employee_info_layout = QGridLayout()
@@ -148,7 +148,7 @@ class AddEmployee(QWidget):
         info = selected_str[1:-1].replace("'", '').replace(" ", '')
         first_name, last_name, wage, level, tasks = info.split(',')
         tasks = tasks[1:-1].split(", ")
-    
+
         return first_name, last_name, wage, level, tasks
 
     def __get_input_fields(self) -> tuple:
@@ -157,14 +157,14 @@ class AddEmployee(QWidget):
         first_name = self.employee_first_name_input.text()
         last_name = self.employee_last_name_input.text()
         wage = self.employee_wage_input.text()
-        level = self.employee_level_input.currentText()
+        level = self.levels[self.employee_level_input.currentText()]
 
         tasks = []
         for task_widget_num in range(self.employee_task_layout.count()):
             task_widget: QCheckBox = self.employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
-                tasks.append(task)
+                tasks.append(self.tasktypes[task])
 
         return first_name, last_name, wage, level, tasks
 
