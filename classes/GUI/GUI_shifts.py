@@ -128,15 +128,14 @@ class Shifts(QWidget):
 
         # Add to list and display widget
         self.__export_shift_to_connector(timeslot, days, week, task_type)
+        self.timeslots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
         # Reset the text inputs
         self.start_time_edit.clear()
         self.end_time_edit.clear()
 
-        self.update_signal.emit()
-
-    def edit_time_slot(self, item: QListWidgetItem) -> None:
+    def edit_time_slot(self, item: object) -> None:
 
         # Get timeslot
         timeslot = self.__get_timeslot(item)
@@ -168,15 +167,15 @@ class Shifts(QWidget):
                 return
 
             self.Controller.delete_shift(old_timeslot)
+            del self.timeslots[old_timeslot]
             self.time_slot_list.takeItem(index)
 
             self.__export_shift_to_connector(new_timeslot, days, week, task_type)
+            self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
             self.time_slot_list.addItem(info_string)
 
             self.start_time_edit.clear()
             self.end_time_edit.clear()
-
-            self.update_signal.emit
 
     def delete_selected_time_slot(self) -> None:
         # Get selected time slot
@@ -188,6 +187,7 @@ class Shifts(QWidget):
 
             # Remove from list and widget
             self.Controller.delete_shift(timeslot)
+            del self.timeslots[timeslot]
             self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
             # Disable buttons
@@ -198,8 +198,6 @@ class Shifts(QWidget):
             self.start_time_edit.clear()
             self.end_time_edit.clear()
 
-            self.update_signal.emit
-
     def all_weeks_checkbox_clicked(self) -> None:
         checkbox = self.sender()
 
@@ -208,7 +206,7 @@ class Shifts(QWidget):
         if checkbox.isChecked():
 
             for week_num in range(1, self.weeks_layout.count()):
-                child_layout = self.weeks_layout.itemAt(week_num)
+                child_layout = self.weeks_layout.itemAt(week_num).layout()
                 children_layouts.append(child_layout)
 
             for child_layout in children_layouts:
@@ -226,6 +224,10 @@ class Shifts(QWidget):
         else:
             self.__add_week_selection(self.weeks_layout)
             self.weeks_layout.update()
+
+    def save(self) -> None:
+
+        print(self.timeslots)
 
     """ Helpers """
 
@@ -269,11 +271,17 @@ class Shifts(QWidget):
         for layout_num in range(self.days_layout.count()):
             day_layout = self.days_layout.itemAt(layout_num)
 
-            for widget_num in range(1, day_layout.count()):
+            for widget_num in range(day_layout.count()):
                 child_widget = day_layout.itemAt(widget_num).widget()
 
-                if child_widget.isChecked():
-                    days.append(layout_num)
+                if isinstance(child_widget, QLabel):
+                    day = child_widget.text()
+
+
+                else:
+                    if child_widget.isChecked():
+
+                        days.append(layout_num)
 
 
         weeks = []
@@ -295,7 +303,10 @@ class Shifts(QWidget):
 
         return time_slot, days, weeks, task_type, info_string
 
-    def __export_shift_to_connector(self, timeslot, days, weeks, task) -> None:
+    def __export_shift_to_connector(self, timeslot, days: list[int], weeks: list[int], task) -> None:
+        '''
+        creates a shift in the controller class with the input from the GUI
+        '''
         for week in weeks:
             for day in days:
                 self.Controller.create_shift(time=timeslot, day=day, week=week, task=task)
