@@ -13,10 +13,12 @@ class Generator:
         self.db, self.cursor = db_cursor()
         self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
         self.schedule = self.init_schedule() # array with shifts that need to be filled
-        self.availability = self.init_availability() # array with all shifts that each employee can fill
 
+        self.availability =  0
+        self.availability = self.init_availability() # array with all shifts that each employee can fill
+        print('init!')
         # print(self.available_employees)
-        self.improve()
+        # self.improve()
     """ INIT """
 
     def init_schedule(self) -> object:
