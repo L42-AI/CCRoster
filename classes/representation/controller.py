@@ -62,12 +62,9 @@ class Controller:
         self.name_to_id[fname+lname] = employee.id
 
         # add employee in database
-        self.queue.put(("INSERT INTO Employee (lname, fname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, tasks, self.location)))
+        self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, tasks, self.location)))
 
     def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
-        # for employee_instance in self.employee_list:
-        #     if employee_instance == employee:
-        #         print(len(employee_instance.availability))
 
         # collect info for queries
         id = employee.id
@@ -82,9 +79,7 @@ class Controller:
             employee.availability.remove(availability_slot)
             self.queue.put(("DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "), (id, week, day, shift))
 
-        for employee_instance in self.employee_list:
-            if employee_instance == employee:
-                print(len(employee_instance.availability))
+
 
     def delete_employee(self, fname, lname):
         id = self.name_to_id[fname+lname]
@@ -123,24 +118,23 @@ class Controller:
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
 
-        self.communicate_server()
+
 
     def communicate_server(self):
         """ Function that gets called all the time to send the new data to the server and download data"""
         cursor = self.cursor
         connection = self.db
-        print(1)
         while True:
             print(self.close)
             if not queue.Empty():
                 query, data = self.queue.get()
-                print('1')
+
                 cursor.execute(query, data)
-                print('2')
+
             av = downloading_availability(connection, cursor)
-            print('3')
+
             connection.commit()
-            print('4')
+
             if av != Generator.availability:
                 print('different!')
             if self.employee_list != 
