@@ -28,7 +28,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str) -> tuple:
+    def get_start_and_finish_time(self, time: str) -> tuple(str, str):
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
@@ -79,8 +79,6 @@ class Controller:
             employee.availability.remove(availability_slot)
             self.queue.put(("DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "), (id, week, day, shift))
 
-
-
     def delete_employee(self, fname, lname):
         id = self.name_to_id[fname+lname]
         for employee_instance in self.employee_list:
@@ -118,8 +116,6 @@ class Controller:
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
 
-
-
     def communicate_server(self):
         """ Function that gets called all the time to send the new data to the server and download data"""
         cursor = self.cursor
@@ -137,6 +133,6 @@ class Controller:
 
             if av != Generator.availability:
                 print('different!')
-            if self.employee_list != 
+            # if self.employee_list != 
 
 
