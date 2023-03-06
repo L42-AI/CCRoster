@@ -3,7 +3,7 @@ from PySide6.QtGui import QColor, QPalette, QPainter, QIcon
 from PySide6.QtCore import Qt
 
 class NavigationOptions(QRadioButton):
-    def __init__(self) -> None:
+    def __init__(self, image) -> None:
         super().__init__()
 
         self.setStyleSheet(
@@ -31,7 +31,7 @@ class NavigationOptions(QRadioButton):
         self.icon_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Load the icon from the given path
-        icon = QIcon()
+        icon = QIcon(image)
 
         # Set the icon to the label
         self.icon_label.setPixmap(icon.pixmap(40, 40))

@@ -13,8 +13,8 @@ from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
 from classes.representation.controller import LOCK, Controller
-
 from classes.representation.controller import Controller
+from logos.images import *
 
 class MainWindow(QMainWindow):
     def __init__(self, generator):
@@ -25,27 +25,27 @@ class MainWindow(QMainWindow):
         self.location = 1
         self.Com = Controller(generator, self.location)
 
-        self.shifts_button = NavigationOptions()
+        self.shifts_button = NavigationOptions(SCHEDULELOGO)
         self.shifts_button.clicked.connect(self.change_page)
         self.shifts_button.index = 1
 
-        self.employee_button = NavigationOptions()
+        self.employee_button = NavigationOptions(EMPLOYEESLOGO)
         self.employee_button.clicked.connect(self.change_page)
         self.employee_button.index = 2
 
-        self.availability_button = NavigationOptions()
+        self.availability_button = NavigationOptions(CHOOSELOGO)
         self.availability_button.clicked.connect(self.change_page)
         self.availability_button.index = 3
 
-        self.team_button = NavigationOptions()
+        self.team_button = NavigationOptions(RELATIONLOGO)
         self.team_button.clicked.connect(self.change_page)
         self.team_button.index = 4
 
-        self.weight_button = NavigationOptions()
+        self.weight_button = NavigationOptions(MONEYLOGO)
         self.weight_button.clicked.connect(self.change_page)
         self.weight_button.index = 5
 
-        self.settings_button = NavigationOptions()
+        self.settings_button = NavigationOptions(SETTINGSLOGO)
         self.settings_button.clicked.connect(self.change_page)
         self.settings_button.index = 6
 
