@@ -12,17 +12,18 @@ from classes.GUI.GUI_availability import Availability
 from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
+from classes.representation.controller import LOCK, Controller
 
 from classes.representation.controller import Controller
 
 class MainWindow(QMainWindow):
-    def __init__(self, controller):
+    def __init__(self, generator):
         super().__init__()
         self.setWindowTitle("Shifter")
         self.setGeometry(100, 100, 875, 625)
 
-        self.Com = controller
-        self.Com.location = 1 # HARDCODE!
+        self.location = 1
+        self.Com = Controller(generator, self.location)
 
         self.shifts_button = NavigationOptions()
         self.shifts_button.clicked.connect(self.change_page)
