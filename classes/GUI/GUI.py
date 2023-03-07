@@ -49,6 +49,10 @@ class MainWindow(QMainWindow):
         self.settings_button.clicked.connect(self.change_page)
         self.settings_button.index = 6
 
+        self.confirm_button = NavigationOptions(VINKJELOGO)
+        self.confirm_button.clicked.connect(self.generate)
+        self.confirm_button.index = 7
+
 
         self.navigation_bar = QVBoxLayout()
         self.navigation_bar.setSpacing(0)
@@ -60,6 +64,7 @@ class MainWindow(QMainWindow):
         self.navigation_bar.addWidget(self.team_button)
         self.navigation_bar.addWidget(self.weight_button)
         self.navigation_bar.addWidget(self.settings_button)
+        self.navigation_bar.addWidget(self.confirm_button)
 
         self.welcome_widget = Welcome()
         self.shift_widget = Shifts(self.Com)
@@ -90,6 +95,10 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(layout)
 
         self.setCentralWidget(main_widget)
+
+    def generate(self):
+        self.Com.generate()
+        sys.exit(window.exec())
 
     def change_page(self) -> None:
         index = self.sender().index

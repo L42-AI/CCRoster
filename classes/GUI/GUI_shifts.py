@@ -13,7 +13,7 @@ class Shifts(QWidget):
         self.Controller: Controller = Con
 
         # Set mutable object
-        self.tasktypes = ['Allround', 'Begels', 'Koffie', 'Kassa']
+        self.tasktypes = {'Allround':1, 'Begels':2, 'Koffie':3, 'Kassa':4}
         self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.amount_of_weeks = 4
 
@@ -21,6 +21,7 @@ class Shifts(QWidget):
 
         self.time_slot_list = QListWidget()
         self.time_slot_list.itemDoubleClicked.connect(self.edit_time_slot)
+
 
         self.start_time_label = QLabel("Start Time:")
         self.start_time_edit = QLineEdit()
@@ -39,6 +40,8 @@ class Shifts(QWidget):
 
         self.task_box = QComboBox()
         self.fill_task_box()
+
+        self.init_shifts_to_display()
 
         """ Layout """
 
@@ -73,6 +76,12 @@ class Shifts(QWidget):
         layout.addLayout(button_layout)
 
     """ Init """
+    def init_shifts_to_display(self) -> None:
+        shifts = self.Controller.shifts_input()
+        for shift in shifts:
+            if shift[1] == self.tasktypes[self.task_box.currentText()]:
+                self.time_slot_list.addItem(str(shift[0]))
+
 
     def init_timeslot_buttons(self) -> None:
         self.add_time_slot_button = QPushButton("Add Time Slot")

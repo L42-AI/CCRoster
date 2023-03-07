@@ -16,6 +16,7 @@ class AddEmployee(QWidget):
 
         self.employee_list = QListWidget()
         self.employee_list.itemDoubleClicked.connect(self.edit_employee)
+        self.init_employees_display()
 
         self.employee_first_name_input = QLineEdit()
         self.employee_last_name_input = QLineEdit()
@@ -85,6 +86,10 @@ class AddEmployee(QWidget):
         save_button.clicked.connect(self.save)
 
         layout.addWidget(save_button)
+
+    def init_employees_display(self):
+        employees = self.Controller.employees_input()
+        self.employee_list.addItems(employees)
 
     def add_employee(self):
         fields = self.__get_input_fields()

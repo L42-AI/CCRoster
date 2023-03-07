@@ -4,7 +4,7 @@ import time
 
 from classes.representation.employee import Employee
 from classes.representation.shift import Shift
-from data.queries import db_cursor, downloading_availability, downloading_shifts
+from data.queries import db_cursor, downloading_availability, downloading_shifts, downloading_employees
 from classes.representation.generator import Generator
 
 LOCK = threading.Lock()
@@ -23,6 +23,8 @@ class Controller:
         self.name_to_id = {}
         self.close = False
         self.threading()
+        self.tasktypes = {1: 'Allround', 2:'Bagels', 3:'Koffie', 4:'Kassa'}
+        self.days = {0:'Maandag', 1:'Dinsdag', 2:'Woensdag', 3:'Donderdag', 4:'Vrijdag', 5:'Zaterdag', 6:'Zondag'}
 
     """ Get """
     def get_employee_list(self) -> list:
@@ -36,8 +38,29 @@ class Controller:
 
     def get_shift_info(self, info: dict) -> tuple:
         return info['day'], info['week'], info['type']
+    
+    """ Input methods for the GUI"""
+    def shifts_input(self):
+        shifts = downloading_shifts(self.db, self.cursor, self.location)
+        for _, shift in enumerate(shifts):
+            week, day, start, end, task = shift
+            shifts[_] = (f'{self.tasktypes[task]} shift in week {week} op {self.days[day]} vanaf {start} tot {end}', task)
+        return shifts
 
+    def employees_input(self):
+        '''
+        method that provides the employee info a user sees when opening the GUI
+        '''
+        employees = downloading_employees(self.db, self.cursor, self.location)
+        for _, employee in enumerate(employees):
+            fname, lname, hourly, level, task = employee
+            employees[_] = f'NAAM:{fname} {lname} SALARIS: {hourly} LEVEL: {level} TAAK: {task}'
+        return employees
+    
     """ Methods """
+    def generate(self):
+        self.generator.improve()
+
     def threading(self):
 
         # deamon condition to indicate it should close when main thread closes too
