@@ -137,12 +137,13 @@ class Shifts(QWidget):
 
         # Add to list and display widget
         self.__export_shift_to_connector(timeslot, days, week, task_type)
-        self.timeslots[timeslot] = {'day': days, 'week': week, 'type': task_type}
         self.time_slot_list.addItem(info_string)
 
         # Reset the text inputs
         self.start_time_edit.clear()
         self.end_time_edit.clear()
+
+        self.update_signal.emit()
 
     def edit_time_slot(self, item: object) -> None:
 
@@ -176,15 +177,15 @@ class Shifts(QWidget):
                 return
 
             self.Controller.delete_shift(old_timeslot)
-            del self.timeslots[old_timeslot]
             self.time_slot_list.takeItem(index)
 
             self.__export_shift_to_connector(new_timeslot, days, week, task_type)
-            self.timeslots[new_timeslot] = {'day': days, 'week': week, 'type': task_type}
             self.time_slot_list.addItem(info_string)
 
             self.start_time_edit.clear()
             self.end_time_edit.clear()
+
+            self.update_signal.emit()
 
     def delete_selected_time_slot(self) -> None:
         # Get selected time slot
@@ -196,7 +197,6 @@ class Shifts(QWidget):
 
             # Remove from list and widget
             self.Controller.delete_shift(timeslot)
-            del self.timeslots[timeslot]
             self.time_slot_list.takeItem(self.time_slot_list.currentRow())
 
             # Disable buttons
@@ -206,6 +206,8 @@ class Shifts(QWidget):
             # Reset text to nothing
             self.start_time_edit.clear()
             self.end_time_edit.clear()
+
+            self.update_signal.emit()
 
     def all_weeks_checkbox_clicked(self) -> None:
         checkbox = self.sender()
