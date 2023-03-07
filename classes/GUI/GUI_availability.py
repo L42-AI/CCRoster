@@ -351,5 +351,8 @@ class Availability(QWidget):
             if widget is not None:
                 widget.deleteLater()
 
+    def clear_schedule_shifts(self, layout: QStackedWidget) -> None:
+        pass
+
     def display_time(self, time: str) -> str:
         return f'{time[:2]}:{time[2:]}'
