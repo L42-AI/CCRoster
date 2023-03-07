@@ -1,5 +1,5 @@
 import random
-import mysql.connector
+from data.queries import db_cursor
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
@@ -15,14 +15,7 @@ class Employee:
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
 
-        self.db = mysql.connector.connect(
-            host="185.224.91.162",
-            port=3308,
-            user="Jacob",
-            password="wouterisdebestehuisgenoot",
-            database="rooster" # niet veranderen
-        )
-        self.cursor = self.db.cursor()
+        self.db, self.cursor = db_cursor()
 
         # self.upload_employee()
         # self.upload_availability()
