@@ -28,7 +28,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str) -> tuple(str, str):
+    def get_start_and_finish_time(self, time: str) -> tuple:
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
