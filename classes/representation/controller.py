@@ -64,6 +64,9 @@ class Controller:
         self.generator.improve()
 
     def threading(self):
+        '''
+        starts a new thread where communicate_server can run on so it does not slow down the application
+        '''
 
         # deamon condition to indicate it should close when main thread closes too
         t = threading.Thread(target=self.communicate_server, daemon=True)
