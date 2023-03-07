@@ -12,11 +12,16 @@ def db_cursor():
     return db, cursor
 
 datalist = [] # this is the list like we discussed
-def downloading_employees(db, cursor):
+def downloading_employees(db, cursor, location):
     '''
     downloading all active employees from one location
     '''
-    query = 'SELECT FROM Employee'
+    query = 'SELECT fname, lname, hourly, level, task FROM Employee WHERE location = %s'
+    values = (location,)
+    cursor.execute(query, values)
+    employees = cursor.fetchall()
+    return employees
+
 def uploading_shifts(db, cursor, entry):
     '''
     uploading shifts needed

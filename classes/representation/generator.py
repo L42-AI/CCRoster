@@ -12,12 +12,10 @@ class Generator:
         self.db, self.cursor = db_cursor()
         self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
         self.schedule = [] # array with shifts that need to be filled
-
         self.location = None
         self.availability =  0
-
-        # print(self.available_employees)
         # self.improve()
+
     """ INIT """
 
     def init_schedule(self) -> object:
@@ -111,7 +109,7 @@ class Generator:
             self.mutate()
 
         print('done')
-        # Switch.random(self.schedule)
+
 
     def mutate(self): # this will probably be a class one day...
         '''
