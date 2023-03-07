@@ -13,14 +13,16 @@ SLEEP = 10 # timer in seconds to slow down the background loading of the program
 class Controller:
     def __init__(self, generator, location) -> None:
         self.generator = generator
+        self.location = location
+
         self.employee_list: list[Employee] = []
         self.shift_list: list[Shift] = []
-        self.location = location
+        self.name_to_id = {}
+
         self.db, self.cursor = db_cursor()
         self.availability = downloading_availability(self.db, self.cursor, location)
         self.shifts = downloading_shifts(self.db, self.cursor, self.location)
         self.queue = queue.Queue()
-        self.name_to_id = {}
         self.close = False
         self.threading()
         self.tasktypes = {1: 'Allround', 2:'Bagels', 3:'Koffie', 4:'Kassa'}
@@ -33,7 +35,7 @@ class Controller:
     def get_shift_list(self) -> list:
         return self.shift_list
 
-    def get_start_and_finish_time(self, time: str):
+    def get_start_and_finish_time(self, time: str) -> tuple:
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
