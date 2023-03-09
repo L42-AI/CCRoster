@@ -11,8 +11,8 @@ LOCK = threading.Lock()
 SLEEP = 10 # timer in seconds to slow down the background loading of the program
 
 class Controller:
-    def __init__(self, generator, location) -> None:
-        self.generator = generator
+    def __init__(self, location) -> None:
+        # self.generator = generator
         self.location = location
 
         self.employee_list: list[Employee] = []
@@ -43,11 +43,15 @@ class Controller:
     
     """ Input methods for the GUI"""
     def shifts_input(self):
-        shifts = downloading_shifts(self.db, self.cursor, self.location)
-        for _, shift in enumerate(shifts):
-            week, day, start, end, task = shift
-            shifts[_] = (f'{self.tasktypes[task]} shift in week {week} op {self.days[day]} vanaf {start} tot {end}', task)
-        return shifts
+        return []
+        try:
+            shifts = downloading_shifts(self.db, self.cursor, self.location)
+            for _, shift in enumerate(shifts):
+                week, day, start, end, task = shift
+                shifts[_] = (f'{self.tasktypes[task]} shift in week {week} op {self.days[day]} vanaf {start} tot {end}', task)
+            return shifts
+        except:
+            return []
 
     def employees_input(self):
         '''
