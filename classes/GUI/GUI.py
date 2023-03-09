@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 875, 625)
 
         self.location = 1
-        self.Com = Controller(generator, self.location)
+        self.Com = Controller(self.location)
 
         self.shifts_button = NavigationOptions(SCHEDULELOGO)
         self.shifts_button.clicked.connect(self.change_page)
@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
         self.weight_widget = Weight()
         self.settings_widget = Settings()
 
-        self.shift_widget.update_signal.connect(self.availability_widget.init_timeslot_dict)
+        self.shift_widget.update_signal.connect(self.availability_widget.update_timeslot_dict)
+        self.employee_widget.update_signal.connect(self.availability_widget.update_timeslot_dict)
 
         self.pages = QStackedWidget()
         self.pages.addWidget(self.welcome_widget)

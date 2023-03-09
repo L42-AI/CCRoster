@@ -18,81 +18,110 @@ class Availability(QWidget):
         self.Controller: Controller = Con
 
 
-        self.tasktypes = {'Allround': 1}
-        self.timeslots = []
+        self.update_tasks()
+        self.update_timeslot_dict()
+        self.update_employee_dict()
+
         self.selected_employee: Employee = None
         self.amount_of_weeks = 4
 
+        """ TEMPORARY """
+        self.timeslots = self.set_timeslot_list('Allround')
 
-        # Create timeslot_dict
-        self.init_timeslot_dict()
+        self.init_UI()
 
-        # Create schedule widget
-        self.schedule_widget = self.init_schedule_widget()
-        self.schedule_layout = self.init_schedule_layout(self.schedule_widget)
+        selected_task = self.task_combobox.currentText()
+        self.timeslots = self.set_timeslot_list(selected_task)
+        self.employees = self.set_employee_list(selected_task)
 
-        # Create bottom layouts
-        self.left_layout = self.init_left_layout()
-        self.mid_layout = self.init_mid_layout()
-        self.right_layout = self.init_right_layout()
 
-        # Create a widget for the right layout
-        work_frequency_widget = QWidget()
-        work_frequency_widget.setLayout(self.right_layout)
-        work_frequency_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        work_frequency_widget.setMinimumSize(work_frequency_widget.sizeHint())
-
-        # Stack info layouts horizontally
-        self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addLayout(self.left_layout)
-        self.bottom_layout.addLayout(self.mid_layout)
-        self.bottom_layout.addWidget(work_frequency_widget)
-
-        # Add to total layout
-        layout = QVBoxLayout(self)
-        layout.addLayout(self.schedule_layout)
-        layout.addLayout(self.bottom_layout)
 
     """ Init """
 
-    def init_timeslot_dict(self) -> dict:
-        self.timeslots_dict = {task: [] for task in self.tasktypes.values()}
-        shift_list: list[Shift] = self.Controller.get_shift_list()
+    def init_UI(self) -> None:
 
-        for shift in shift_list:
+        """ Schedule widget """
 
-            self.timeslots_dict[shift.task].append(shift)
+        self.schedule_widget = QStackedWidget()
+        self.schedule_widget.setContentsMargins(0,0,0,0)
 
-    def init_left_layout(self) -> QVBoxLayout:
+        for week_num in range(self.amount_of_weeks):
+
+            week_layout = QHBoxLayout()
+            week_layout.setContentsMargins(0,0,0,0)
+            week_layout.setSpacing(0)
+
+            for day_num, day in enumerate(DAYS):
+                day_label = QLabel(day)
+                day_label.setAlignment(Qt.AlignHCenter)
+
+                day_layout = QVBoxLayout()
+                day_layout.setContentsMargins(0,0,0,0)
+                day_layout.addWidget(day_label)
+
+                for timeslot_num, timeslot in enumerate(self.timeslots):
+                    checkbox = QCheckBox(timeslot)
+                    checkbox.week = week_num
+                    checkbox.day = day_num
+                    checkbox.timeslot = timeslot_num
+                    checkbox.clicked.connect(self.availability_checkbox_clicked)
+                    checkbox.setChecked(False)
+                    day_layout.addWidget(checkbox)
+
+                day_widget = QWidget()
+                day_widget.setLayout(day_layout)
+                day_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                day_widget.setMinimumSize(day_widget.sizeHint())
+                day_widget.day_num = day_num
+
+                week_layout.addWidget(day_widget)
+
+            week_widget = QWidget()
+            week_widget.setContentsMargins(0,0,0,0)
+            week_widget.setLayout(week_layout)
+
+            self.schedule_widget.addWidget(week_widget)
+
+        """ Schedule layout """
+
+        self.week_label = QLabel(f'Week: 1')
+
+        forward_button = QPushButton('>')
+        forward_button.setFixedHeight(100)
+        forward_button.setFixedWidth(20)
+
+        backward_button = QPushButton('<')
+        backward_button.setFixedHeight(100)
+        backward_button.setFixedWidth(20)
+
+        forward_button.clicked.connect(lambda: self.schedule_scroller(forward=True))
+        backward_button.clicked.connect(lambda: self.schedule_scroller(forward=False))
+
+        schedule_layout = QGridLayout()
+        schedule_layout.addWidget(self.week_label, 0, 0, 1, 3, Qt.AlignHCenter)
+        schedule_layout.addWidget(backward_button, 1, 0, 2, 1)
+        schedule_layout.addWidget(self.schedule_widget, 1, 1, 2, 1)
+        schedule_layout.addWidget(forward_button, 1, 2, 2, 1)
+
+        """ Task combobox """
+
         self.task_combobox = QComboBox()
         self.task_combobox.setFixedWidth(150)
         self.task_combobox.activated.connect(self.update_shift_display)
-        self.task_combobox = self.fill_tasktype_combobox(self.task_combobox)
+        self.update_task_combobox()
+
+        """ Timeslots layout """
 
         self.timeslots_layout = QVBoxLayout()
-        self.timeslots_layout = self.fill_timeslot_display_layout(self.timeslots_layout)
+        self.update_timeslot_display_layout()
 
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("Shifts"))
-        layout.addWidget(self.task_combobox)
-        layout.addLayout(self.timeslots_layout)
+        shifts_layout = QVBoxLayout()
+        shifts_layout.addWidget(QLabel("Shifts"))
+        shifts_layout.addWidget(self.task_combobox)
+        shifts_layout.addLayout(self.timeslots_layout)
 
-        return layout
+        """ Employee combobox """
 
-    def fill_tasktype_combobox(self, combobox: QComboBox) -> QComboBox:
-        combobox.addItems(self.tasktypes.keys())
-        return combobox
-
-    def fill_timeslot_display_layout(self, layout: QVBoxLayout) -> QVBoxLayout:
-        existant = set()
-        for shift in self.timeslots:
-            if tuple((shift.start_time, shift.end_time)) not in existant:
-                existant.add(tuple((shift.start_time, shift.end_time)))
-                timeslot_label = QLabel(self.display_time(shift.start_time) + ' - ' + self.display_time(shift.end_time))
-                layout.addWidget(timeslot_label)
-        return layout
-
-    def init_mid_layout(self) -> QVBoxLayout:
         self.employee_combo = QComboBox()
         self.employee_combo.currentIndexChanged.connect(self.set_employee)
 
@@ -108,23 +137,22 @@ class Availability(QWidget):
         width = max(name_lengths) * 12
         self.employee_combo.setFixedWidth(width)
 
+        """ Employee wage """
+
         self.employee_wage_label = QLabel("Wage: N/A")
 
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignHCenter)
-        layout.setAlignment(Qt.AlignVCenter)
-        layout.addWidget(self.employee_combo)
-        layout.addWidget(self.employee_wage_label)
+        employee_layout = QVBoxLayout()
+        employee_layout.setAlignment(Qt.AlignCenter)
+        employee_layout.addWidget(self.employee_combo)
+        employee_layout.addWidget(self.employee_wage_label)
 
-        return layout
+        """ Employee work frequency """
 
-    def init_right_layout(self) -> QGridLayout:
-        layout = QGridLayout()
+        work_frequecy_layout = QGridLayout()
 
         label = QLabel('Diensten Per Week')
-        label.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(label, 0, 1, 1, 3)
-
+        label.setAlignment(Qt.AlignCenter)
+        work_frequecy_layout.addWidget(label, 0, 1, 1, 3)
 
         for week in range(4):
 
@@ -137,88 +165,99 @@ class Availability(QWidget):
             info_button = QPushButton('i')
             info_button.setFixedWidth(25)
 
-            layout.addWidget(label, week + 1, 1)
-            layout.addWidget(editor, week + 1, 2)
-            layout.addWidget(info_button, week + 1, 3)
+            work_frequecy_layout.addWidget(label, week + 1, 1)
+            work_frequecy_layout.addWidget(editor, week + 1, 2)
+            work_frequecy_layout.addWidget(info_button, week + 1, 3)
 
-        return layout
+        # Create a widget for the right layout
+        work_frequency_widget = QWidget()
+        work_frequency_widget.setLayout(work_frequecy_layout)
+        work_frequency_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        work_frequency_widget.setMinimumSize(work_frequency_widget.sizeHint())
 
-    def init_schedule_widget(self) -> QStackedWidget:
-        schedule_widget = QStackedWidget()
-        schedule_widget.setContentsMargins(0,0,0,0)
+        """ Layout """
 
-        for week_num in range(self.amount_of_weeks):
-            week_widget = self.init_week_widget(week_num)
-            schedule_widget.addWidget(week_widget)
+        # Stack info layouts horizontally
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addLayout(shifts_layout)
+        bottom_layout.addLayout(employee_layout)
+        bottom_layout.addWidget(work_frequency_widget)
 
-        return schedule_widget
+        # Add to total layout
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(schedule_layout)
+        main_layout.addLayout(bottom_layout)
 
-    def init_week_widget(self, week_num: int) -> QWidget:
-        week_layout = QHBoxLayout()
-        week_layout.setContentsMargins(0,0,0,0)
-        week_layout.setSpacing(0)
+    """ Update """
 
-        for day_num, day in enumerate(DAYS):
-            day_widget = self.init_day_widget(week_num, day_num, day)
-            week_layout.addWidget(day_widget)
+    def update_tasks(self) -> None:
+        """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
+        self.tasks = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
 
-        week_widget = QWidget()
-        week_widget.setContentsMargins(0,0,0,0)
-        week_widget.setLayout(week_layout)
+    def update_timeslot_dict(self) -> None:
+        self.timeslots_dict = {task: [] for task in self.tasks.values()}
+        shift_list: list[Shift] = self.Controller.get_shift_list()
 
-        return week_widget
+        [self.timeslots_dict[shift.task].append(shift) for shift in shift_list]
 
-    def init_day_widget(self, week_num: int, day_num: int, day: str) -> QWidget:
-        day_label = QLabel(day)
-        day_label.setAlignment(Qt.AlignHCenter)
+    def update_employee_dict(self) -> None:
+        self.employee_dict = {task: [] for task in self.tasks.values()}
+        employee_list: list[Employee] = self.Controller.get_employee_list()
 
-        day_layout = QVBoxLayout()
-        day_layout.setContentsMargins(0,0,0,0)
-        day_layout.addWidget(day_label)
+        for employee in employee_list:
+            for employee_task in employee:
+                self.employee_dict[employee_task].append(employee)
 
-        for timeslot_num, timeslot in enumerate(self.timeslots):
-            checkbox = self.init_checkbox(week_num, day_num, timeslot_num, timeslot)
-            day_layout.addWidget(checkbox)
+    def update_shift_display(self):
+        self.update_employee_dict()
+        self.update_timeslot_dict()
 
-        day_widget = QWidget()
-        day_widget.setLayout(day_layout)
-        day_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        day_widget.setMinimumSize(day_widget.sizeHint())
+        selected_task = self.task_combobox.currentText()
+        self.timeslots = self.set_timeslot_list(selected_task)
+        self.employees = self.set_employee_list(selected_task)
 
-        return day_widget
+        self.update_timeslot_display_layout()
+        self.update_employee_combobox()
 
-    def init_checkbox(self, week_num: int, day_num: int, timeslot_num: int, timeslot: str) -> QCheckBox:
-        checkbox = QCheckBox(timeslot)
-        checkbox.week = week_num
-        checkbox.day = day_num
-        checkbox.timeslot = timeslot_num
-        checkbox.clicked.connect(self.availability_checkbox_clicked)
-        checkbox.setChecked(False)
+    def update_task_combobox(self) -> None:
+        # Clear
+        self.task_combobox.clear()
 
-        return checkbox
+        # Fill
+        self.task_combobox.addItems(self.tasks.keys())
 
-    def init_schedule_layout(self, schedule_widget: QStackedWidget) -> QGridLayout:
+    def update_employee_combobox(self) -> None:
+        # Clear
+        self.employee_combo.clear()
 
-        self.week_label = QLabel(f'Week: 1')
+        # Fill
+        [self.employee_combo.addItem(employee.name) for employee in self.employees]
 
-        forward_button = QPushButton('>')
-        forward_button.setFixedHeight(100)
-        forward_button.setFixedWidth(20)
+    def update_timeslot_display_layout(self) -> None:
+        # Clear
+        self.clear_layout(self.timeslots_layout)
 
-        backward_button = QPushButton('<')
-        backward_button.setFixedHeight(100)
-        backward_button.setFixedWidth(20)
+        # Fill
+        existant = set()
+        for shift in self.timeslots:
+            if tuple((shift.start_time, shift.end_time)) not in existant:
+                existant.add(tuple((shift.start_time, shift.end_time)))
+                timeslot_label = QLabel(self.display_time(shift.start_time) + ' - ' + self.display_time(shift.end_time))
+                self.timeslots_layout.addWidget(timeslot_label)
 
-        forward_button.clicked.connect(lambda: self.schedule_scroller(forward=True))
-        backward_button.clicked.connect(lambda: self.schedule_scroller(forward=False))
+    def update_schedule_display(self) -> None:
+        """ Method to fill the schedule with appropriate timeslots """
+        self.timeslots
+        self.schedule_widget
+        pass
 
-        layout = QGridLayout()
-        layout.addWidget(self.week_label, 0, 0, 1, 3, Qt.AlignHCenter)
-        layout.addWidget(backward_button, 1, 0, 2, 1)
-        layout.addWidget(schedule_widget, 1, 1, 2, 1)
-        layout.addWidget(forward_button, 1, 2, 2, 1)
+    def set_timeslot_list(self, selected_task: str) -> list[Shift]:
+        tasknum = self.tasks[selected_task]
+        return self.timeslots_dict[tasknum]
 
-        return layout
+    def set_employee_list(self, selected_task: str) -> list[Employee]:
+        tasknum = self.tasks[selected_task]
+        return self.employee_dict[tasknum]
 
     """ Get """
 
@@ -252,43 +291,30 @@ class Availability(QWidget):
 
             # Find the child layout containing all the days
             week_widget = self.schedule_widget.widget(week_num)
-            widget_layout = week_widget.layout()
-
-            for child in range(widget_layout.count()):
-
-                child = widget_layout.itemAt(child)
-
-                # Skip if child is not layout containing days
-                if not isinstance(child, QHBoxLayout):
-                    continue
+            week_layout = week_widget.layout()
 
             # For each day
-            for day_num in range(child.count()):
+            for day_num in range(week_layout.count()):
 
                 # Find the child layout containing all the days
-                second_child = child.itemAt(day_num).widget()
-                second_child_layout = second_child.layout()
-
+                day_widget = week_layout.itemAt(day_num).widget()
+                day_layout = day_widget.layout()
 
                 # For each shift
-                for shift_num in range(second_child_layout.count()):
+                for shift_num in range(1, day_layout.count()):
 
                     # Find the child widgets
-                    third_child = second_child_layout.itemAt(shift_num).widget()
-
-                    # Exclude the labels
-                    if isinstance(third_child, QLabel):
-                        continue
+                    shift_widget = day_layout.itemAt(shift_num).widget()
 
                     # Set checkbox to true if employee is available
-                    if [third_child.week, third_child.day, third_child.timeslot] in self.selected_employee.availability:
-                        third_child.setChecked(True)
+                    if [shift_widget.week, shift_widget.day, shift_widget.timeslot] in self.selected_employee.availability:
+                        shift_widget.setChecked(True)
                     else:
-                        third_child.setChecked(False)
+                        shift_widget.setChecked(False)
 
     def set_employee(self):
 
-        combobox = self.sender()
+        combobox: QComboBox = self.sender()
 
         name = combobox.currentText()
         if name != 'Geen Werknemer':
@@ -329,19 +355,6 @@ class Availability(QWidget):
                 if timeslot in self.selected_employee.availability:
                     self.selected_employee.availability.remove(timeslot)
                     self.Controller.edit_employee_availability(timeslot, add=False)
-
-    def update_shift_display(self):
-        selected_task = self.task_combobox.currentText()
-        self.init_timeslot_dict()
-        self.timeslots = self.set_timeslot_list(selected_task)
-
-        self.clear_layout(self.timeslots_layout)
-        self.timeslots_layout = self.fill_timeslot_display_layout(self.timeslots_layout)
-
-
-    def set_timeslot_list(self, selected_task: str) -> list[Shift]:
-        tasknum = self.tasktypes[selected_task]
-        return self.timeslots_dict[tasknum]
 
     def clear_layout(self, layout: QLayout) -> None:
         # Remove and delete all the widgets in the layout
