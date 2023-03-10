@@ -101,18 +101,18 @@ class AddEmployee(QWidget):
         layout.addLayout(add_employee_layout)
 
     def update_level(self) -> None:
-        [self.employee_level_input.addItem(level) for level in self.levels.keys()]
+        [self.employee_level_input.addItem(level.name) for level in self.Levels]
 
     def update_task_layout(self) -> None:
-        [self.employee_task_layout.addWidget(QCheckBox(task)) for task in self.tasks]
+        [self.employee_task_layout.addWidget(QCheckBox(task.name)) for task in self.Tasks]
 
     def update_levels(self) -> None:
         """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
-        self.levels = {'Stagair': 0, 'Manager': 1, 'Lead':2}
+        self.Levels = self.Controller.get_Levels_enum()
 
     def update_tasks(self) -> None:
         """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
-        self.tasks = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
+        self.Tasks = self.Controller.get_Tasks_enum()
 
     def update_employees_display(self):
         employees = self.Controller.employees_input()
@@ -195,13 +195,13 @@ class AddEmployee(QWidget):
         first_name = self.employee_first_name_input.text()
         last_name = self.employee_last_name_input.text()
         wage = self.employee_wage_input.text()
-        level = self.levels[self.employee_level_input.currentText()]
+        level = self.Levels[self.employee_level_input.currentText()].name
 
         tasks = []
         for task_widget_num in range(self.employee_task_layout.count()):
             task_widget: QCheckBox = self.employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
-                tasks.append(self.tasks[task])
+                tasks.append(self.Tasks[task].name)
 
         return first_name, last_name, wage, level, tasks

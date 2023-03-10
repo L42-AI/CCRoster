@@ -30,7 +30,6 @@ class Shifts(QWidget):
 
         self.time_slot_list = QListWidget()
         self.time_slot_list.itemDoubleClicked.connect(self.edit_time_slot)
-        self.update_shifts_display()
 
         """ Time input widgets """
 
@@ -97,6 +96,7 @@ class Shifts(QWidget):
         self.task_box = QComboBox()
         self.update_task_box()
 
+        self.update_shifts_display()
 
         """ Layout """
 
@@ -121,16 +121,16 @@ class Shifts(QWidget):
     def update_shifts_display(self) -> None:
         shifts = self.Controller.shifts_input()
         for shift in shifts:
-            if shift[1] == self.tasktypes[self.task_box.currentText()]:
+            if shift[1] == self.Tasks[self.task_box.currentText()].value:
                 self.time_slot_list.addItem(str(shift[0]))
 
     def update_task_box(self) -> None:
-        for task_type in self.tasktypes:
-            self.task_box.addItem(task_type)
+        for task in self.Tasks:
+            self.task_box.addItem(task.name)
 
     def update_task_types(self) -> None:
         """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
-        self.tasktypes = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
+        self.Tasks = self.Controller.get_Tasks_enum()
 
     """ Methods """
 
