@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date, time
 
 @dataclass
 class Shift:
@@ -8,3 +9,9 @@ class Shift:
     week: int
     task: int
     location: int
+
+@dataclass
+class Availability:
+    day: date
+    start: time
+    end: time
