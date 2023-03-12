@@ -10,10 +10,9 @@ from classes.GUI.GUI_shifts import Shifts
 from classes.GUI.GUI_employee import AddEmployee
 from classes.GUI.GUI_availability import Availability
 from classes.GUI.GUI_team import EmployeeMatch
-from classes.GUI.GUI_weight import Weight
+from classes.GUI.GUI_generate import Generate
 from classes.GUI.GUI_settings import Settings
 from classes.representation.controller import LOCK, Controller
-from classes.representation.controller import Controller
 from logos.images import *
 
 class MainWindow(QMainWindow):
@@ -23,7 +22,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 875, 625)
 
         self.location = 1
-        self.Com = Controller(self.location)
+        self.Controller = Controller(self.location)
 
         self.shifts_button = NavigationOptions(SCHEDULELOGO)
         self.shifts_button.clicked.connect(self.change_page)
@@ -67,11 +66,11 @@ class MainWindow(QMainWindow):
         self.navigation_bar.addWidget(self.confirm_button)
 
         self.welcome_widget = Welcome()
-        self.shift_widget = Shifts(self.Com)
-        self.employee_widget = AddEmployee(self.Com)
-        self.availability_widget = Availability(self.Com)
-        self.relation_widget = EmployeeMatch(self.Com)
-        self.weight_widget = Weight()
+        self.shift_widget = Shifts(self.Controller)
+        self.employee_widget = AddEmployee(self.Controller)
+        self.availability_widget = Availability(self.Controller)
+        self.relation_widget = EmployeeMatch(self.Controller)
+        self.weight_widget = Generate(self.Controller)
         self.settings_widget = Settings()
 
         self.shift_widget.update_signal.connect(self.availability_widget.update_shift_dict)
@@ -98,7 +97,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
 
     def generate(self):
-        self.Com.generate()
+        self.Controller.generate()
         sys.exit(window.exec())
 
     def change_page(self) -> None:

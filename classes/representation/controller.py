@@ -23,13 +23,15 @@ class Controller:
         self.shift_list: list[ShiftData] = shift_list
         self.name_to_id = {}
 
-        self.levels_dict = {}
+        # Set tasks and levels
+        """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
         self.update_levels()
-        self.tasks_dict = {}
         self.update_tasks()
 
-        self.Levels = self.update_levels_enum()
-        self.Tasks = self.update_tasks_enum()
+        # Create enums
+        """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
+        self.update_levels_enum()
+        self.update_tasks_enum()
 
         self.db, self.cursor = db_cursor()
         self.availability = downloading_availability(self.db, self.cursor, location)
@@ -41,30 +43,18 @@ class Controller:
         self.days = {0:'Maandag', 1:'Dinsdag', 2:'Woensdag', 3:'Donderdag', 4:'Vrijdag', 5:'Zaterdag', 6:'Zondag'}
 
         self.start_date = self.get_monday(self.get_last_day_of_month())
-        self.end_date = self.get_monday(self.get_last_day_of_month(1))
+        self.end_date = self.get_monday(self.get_last_day_of_month(months_into_future=1))
 
     """ GET """
 
-    def get_start_date(self) -> date:
-        return self.start_date
-
-    def get_end_date(self) -> date:
-        return self.end_date
-
-    def get_last_day_of_month(self, months_into_future: int = 0):
+    def get_last_day_of_month(self, months_into_future: int = 0) -> date:
         today = date.today()
         last_day_of_month = today.replace(month=today.month + months_into_future + 1, day=1) - timedelta(1)
         return last_day_of_month
 
-    def get_monday(self, last_day_of_month):
+    def get_monday(self, last_day_of_month: date) -> date:
         first_monday_of_next_month = last_day_of_month + timedelta(days=(7-last_day_of_month.weekday()))
         return first_monday_of_next_month
-
-    def get_employee_list(self) -> list:
-        return self.employee_list
-
-    def get_shift_list(self) -> list:
-        return self.shift_list
 
     def get_start_and_finish_time(self, time: str) -> tuple:
         return time.split(' - ')
@@ -72,10 +62,22 @@ class Controller:
     def get_shift_info(self, info: dict) -> tuple:
         return info['day'], info['week'], info['type']
 
-    def get_Levels_enum(self):
+    def get_start_date(self) -> date:
+        return self.start_date
+
+    def get_end_date(self) -> date:
+        return self.end_date
+
+    def get_employee_list(self) -> list:
+        return self.employee_list
+
+    def get_shift_list(self) -> list:
+        return self.shift_list
+
+    def get_Levels_enum(self) -> Enum:
         return self.Levels
 
-    def get_Tasks_enum(self):
+    def get_Tasks_enum(self) -> Enum:
         return self.Tasks
 
     """ Input methods for the GUI"""
@@ -254,15 +256,13 @@ class Controller:
         """ TO BE CONNECTED TO SETTINGS PAGE """
         self.levels_dict = {'Stagair': 1, 'Manager': 2, 'Lead': 3}
 
-    def update_levels_enum(self) -> Enum:
-        Level = Enum("Level", {key: value for key, value in self.levels_dict.items()})
-        return Level
-
     def update_tasks(self) -> None:
         """ TO BE CONNECTED TO SETTINGS PAGE """
         self.tasks_dict = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
 
+    def update_levels_enum(self) -> Enum:
+        self.Levels = Enum("Level", {key: value for key, value in self.levels_dict.items()})
+
     def update_tasks_enum(self) -> Enum:
-        Task = Enum("Task", {key: value for key, value in self.tasks_dict.items()})
-        return Task
+        self.Tasks = Enum("Task", {key: value for key, value in self.tasks_dict.items()})
 
