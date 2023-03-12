@@ -268,12 +268,14 @@ class Availability(QWidget):
     def update_timeslot_display_layout(self) -> None:
         self.clear_layout(self.shifts_layout)
 
-        existant = set()
+        existant = {}
         for shift in self.shifts:
-            if tuple((shift.start, shift.end)) not in existant:
-                existant.add(tuple((shift.start, shift.end)))
-                timeslot_label = QLabel(f'{shift.start} - {shift.end}')
+            key = f'{shift.start} - {shift.end}'
+            if key not in existant:
+                existant[key] = True
+                timeslot_label = QLabel(key)
                 self.shifts_layout.addWidget(timeslot_label)
+
 
     def update_schedule_display(self) -> None:
         """ Method to fill the schedule with appropriate timeslots """
