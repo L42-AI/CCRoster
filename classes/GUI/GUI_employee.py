@@ -101,6 +101,9 @@ class AddEmployee(QWidget):
         layout.addLayout(add_employee_layout)
 
     def update_level(self) -> None:
+
+        self.employee_level_input.clear()
+
         [self.employee_level_input.addItem(level.name) for level in self.Levels]
 
     def update_task_layout(self) -> None:

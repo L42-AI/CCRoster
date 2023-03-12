@@ -1,8 +1,10 @@
 import random
 import mysql.connector
 
+from classes.representation.availabilty import Availability
+
 class Employee:
-    def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
+    def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict, wage: float, level, task, location) -> None:
         self.fname = fname
         self.lname = lname
         self.name= fname + " " + lname
@@ -30,11 +32,10 @@ class Employee:
     """ Upload """
     def upload_employee(self):
 
-
         # translate the string to a code corresponding with the location
         if self.location == 'coffee_company':
             location = 1
-        if self.tasks == 'everything':
+        if self.tasks == 'Allround':
             task = 1
 
         # add the employee to the database

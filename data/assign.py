@@ -1,54 +1,54 @@
+from datetime import date, time
+
 from classes.representation.employee import Employee
+from classes.representation.availabilty import Availability
 
 employee_list: list[Employee] = []
 
-employee_list.append(Employee('Emma', 'Deckers', [[0,0,0],[0,0,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
-                                             [1,0,0],[1,0,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
-                                             [2,0,0],[2,0,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
-                                             [3,0,0],[3,0,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
-                                             {0:2, 1:2, 2:2, 3:2}, 24, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Emma', 'Deckers', [Availability(date=date(2023,1,30), start=time(0,0), end=time(23,59)),
+                                                  Availability(date=date(2023,2,1), start=time(0,0), end=time(23,59)),
+                                                  Availability(date=date(2023,2,2), start=time(0,0), end=time(23,59)),
+                                                  Availability(date=date(2023,2,3), start=time(0,0), end=time(23,59))],
+                                                  {0:2, 1:2, 2:2, 3:2}, 24, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Soraya', 'van Geldere', [[0,0,0],[0,0,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,5,0],[0,5,1],[0,4,0],[0,4,1],
-                                                 [1,0,0],[1,0,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,5,0],[1,5,1],[1,4,0],[1,4,1],
-                                                 [2,0,0],[2,0,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,5,0],[2,5,1],[2,4,0],[2,4,1],
-                                                 [3,0,0],[3,0,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,5,0],[3,5,1],[3,4,0],[3,4,1]],
-                                                 {0:4, 1:4, 2:4, 3:4}, 10, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Soraya', 'van Geldere', [Availability(date=date(2023,1,30), start=time(0,0), end=time(23,59)),
+                                                        Availability(date=date(2023,1,31), start=time(0,0), end=time(23,59)),
+                                                        Availability(date=date(2023,2,1), start=time(0,0), end=time(23,59)),
+                                                        Availability(date=date(2023,2,2), start=time(0,0), end=time(23,59))],
+                                                        {0:4, 1:4, 2:4, 3:4}, 10, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee("Sophie", "van 't Hullenaar", [[0,4,0],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
-                                                      [1,4,0],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
-                                                      [2,4,0],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
-                                                      [3,4,0],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
-                                                      {0:2, 1:2, 2:2, 3:2}, 12, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee("Sophie", "van 't Hullenaar", [Availability(date=date(2023,2,3), start=time(13,30), end=time(23,59)),
+                                                             Availability(date=date(2023,2,4), start=time(0,0), end=time(23,59)),
+                                                             Availability(date=date(2023,2,5), start=time(0,0), end=time(23,59))],
+                                                             {0:2, 1:2, 2:2, 3:2}, 12, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Isabel', 'Koster', [[0,4,0],[0,4,1],[0,5,0],[0,5,1],[0,6,0],
-                                            [1,4,0],[1,4,1],[1,5,0],[1,5,1],[1,6,0],
-                                            [2,4,0],[2,4,1],[2,5,0],[2,5,1],[2,6,0],
-                                            [3,4,0],[3,4,1],[3,5,0],[3,5,1],[3,6,0]],
-                                            {0:2, 1:2, 2:2, 3:2}, 11, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Isabella', 'Koster', [Availability(date=date(2023,1,30), start=time(7,30), end=time(18,00)),
+                                                     Availability(date=date(2023,1,31), start=time(7,30), end=time(18,00)),
+                                                     Availability(date=date(2023,2,4), start=time(8,30), end=time(13,30))],
+                                                     {0:2, 1:2, 2:2, 3:2}, 11, 1, 'Allround', 'coffee_company'))
 
 employee_list.append(Employee('Alexandra', 'Offringa', [],
-                                             {0:0, 1:0, 2:0, 3:0}, 15.5, 1, 'everything', 'coffee_company'))
+                                                       {0:0, 1:0, 2:0, 3:0}, 15.5, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Pim', 'Putman', [],
-                                            {0:0, 1:0, 2:0, 3:0}, 16.60, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Pim', 'Putman', [Availability(date=date(2023,1,30), start=time(0,0), end=time(14,00)),
+                                                Availability(date=date(2023,1,31), start=time(0,0), end=time(23,59))],
+                                                {0:0, 1:0, 2:0, 3:0}, 16.60, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Danaë', 'Verstegen', [[0,1,0],[0,1,1],[0,6,0],[0,6,1],
-                                               [1,1,0],[1,1,1],[1,6,0],[1,6,1],
-                                               [2,1,0],[2,1,1],[2,6,0],[2,6,1],
-                                               [3,1,0],[3,1,1],[3,6,0],[3,6,1]],
-                                               {0:2, 1:2, 2:2, 3:2}, 14, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Danaë', 'Verstegen', [Availability(date=date(2023,1,30), start=time(0,0), end=time(23,59)),
+                                                     Availability(date=date(2023,1,31), start=time(7,30), end=time(13,00)),
+                                                     Availability(date=date(2023,2,5), start=time(8,30), end=time(13,30))],
+                                                     {0:2, 1:2, 2:2, 3:2}, 14, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Miranda', 'van Vuren', [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[0,3,0],[0,3,1],[0,4,0],[0,4,1],
-                                               [1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[1,4,0],[1,4,1],
-                                               [2,0,0],[2,0,1],[2,1,0],[2,1,1],[2,2,0],[2,2,1],[2,3,0],[2,3,1],[2,4,0],[2,4,1],
-                                               [3,0,0],[3,0,1],[3,1,0],[3,1,1],[3,2,0],[3,2,1],[3,3,0],[3,3,1],[3,4,0],[3,4,1]],
-                                               {0:2, 1:2, 2:2, 3:2}, 18, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Miranda', 'van Vuren', [Availability(date=date(2023,1,30), start=time(0,0), end=time(23,59)),
+                                                       Availability(date=date(2023,1,31), start=time(0,0), end=time(23,59)),
+                                                       Availability(date=date(2023,2,1), start=time(0,0), end=time(23,59)),
+                                                       Availability(date=date(2023,2,2), start=time(0,0), end=time(23,59)),
+                                                       Availability(date=date(2023,2,5), start=time(0,0), end=time(23,59))],
+                                                       {0:2, 1:2, 2:2, 3:2}, 18, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Lulu', 'Wolff', [],
-                                           {0:0, 1:0, 2:0, 3:0}, 11, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Lulu', 'Wolff', [Availability(date=date(2023,2,4), start=time(0,0), end=time(23,59))],
+                                                {0:0, 1:0, 2:0, 3:0}, 11, 1, 'Allround', 'coffee_company'))
 
-employee_list.append(Employee('Tamar', 'van der Zalm', [[0,0,1],[0,1,0],[0,1,1],[0,3,0],[0,3,1],[0,4,0],[0,4,1],[0,5,0],[0,5,1],[0,6,0],[0,6,1],
-                                                  [1,0,1],[1,1,0],[1,1,1],[1,3,0],[1,3,1],[1,4,0],[1,4,1],[1,5,0],[1,5,1],[1,6,0],[1,6,1],
-                                                  [2,0,1],[2,1,0],[2,1,1],[2,3,0],[2,3,1],[2,4,0],[2,4,1],[2,5,0],[2,5,1],[2,6,0],[2,6,1],
-                                                  [3,0,1],[3,1,0],[3,1,1],[3,3,0],[3,3,1],[3,4,0],[3,4,1],[3,5,0],[3,5,1],[3,6,0],[3,6,1]],
-                                                  {0:2, 1:2, 2:2, 3:2}, 30, 1, 'everything', 'coffee_company'))
+employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(date=date(2023,2,1), start=time(13,0), end=time(23,59)),
+                                                        Availability(date=date(2023,2,2), start=time(7,0), end=time(18,00))],
+                                                        {0:2, 1:2, 2:2, 3:2}, 30, 1, 'Allround', 'coffee_company'))

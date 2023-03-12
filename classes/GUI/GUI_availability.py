@@ -17,7 +17,6 @@ class Availability(QWidget):
 
         self.Controller: Controller = Con
 
-
         self.update_tasks()
         self.update_timeslot_dict()
         self.update_employee_dict()
@@ -41,7 +40,7 @@ class Availability(QWidget):
     def init_UI(self) -> None:
 
         """ Schedule widget """
-
+        self.schedule_layout_dict = {}
         self.schedule_widget = QStackedWidget()
         self.schedule_widget.setContentsMargins(0,0,0,0)
 
@@ -58,15 +57,6 @@ class Availability(QWidget):
                 day_layout = QVBoxLayout()
                 day_layout.setContentsMargins(0,0,0,0)
                 day_layout.addWidget(day_label)
-
-                for timeslot_num, timeslot in enumerate(self.timeslots):
-                    checkbox = QCheckBox(timeslot)
-                    checkbox.week = week_num
-                    checkbox.day = day_num
-                    checkbox.timeslot = timeslot_num
-                    checkbox.clicked.connect(self.availability_checkbox_clicked)
-                    checkbox.setChecked(False)
-                    day_layout.addWidget(checkbox)
 
                 day_widget = QWidget()
                 day_widget.setLayout(day_layout)
@@ -189,6 +179,22 @@ class Availability(QWidget):
         main_layout.addLayout(bottom_layout)
 
     """ Update """
+
+    # for timeslot_num, timeslot in enumerate(self.timeslots):
+    #     checkbox = QCheckBox(timeslot)
+    #     checkbox.week = week_num
+    #     checkbox.day = day_num
+    #     checkbox.timeslot = timeslot_num
+    #     checkbox.clicked.connect(self.availability_checkbox_clicked)
+    #     checkbox.setChecked(False)
+
+
+    """ WORK IN PROGRESS """
+    def update_schedule_slots(self) -> None:
+        for week_num in range(self.schedule_widget.count()):
+            week_widget: QWidget = self.schedule_widget[week_num]
+            for day_num in range(week_widget.count()):
+                day_layout = week_widget.itemAt(day_num).layout()
 
     def update_tasks(self) -> None:
         """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
