@@ -2,11 +2,14 @@ import queue
 import threading
 import time
 from enum import Enum
+from datetime import date, timedelta
 
-from classes.representation.employee import Employee
-from classes.representation.shift import Shift
-from data.queries import db_cursor, downloading_availability, downloading_shifts, downloading_employees
 from classes.representation.generator import Generator
+from classes.representation.employee import Employee
+from classes.representation.shift import ShiftData
+
+from data.assign import employee_list, shift_list
+from data.queries import db_cursor, downloading_availability, downloading_shifts, downloading_employees
 
 LOCK = threading.Lock()
 SLEEP = 10 # timer in seconds to slow down the background loading of the program
@@ -16,8 +19,8 @@ class Controller:
         # self.generator = generator
         self.location = location
 
-        self.employee_list: list[Employee] = []
-        self.shift_list: list[Shift] = []
+        self.employee_list: list[Employee] = employee_list
+        self.shift_list: list[ShiftData] = shift_list
         self.name_to_id = {}
 
         self.levels_dict = {}
@@ -37,7 +40,25 @@ class Controller:
         self.tasktypes = {1: 'Allround', 2:'Bagels', 3:'Koffie', 4:'Kassa'}
         self.days = {0:'Maandag', 1:'Dinsdag', 2:'Woensdag', 3:'Donderdag', 4:'Vrijdag', 5:'Zaterdag', 6:'Zondag'}
 
-    """ Get """
+        self.start_date = self.get_monday(self.get_last_day_of_month())
+        self.end_date = self.get_monday(self.get_last_day_of_month(1))
+
+    """ GET """
+
+    def get_start_date(self) -> date:
+        return self.start_date
+
+    def get_end_date(self) -> date:
+        return self.end_date
+
+    def get_last_day_of_month(self, months_into_future: int = 0):
+        today = date.today()
+        last_day_of_month = today.replace(month=today.month + months_into_future + 1, day=1) - timedelta(1)
+        return last_day_of_month
+
+    def get_monday(self, last_day_of_month):
+        first_monday_of_next_month = last_day_of_month + timedelta(days=(7-last_day_of_month.weekday()))
+        return first_monday_of_next_month
 
     def get_employee_list(self) -> list:
         return self.employee_list
@@ -150,9 +171,9 @@ class Controller:
         start_time, end_time = self.get_start_and_finish_time(time)
 
         self.shift_list.append(
-            Shift(
-            start_time = start_time,
-            end_time = end_time,
+            ShiftData(
+            start = start_time,
+            end = end_time,
             day = day,
             week = week,
             task = task,
@@ -164,7 +185,7 @@ class Controller:
         self.queue.put(("INSERT INTO Shifts (location, week, day, start, end, task) VALUES (%s, %s, %s, %s, %s, %s)", (self.location, week, day, start_time, end_time, task)))
 
     def delete_shift(self, time: str) -> None:
-        self.to_delete: list[Shift] = []
+        self.to_delete: list[ShiftData] = []
         start_time, end_time = self.get_start_and_finish_time(time)
 
         for shift_instance in self.shift_list:

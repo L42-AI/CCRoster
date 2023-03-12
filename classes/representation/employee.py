@@ -13,7 +13,7 @@ class Employee:
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
-        self.tasks = task
+        self.tasks = [task]
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
 

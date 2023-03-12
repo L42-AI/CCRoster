@@ -1,5 +1,6 @@
 from datetime import date, time
 
+from classes.representation.shift import ShiftData
 from classes.representation.employee import Employee
 from classes.representation.availabilty import Availability
 
@@ -52,3 +53,34 @@ employee_list.append(Employee('Lulu', 'Wolff', [Availability(date=date(2023,2,4)
 employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(date=date(2023,2,1), start=time(13,0), end=time(23,59)),
                                                         Availability(date=date(2023,2,2), start=time(7,0), end=time(18,00))],
                                                         {0:2, 1:2, 2:2, 3:2}, 30, 1, 'Allround', 'coffee_company'))
+
+shift_list: list[ShiftData] = []
+
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,3), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,4), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,5), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,6), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,7), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,8), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,9), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,10), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,11), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,12), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,13), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,14), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,15), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,16), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,17), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,18), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,19), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,20), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,21), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,22), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,23), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,24), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,25), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,26), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,27), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,28), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,29), task=1, location=1))
+shift_list.append(ShiftData(start=time(7), end=time(9), date=date(2023,4,30), task=1, location=1))

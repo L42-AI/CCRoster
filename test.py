@@ -1,86 +1,21 @@
-import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+from datetime import date, timedelta
 
-class InitialCard(QtWidgets.QLabel):
-    def __init__(self, text, parent):
-        super(InitialCard, self).__init__(text, parent)
-        self.setAutoFillBackground(True)
-        self.setFrameStyle(QtWidgets.QFrame.WinPanel|QtWidgets.QFrame.Sunken)
-        newFont = QtGui.QFont("MsReferenceSansSerif", 10)
-        newFont.setBold(False)
-        self.setFont(newFont)
-        self.setMinimumSize(90, 25)
-        self.setMaximumHeight(30)
-        self.setAlignment(QtCore.Qt.AlignCenter)
-        self.mimeText=self.text()
+def get_last_day_of_month(months_into_future: int = 0):
+    today = date.today()
+    last_day_of_month = today.replace(month=today.month + months_into_future + 1, day=1) - timedelta(1)
+    return last_day_of_month
 
-    def mouseMoveEvent(self, event):
-        if not self.text():
-            return
-        mimeData = QtCore.QMimeData()
-        mimeData.setText(' ')
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-        drag.exec(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
 
-class CardsDropWidget(QtWidgets.QWidget):
+def get_monday(last_day_of_month):
+    first_monday_of_next_month = last_day_of_month + timedelta(days=(7-last_day_of_month.weekday()))
+    return first_monday_of_next_month
 
-    def __init__(self, parent):
-        super(CardsDropWidget, self).__init__(parent)
-        self.setAcceptDrops(True)
-        self.contentsVLO = QtWidgets.QVBoxLayout()
-        self.contentsVLO.setAlignment(QtCore.Qt.AlignTop)
-        self.setLayout(self.contentsVLO)
-    
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasText():
-            event.setDropAction(QtCore.Qt.CopyAction)
-            event.accept()
-        else:
-            event.ignore()
 
-    def dropEvent(self, event):
-        if event.mimeData().hasText():
-            cardSource=event.source()
-            cardText=cardSource.text()
-            if not cardSource in self.children():
-                newCard = InitialCard(cardText, self)
-                self.contentsVLO.addWidget(newCard)
-                cardSource.clear()
-            else:
-                event.ignore()
-        else:
-            event.ignore()
+last_day_of_current_month = get_last_day_of_month()
+last_day_of_next_month = get_last_day_of_month(months_into_future=1)
 
-class MainDialogue(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(MainDialogue, self).__init__(parent)
-        self.label=InitialCard("initial", self)
-        self.lineEdit=QtWidgets.QLineEdit("Create a Card Here!!")
-        self.lineEdit.selectAll()
-        self.scrollArea = QtWidgets.QScrollArea()
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollContent = CardsDropWidget(self.scrollArea)
-        self.scrollArea.setMinimumWidth(150)
-        self.scrollArea.setWidget(self.scrollContent)
-        self.dialogueLayout=QtWidgets.QHBoxLayout()
-        self.labelLayout=QtWidgets.QVBoxLayout()
-        self.labelLayout.addWidget(self.label)
-        self.labelLayout.addWidget(self.lineEdit)
-        self.labelLayout.addStretch()
-        self.dialogueLayout.addWidget(self.scrollArea)
-        self.dialogueLayout.addLayout(self.labelLayout)
-        self.setLayout(self.dialogueLayout)
-        self.setWindowTitle("Drag and Drop")
-        self.setMinimumSize(300, 150)
-        self.lineEdit.returnPressed.connect(self.createCardTxt_fn)
+start_day = get_monday(last_day_of_current_month)
+end_day = get_monday(last_day_of_next_month)
 
-    def createCardTxt_fn(self):
-        cardTxt=self.lineEdit.text()
-        self.label.setText(cardTxt)
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = MainDialogue()
-    window.show()
-    sys.exit(app.exec())
+print(start_day)
+print(end_day)
