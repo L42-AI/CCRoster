@@ -1,5 +1,6 @@
 import random
 from datetime import date, time
+from classes.representation.availability import Availability
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
@@ -7,7 +8,7 @@ class Employee:
         self.lname = lname
         self.name= fname + " " + lname
         self.id = None
-        self.availability: list[list[date, time, time, int]] = av
+        self.availability: list[Availability] = self.init_availability(av)
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
@@ -17,6 +18,19 @@ class Employee:
 
         # self.upload_employee()
         # self.upload_availability()
+
+    """ Init """
+
+    def init_availability(self, av):
+        """
+        Initiates the availability list of an employee with data objects"""
+        availability = []
+        for entry in av:
+            start_datetime = entry[0]
+            end_datetime = entry[1]
+            availability.append(Availability(start=start_datetime, end=end_datetime))
+        return availability
+
 
     """ Upload """
     def upload_employee(self):

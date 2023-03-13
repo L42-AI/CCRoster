@@ -6,7 +6,7 @@ from classes.representation.maluscalc import MalusCalculator
 from data.assign import *
 class Generator:
     def __init__(self) -> None:
-        self.shifts: list[tuple] = self.init_shifts()
+        self.shifts: list[tuple] = shift_list # shift list from assign with shift instances
         self.avalabilities: list[list] = self.init_availability()
         self.work_load: dict = self.init_work_load()
         self.schedule: list[tuple[int, int]] = self.init_schedule()
@@ -14,16 +14,6 @@ class Generator:
 
 
     """ INIT """
-
-    def init_shifts(self) -> list[tuple]:
-        """
-        Initiate the shifts
-        """
-
-        # create the list with shift info per shift needed in a schedule
-        shifts: list[tuple] = [(x.start, x.end, x.task) for x in shift_list]
-
-        return shifts
 
     def init_availability(self) -> list[list]:
         """
@@ -64,13 +54,17 @@ class Generator:
         this method is only used to develop the generator, later, the info will actually be downlaoded
         for now it just returns a hardcoded list with availability
         """
+
+        # shift in the format of availability data that employees have
+        shift_info = (shift.start, shift.end, shift.task)
+
         downloaded_availabilities = []
         for index, employee in enumerate(employee_list):
 
-            # employee.availability is a list with tuples corresponding with datetimes they can work
-            for available_shift in employee.availability:
+            # employee.availability is a list with Availability objects corresponding with datetimes they can work
+            for workable_shift in employee.availability:
 
-                if (*available_shift, employee.get_tasks()) == shift:
+                if (workable_shift.start, workable_shift.end, employee.get_tasks()) == shift_info:
 
                     # for now, use index as employee id since downloading the key from the server obviously does not work
                     downloaded_availabilities.append((index + 1, employee.get_wage()))
@@ -97,7 +91,7 @@ class Generator:
         possible_employee = self.__random_employee(index)
 
         # get the duration of the shift
-        minutes = self.__duration_in_minutes(shift_to_replace[0], shift_to_replace[1])
+        minutes = self.__duration_in_minutes(shift_to_replace.start, shift_to_replace.end)
         # print(possible_employee)
 
         # # calculate the cost and find what employee previously had that shift
