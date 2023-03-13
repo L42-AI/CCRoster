@@ -22,6 +22,8 @@ class MainWindow(QMainWindow):
         self.location = 1
         self.Controller = Controller(self.location)
 
+        self.initUI()
+
     def initUI(self) -> None:
 
         self.setWindowTitle("Shifter")

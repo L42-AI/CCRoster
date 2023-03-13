@@ -199,12 +199,14 @@ class Availability(QWidget):
 
         # Fill
         for shift in self.shifts:
-            checkbox = QCheckBox(f'{shift.start} - {shift.end}')
+            start_time_HM = shift.start.time().strftime('%H:%M')
+            end_time_HM = shift.end.time().strftime('%H:%M')
+            checkbox = QCheckBox(f"{start_time_HM} - {end_time_HM}")
             checkbox.shift = shift
             checkbox.clicked.connect(self.availability_checkbox_clicked)
             checkbox.setChecked(False)
 
-            layout_to_include = self.schedule_dict[shift.date].layout()
+            layout_to_include = self.schedule_dict[shift.start.date()].layout()
             layout_to_include.addWidget(checkbox)
 
 
@@ -234,9 +236,8 @@ class Availability(QWidget):
         # Fill employee dict
         """ SLECHT GECODE, CLASSES KRIJGEN REFERENCES IN MUTABLE OBJECTS """
         for employee in employee_list:
-            for employee_task in employee.tasks:
-                task_code = self.tasks[employee_task]
-                self.employee_dict[task_code].append(employee.name)
+            task_num = self.tasks[employee.tasks]
+            self.employee_dict[task_num].append(employee.name)
 
     def update_shift_display(self):
         """ Update the shifts displayed in the GUI """
@@ -269,7 +270,12 @@ class Availability(QWidget):
 
         existant = {}
         for shift in self.shifts:
-            key = f'{shift.start} - {shift.end}'
+
+            start_time_HM = shift.start.time().strftime('%H:%M')
+            end_time_HM = shift.end.time().strftime('%H:%M')
+
+            key = f"{start_time_HM} - {end_time_HM}"
+
             if key not in existant:
                 existant[key] = True
                 timeslot_label = QLabel(key)

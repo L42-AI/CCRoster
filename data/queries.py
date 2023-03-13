@@ -1,7 +1,7 @@
-import mysql
+from mysql import connector
 # http://wouterverdegaal.com:8080/
 def db_cursor():
-    db = mysql.connector.connect(
+    db = connector.connect(
                 host="185.224.91.162",
                 port=3308,
                 user="Jacob",
