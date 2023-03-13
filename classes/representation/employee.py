@@ -7,7 +7,7 @@ class Employee:
         self.fname = fname
         self.lname = lname
         self.name= fname + " " + lname
-        self.id = None
+        self.id: int = None
         self.availability: list[Availability] = self.init_availability(av)
         self.wage = wage
         self.weekly_max = maximum

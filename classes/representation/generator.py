@@ -2,16 +2,19 @@ import datetime
 import numpy as np
 import random
 
-from data.assign import *
+from classes.representation.dataclasses import Shift
+from classes.representation.employee import Employee
+
+from data.assign import employee_list, shift_list
 
 OFFLINE = True
 class Generator:
     def __init__(self) -> None:
-        self.shifts: list[tuple] = shift_list # shift list from assign with shift instances
-        self.avalabilities: list[list] = self.init_availability()
-        self.workload: dict = self.init_workload()
-        self.schedule: list[tuple[ShiftData, Employee.id]] = self.init_schedule()
-        self.id_employee: dict[Employee.id:Employee] = self.init_id_to_employee()
+        self.shifts = shift_list # shift list from assign with shift instances
+        self.avalabilities = self.init_availability()
+        self.workload = self.init_workload()
+        self.schedule = self.init_schedule()
+        self.id_employee = self.init_id_to_employee()
         self.improve()
 
     """ INIT """
@@ -41,7 +44,7 @@ class Generator:
                 workload[employee.get_id()] = {}
         return workload
 
-    def init_schedule(self) -> list[tuple[int, int]]:
+    def init_schedule(self) -> list[tuple[Shift, Employee.id]]:
         schedule: list[tuple[int, int]] = []
 
         for index in range(len(self.shifts)):
@@ -50,7 +53,7 @@ class Generator:
             schedule.append((888, 999))
         return schedule
 
-    def init_id_to_employee(self) -> dict[int:Employee]:
+    def init_id_to_employee(self) -> dict[Employee.id: Employee]:
         """
         returns dictionary that stores employees with their id as key
         """
