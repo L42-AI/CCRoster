@@ -11,6 +11,8 @@ OFFLINE = True
 class Generator:
     def __init__(self) -> None:
         self.shifts = shift_list # shift list from assign with shift instances
+        self.employees = employee_list
+
         self.avalabilities = self.init_availability()
         self.workload = self.init_workload()
         self.schedule = self.init_schedule()
@@ -35,7 +37,7 @@ class Generator:
 
     def init_workload(self) -> dict:
         workload = {}
-        for index, employee in enumerate(employee_list):
+        for index, employee in enumerate(self.employees):
 
             # each employee will have a list with shift objects that correspond to the shifts he is scheduled for
             if OFFLINE:
@@ -60,12 +62,12 @@ class Generator:
 
         id_employee = {}
         if OFFLINE:
-            for index, employee in enumerate(employee_list):
+            for index, employee in enumerate(self.employees):
                 id_employee[index] = employee
         else:
 
             # when not offline, employees get their key as id
-            for index, employee in enumerate(employee_list):
+            for index, employee in enumerate(self.employees):
                 id_employee[employee.get_id()] = employee
 
         return id_employee
@@ -81,7 +83,7 @@ class Generator:
         shift_info = (shift.start, shift.end, shift.task)
 
         downloaded_availabilities = []
-        for index, employee in enumerate(employee_list):
+        for index, employee in enumerate(self.employees):
 
             # employee.availability is a list with Availability objects corresponding with datetimes they can work
             for workable_shift in employee.availability:
