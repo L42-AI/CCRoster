@@ -1,9 +1,11 @@
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
-                               QCheckBox, QListWidgetItem)
+                               QCheckBox, QListWidgetItem, QLayout)
 import re
 from classes.representation.controller import Controller
+
+DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 class Shifts(QWidget):
     update_signal = Signal()
@@ -13,77 +15,35 @@ class Shifts(QWidget):
         self.Controller: Controller = Con
 
         # Set mutable object
-        self.tasktypes = {'Allround':1, 'Begels':2, 'Koffie':3, 'Kassa':4}
-        self.days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         self.amount_of_weeks = 4
 
-        """ Create Widgets """
+        """ Call in init for now """
+        self.update_task_types()
+
+        self.init_UI()
+
+    """ Init """
+
+    def init_UI(self) -> None:
+
+        """ Timeslot Widget """
 
         self.time_slot_list = QListWidget()
         self.time_slot_list.itemDoubleClicked.connect(self.edit_time_slot)
 
+        """ Time input widgets """
 
-        self.start_time_label = QLabel("Start Time:")
         self.start_time_edit = QLineEdit()
-
-        self.end_time_label = QLabel("End Time:")
         self.end_time_edit = QLineEdit()
 
-        self.init_timeslot_buttons()
-
-        # Create the weekday checkboxes
-        self.days_layout = QHBoxLayout()
-        self.init_day_checkboxes()
-
-        self.weeks_layout = QHBoxLayout()
-        self.init_week_checkboxes()
-
-        self.task_box = QComboBox()
-        self.fill_task_box()
-
-        self.init_shifts_to_display()
-
-        """ Layout """
-
-        # Create the time widgets layout
         times_layout = QVBoxLayout()
-        times_layout.addWidget(self.start_time_label)
+        times_layout.addWidget(QLabel("Start Time:"))
         times_layout.addWidget(self.start_time_edit)
-        times_layout.addWidget(self.end_time_label)
+        times_layout.addWidget(QLabel("End Time:"))
         times_layout.addWidget(self.end_time_edit)
 
-        # Add the day layouts
-        self.moment_layout = QVBoxLayout()
-        self.moment_layout.addLayout(self.days_layout)
-        self.moment_layout.addLayout(self.weeks_layout)
+        """ Interact buttons """
 
-        # Create the time set layout
-        timeset_layout = QHBoxLayout()
-        timeset_layout.addLayout(times_layout)
-        timeset_layout.addLayout(self.moment_layout)
-
-        # Create the button layout
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.add_time_slot_button)
-        button_layout.addWidget(self.edit_time_slot_button)
-        button_layout.addWidget(self.delete_time_slot_button)
-
-        # Create the main layout
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.task_box)
-        layout.addWidget(self.time_slot_list)
-        layout.addLayout(timeset_layout)
-        layout.addLayout(button_layout)
-
-    """ Init """
-    def init_shifts_to_display(self) -> None:
-        shifts = self.Controller.shifts_input()
-        for shift in shifts:
-            if shift[1] == self.tasktypes[self.task_box.currentText()]:
-                self.time_slot_list.addItem(str(shift[0]))
-
-
-    def init_timeslot_buttons(self) -> None:
         self.add_time_slot_button = QPushButton("Add Time Slot")
         self.add_time_slot_button.clicked.connect(self.add_time_slot)
 
@@ -95,8 +55,15 @@ class Shifts(QWidget):
         self.delete_time_slot_button.clicked.connect(self.delete_selected_time_slot)
         self.delete_time_slot_button.setEnabled(False)
 
-    def init_day_checkboxes(self) -> None:
-        for day in self.days:
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.add_time_slot_button)
+        button_layout.addWidget(self.edit_time_slot_button)
+        button_layout.addWidget(self.delete_time_slot_button)
+
+        """ Day checkboxes """
+
+        self.days_layout = QHBoxLayout()
+        for day in DAYS:
             label = QLabel(day[:2])
             box = QCheckBox()
             box.day = day
@@ -107,7 +74,9 @@ class Shifts(QWidget):
 
             self.days_layout.addLayout(day_layout)
 
-    def init_week_checkboxes(self) -> None:
+        """ Week checkboxes """
+
+        self.weeks_layout = QHBoxLayout()
 
         all_weeks_label = QLabel('Uniform')
 
@@ -122,9 +91,46 @@ class Shifts(QWidget):
         # Create the week selector
         self.weeks_layout.addLayout(all_weeks_layout)
 
-    def fill_task_box(self) -> None:
-        for task_type in self.tasktypes:
-            self.task_box.addItem(task_type)
+        """ Tasks """
+
+        self.task_box = QComboBox()
+        self.update_task_box()
+
+        self.update_shifts_display()
+
+        """ Layout """
+
+        # Add the day layouts
+        self.moment_layout = QVBoxLayout()
+        self.moment_layout.addLayout(self.days_layout)
+        self.moment_layout.addLayout(self.weeks_layout)
+
+        # Create the time set layout
+        timeset_layout = QHBoxLayout()
+        timeset_layout.addLayout(times_layout)
+        timeset_layout.addLayout(self.moment_layout)
+
+
+        # Create the main layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.task_box)
+        layout.addWidget(self.time_slot_list)
+        layout.addLayout(timeset_layout)
+        layout.addLayout(button_layout)
+
+    def update_shifts_display(self) -> None:
+        shifts = self.Controller.shifts_input()
+        for shift in shifts:
+            if shift[1] == self.Tasks[self.task_box.currentText()].value:
+                self.time_slot_list.addItem(str(shift[0]))
+
+    def update_task_box(self) -> None:
+        for task in self.Tasks:
+            self.task_box.addItem(task.name)
+
+    def update_task_types(self) -> None:
+        """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
+        self.Tasks = self.Controller.get_Tasks_enum()
 
     """ Methods """
 
@@ -145,7 +151,7 @@ class Shifts(QWidget):
 
         self.update_signal.emit()
 
-    def edit_time_slot(self, item: object) -> None:
+    def edit_time_slot(self, item: QListWidgetItem) -> None:
 
         # Get timeslot
         timeslot = self.__get_timeslot(item)
@@ -236,10 +242,6 @@ class Shifts(QWidget):
             self.__add_week_selection(self.weeks_layout)
             self.weeks_layout.update()
 
-    def save(self) -> None:
-
-        print(self.timeslots)
-
     """ Helpers """
 
     def __check_correct_time(self, timeslot: str) -> bool:
@@ -280,15 +282,13 @@ class Shifts(QWidget):
 
         days = []
         for layout_num in range(self.days_layout.count()):
-            day_layout = self.days_layout.itemAt(layout_num)
+            day_layout: QVBoxLayout = self.days_layout.itemAt(layout_num)
 
             for widget_num in range(day_layout.count()):
                 child_widget = day_layout.itemAt(widget_num).widget()
 
                 if isinstance(child_widget, QLabel):
                     day = child_widget.text()
-
-
                 else:
                     if child_widget.isChecked():
 
@@ -300,10 +300,10 @@ class Shifts(QWidget):
             weeks = [0,1,2,3]
         else:
             for week_num in range(1, self.weeks_layout.count()):
-                week_layout = self.weeks_layout.itemAt(week_num)
+                week_layout: QLayout = self.weeks_layout.itemAt(week_num)
 
                 for widget_num in range(1, week_layout.count()):
-                    box = week_layout.itemAt(widget_num).widget()
+                    box: QCheckBox = week_layout.itemAt(widget_num).widget()
 
                     if box.isChecked():
                         weeks.append(week_num)

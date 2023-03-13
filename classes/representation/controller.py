@@ -1,23 +1,36 @@
 import queue
 import threading
 import time
+from enum import Enum
+from datetime import date, timedelta
 
 from classes.representation.employee import Employee
-from classes.representation.shift import Shift
+from classes.representation.dataclasses import Shift, Availability
+
+from data.assign import employee_list, shift_list
 from data.queries import db_cursor, downloading_availability, downloading_shifts, downloading_employees
-from classes.representation.generator import Generator
 
 LOCK = threading.Lock()
 SLEEP = 10 # timer in seconds to slow down the background loading of the program
 
 class Controller:
-    def __init__(self, generator, location) -> None:
-        self.generator = generator
+    def __init__(self, location) -> None:
+        # self.generator = generator
         self.location = location
 
-        self.employee_list: list[Employee] = []
-        self.shift_list: list[Shift] = []
+        self.employee_list: list[Employee] = employee_list
+        self.shift_list: list[Shift] = shift_list
         self.name_to_id = {}
+
+        # Set tasks and levels
+        """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
+        self.update_levels()
+        self.update_tasks()
+
+        # Create enums
+        """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
+        self.update_levels_enum()
+        self.update_tasks_enum()
 
         self.db, self.cursor = db_cursor()
         self.availability = downloading_availability(self.db, self.cursor, location)
@@ -28,20 +41,46 @@ class Controller:
         self.tasktypes = {1: 'Allround', 2:'Bagels', 3:'Koffie', 4:'Kassa'}
         self.days = {0:'Maandag', 1:'Dinsdag', 2:'Woensdag', 3:'Donderdag', 4:'Vrijdag', 5:'Zaterdag', 6:'Zondag'}
 
-    """ Get """
-    def get_employee_list(self) -> list:
-        return self.employee_list
+        self.start_date = self.get_monday(self.get_last_day_of_month())
+        self.end_date = self.get_monday(self.get_last_day_of_month(months_into_future=1))
 
-    def get_shift_list(self) -> list:
-        return self.shift_list
+    """ GET """
+
+    def get_last_day_of_month(self, months_into_future: int = 0) -> date:
+        today = date.today()
+        last_day_of_month = today.replace(month=today.month + months_into_future + 1, day=1) - timedelta(1)
+        return last_day_of_month
+
+    def get_monday(self, last_day_of_month: date) -> date:
+        first_monday_of_next_month = last_day_of_month + timedelta(days=(7-last_day_of_month.weekday()))
+        return first_monday_of_next_month
 
     def get_start_and_finish_time(self, time: str) -> tuple:
         return time.split(' - ')
 
     def get_shift_info(self, info: dict) -> tuple:
         return info['day'], info['week'], info['type']
-    
+
+    def get_start_date(self) -> date:
+        return self.start_date
+
+    def get_end_date(self) -> date:
+        return self.end_date
+
+    def get_employee_list(self) -> list:
+        return self.employee_list
+
+    def get_shift_list(self) -> list:
+        return self.shift_list
+
+    def get_Levels_enum(self) -> Enum:
+        return self.Levels
+
+    def get_Tasks_enum(self) -> Enum:
+        return self.Tasks
+
     """ Input methods for the GUI"""
+
     def shifts_input(self):
         shifts = downloading_shifts(self.db, self.cursor, self.location)
         for _, shift in enumerate(shifts):
@@ -58,24 +97,11 @@ class Controller:
             fname, lname, hourly, level, task = employee
             employees[_] = f'NAAM:{fname} {lname} SALARIS: {hourly} LEVEL: {level} TAAK: {task}'
         return employees
-    
+
     """ Methods """
+
     def generate(self):
         self.generator.improve()
-
-    def threading(self):
-        '''
-        starts a new thread where communicate_server can run on so it does not slow down the application
-        '''
-
-        # deamon condition to indicate it should close when main thread closes too
-        t = threading.Thread(target=self.communicate_server, daemon=True)
-        t.start()
-        if self.close:
-            self.cursor.close()
-            self.db.close()
-            return
-
 
     def create_employee(self, lname: str, fname: str, hourly_wage: int, level: int, tasks: int):
         for task in tasks:
@@ -106,7 +132,7 @@ class Controller:
         id = employee.id
         week = availability_slot[0]
         day = availability_slot[1]
-        shift =availability_slot[2]
+        shift = availability_slot[2]
 
         # add or remove employee both locally and in the database
         if add:
@@ -129,6 +155,14 @@ class Controller:
                 self.queue.put(("DELETE FROM Employee WHERE id=%s", (id,)))
                 break
 
+    def update_employee_availability_local(self, new_av: list[tuple]):
+        ''''
+        updates the availability of the LOCAL employee instance that the GUI uses
+        '''
+        for employee in self.employee_list:
+            mask = [x[0] == employee.id for x in new_av]
+            employee.availability = [x for x, i in enumerate(new_av) if mask[i]]
+
 
     def create_shift(self, time: str, day: int, week: int, task: int) -> None:
         '''
@@ -138,8 +172,8 @@ class Controller:
 
         self.shift_list.append(
             Shift(
-            start_time = start_time,
-            end_time = end_time,
+            start = start_time,
+            end = end_time,
             day = day,
             week = week,
             task = task,
@@ -164,13 +198,19 @@ class Controller:
         for i in range(len(self.to_delete)):
             self.shift_list.remove(self.to_delete[i])
 
-    def update_employee_availability_local(self, new_av):
-        ''''
-        updates the availability of the LOCAL employee instance that the GUI uses
+
+    def threading(self):
         '''
-        for employee in self.employee_list:
-            mask = [x[0] == employee.id for x in new_av]
-            employee.availability = [x for x, i in enumerate(new_av) if mask[i]]
+        starts a new thread where communicate_server can run on so it does not slow down the application
+        '''
+
+        # deamon condition to indicate it should close when main thread closes too
+        tread = threading.Thread(target=self.communicate_server, daemon=True)
+        tread.start()
+        if self.close:
+            self.cursor.close()
+            self.db.close()
+            return
 
     def store_availability(self, new_availability, lock):
         '''
@@ -180,7 +220,6 @@ class Controller:
         lock.acquire()
         self.availability = new_availability
         lock.release()
-
 
     def communicate_server(self):
         """ Function that runs all the time to send the new data to the server and download data"""
@@ -209,6 +248,19 @@ class Controller:
             # do not run at full speed
             time.sleep(SLEEP)
 
+    """ Enum """
 
+    def update_levels(self) -> None:
+        """ TO BE CONNECTED TO SETTINGS PAGE """
+        self.levels_dict = {'Stagair': 1, 'Manager': 2, 'Lead': 3}
 
+    def update_tasks(self) -> None:
+        """ TO BE CONNECTED TO SETTINGS PAGE """
+        self.tasks_dict = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
+
+    def update_levels_enum(self) -> None:
+        self.Levels = Enum("Level", {key: value for key, value in self.levels_dict.items()})
+
+    def update_tasks_enum(self) -> None:
+        self.Tasks = Enum("Task", {key: value for key, value in self.tasks_dict.items()})
 

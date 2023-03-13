@@ -1,3 +1,4 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget, QListWidget,
                                QCheckBox, QListWidgetItem, QComboBox)
@@ -6,27 +7,42 @@ from classes.representation.controller import Controller
 
 
 class AddEmployee(QWidget):
+    update_signal = Signal()
     def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
         self.Controller: Controller = Con
 
-        self.tasktypes = {'Allround': 1}
-        self.levels = {'Stagair': 0, 'Manager': 1, 'Lead':2}
+        """ Call in init for now """
+        self.update_tasks()
+
+        """ Call in init for now """
+        self.update_levels()
+
+        self.init_UI()
+
+    """ Init """
+
+    def init_UI(self) -> None:
+
+        """ Employee Widget """
 
         self.employee_list = QListWidget()
         self.employee_list.itemDoubleClicked.connect(self.edit_employee)
-        self.init_employees_display()
+        self.update_employees_display()
+
+        """ Time input widgets """
 
         self.employee_first_name_input = QLineEdit()
         self.employee_last_name_input = QLineEdit()
 
-        self.employee_name_layout = QVBoxLayout()
-        self.employee_name_layout.addWidget(QLabel("First Name:"))
-        self.employee_name_layout.addWidget(self.employee_first_name_input)
-        self.employee_name_layout.addWidget(QLabel("Last Name:"))
-        self.employee_name_layout.addWidget(self.employee_last_name_input)
+        employee_name_layout = QVBoxLayout()
+        employee_name_layout.addWidget(QLabel("First Name:"))
+        employee_name_layout.addWidget(self.employee_first_name_input)
+        employee_name_layout.addWidget(QLabel("Last Name:"))
+        employee_name_layout.addWidget(self.employee_last_name_input)
 
+        """ Interact buttons """
 
         self.add_employee_button = QPushButton("Add Employee")
         self.add_employee_button.clicked.connect(self.add_employee)
@@ -39,55 +55,69 @@ class AddEmployee(QWidget):
         self.delete_employee_button.clicked.connect(self.delete_selected_employee)
         self.delete_employee_button.setEnabled(False)
 
-
-        # Create the button layout
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.add_employee_button)
         button_layout.addWidget(self.edit_employee_button)
         button_layout.addWidget(self.delete_employee_button)
 
+        """ Wage input """
 
         self.employee_wage_input = QLineEdit()
         self.employee_wage_input.setFixedWidth(50)
 
-        self.employee_wage_layout = QHBoxLayout()
-        self.employee_wage_layout.addWidget(QLabel("Hourly Wage:"))
-        self.employee_wage_layout.addWidget(self.employee_wage_input)
+        employee_wage_layout = QHBoxLayout()
+        employee_wage_layout.addWidget(QLabel("Hourly Wage:"))
+        employee_wage_layout.addWidget(self.employee_wage_input)
+
+        """ Level Input """
 
         self.employee_level_input = QComboBox()
-        [self.employee_level_input.addItem(level) for level in self.levels.keys()]
+        self.update_level()
 
-        self.employee_level_layout = QVBoxLayout()
-        self.employee_level_layout.addWidget(QLabel("Level:"))
-        self.employee_level_layout.addWidget(self.employee_level_input)
+        employee_level_layout = QVBoxLayout()
+        employee_level_layout.addWidget(QLabel("Level:"))
+        employee_level_layout.addWidget(self.employee_level_input)
+
+        """ Task """
 
         self.employee_task_layout = QVBoxLayout()
-        for task in self.tasktypes.keys():
-            self.employee_task_layout.addWidget(QCheckBox(task))
+        self.update_task_layout()
 
-        self.employee_info_layout = QGridLayout()
-        self.employee_info_layout.addLayout(self.employee_level_layout,2,0,2,2)
-        self.employee_info_layout.addLayout(self.employee_wage_layout,0,0,2,2)
-        self.employee_info_layout.addLayout(self.employee_task_layout,0,2,4,2)
+        employee_info_layout = QGridLayout()
+        employee_info_layout.addLayout(employee_level_layout,2,0,2,2)
+        employee_info_layout.addLayout(employee_wage_layout,0,0,2,2)
+        employee_info_layout.addLayout(self.employee_task_layout,0,2,4,2)
 
-        self.employee_layout = QHBoxLayout()
-        self.employee_layout.addLayout(self.employee_name_layout)
-        self.employee_layout.addLayout(self.employee_info_layout)
+        employee_layout = QHBoxLayout()
+        employee_layout.addLayout(employee_name_layout)
+        employee_layout.addLayout(employee_info_layout)
 
-        self.add_employee_layout = QVBoxLayout()
-        self.add_employee_layout.addLayout(self.employee_layout)
-        self.add_employee_layout.addLayout(button_layout)
+        add_employee_layout = QVBoxLayout()
+        add_employee_layout.addLayout(employee_layout)
+        add_employee_layout.addLayout(button_layout)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.employee_list)
-        layout.addLayout(self.add_employee_layout)
+        layout.addLayout(add_employee_layout)
 
-        save_button = QPushButton('Save')
-        save_button.clicked.connect(self.save)
+    def update_level(self) -> None:
 
-        layout.addWidget(save_button)
+        self.employee_level_input.clear()
 
-    def init_employees_display(self):
+        [self.employee_level_input.addItem(level.name) for level in self.Levels]
+
+    def update_task_layout(self) -> None:
+        [self.employee_task_layout.addWidget(QCheckBox(task.name)) for task in self.Tasks]
+
+    def update_levels(self) -> None:
+        """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
+        self.Levels = self.Controller.get_Levels_enum()
+
+    def update_tasks(self) -> None:
+        """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
+        self.Tasks = self.Controller.get_Tasks_enum()
+
+    def update_employees_display(self):
         employees = self.Controller.employees_input()
         self.employee_list.addItems(employees)
 
@@ -96,6 +126,8 @@ class AddEmployee(QWidget):
         self.Controller.create_employee(*fields)
         self.employee_list.addItem(str(fields))
         self.__clear_input_fields()
+
+        self.update_signal.emit()
 
     def edit_employee(self, item: QListWidgetItem) -> None:
         fields = self.__get_list_item_info(item)
@@ -122,6 +154,8 @@ class AddEmployee(QWidget):
             self.employee_list.addItem(str(new_fields))
             self.__clear_input_fields()
 
+            self.update_signal.emit()
+
     def delete_selected_employee(self) -> None:
         item = self.employee_list.currentItem()
         if item is not None:
@@ -132,6 +166,8 @@ class AddEmployee(QWidget):
             self.edit_employee_button.setEnabled(False)
             self.delete_employee_button.setEnabled(False)
             self.__clear_input_fields()
+
+            self.update_signal.emit()
 
     def __clear_input_fields(self) -> None:
         """ Clear all input fields """
@@ -162,16 +198,13 @@ class AddEmployee(QWidget):
         first_name = self.employee_first_name_input.text()
         last_name = self.employee_last_name_input.text()
         wage = self.employee_wage_input.text()
-        level = self.levels[self.employee_level_input.currentText()]
+        level = self.Levels[self.employee_level_input.currentText()].name
 
         tasks = []
         for task_widget_num in range(self.employee_task_layout.count()):
             task_widget: QCheckBox = self.employee_task_layout.itemAt(task_widget_num).widget()
             task = task_widget.text()
             if task_widget.isChecked():
-                tasks.append(self.tasktypes[task])
+                tasks.append(self.Tasks[task].name)
 
         return first_name, last_name, wage, level, tasks
-
-    def save(self) -> None:
-        [print(employee.name) for employee in self.Controller.get_employee_list()]

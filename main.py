@@ -1,4 +1,9 @@
-from classes.representation.generator import Generator
+from classes.GUI.GUI import MainWindow
+from PySide6.QtWidgets import QApplication
+import sys
 
 if __name__ == "__main__":
-    Generator()
+    window = QApplication(sys.argv)
+    app = MainWindow()
+    app.show()
+    sys.exit(window.exec())
