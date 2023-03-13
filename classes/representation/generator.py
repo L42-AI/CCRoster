@@ -49,7 +49,7 @@ class Generator:
 
     """ METHODS """
 
-    def __downloading_availabilities(self, shift: tuple[datetime, datetime, int]):
+    def __downloading_availabilities(self, shift: tuple[datetime.datetime, datetime.datetime, int]):
         """"
         this method is only used to develop the generator, later, the info will actually be downlaoded
         for now it just returns a hardcoded list with availability
