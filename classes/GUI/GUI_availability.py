@@ -195,7 +195,7 @@ class Availability(QWidget):
 
         # Clear
         for scheduling_date in self.schedule_dict:
-            day_layout = self.schedule_dict[scheduling_date]
+            day_layout = self.schedule_dict[scheduling_date].layout()
             self.clear_layout(day_layout, skip=1)
 
         # Fill

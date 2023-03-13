@@ -7,13 +7,13 @@ class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict, wage: float, level, task, location) -> None:
         self.fname = fname
         self.lname = lname
-        self.name= fname + " " + lname
+        self.name = fname + " " + lname
         self.id = None
         self.availability = av
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
-        self.tasks = [task]
+        self.tasks = task
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
 

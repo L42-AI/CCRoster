@@ -134,7 +134,7 @@ class Controller:
         id = employee.id
         week = availability_slot[0]
         day = availability_slot[1]
-        shift =availability_slot[2]
+        shift = availability_slot[2]
 
         # add or remove employee both locally and in the database
         if add:
@@ -157,7 +157,7 @@ class Controller:
                 self.queue.put(("DELETE FROM Employee WHERE id=%s", (id,)))
                 break
 
-    def update_employee_availability_local(self, new_av):
+    def update_employee_availability_local(self, new_av: list[tuple]):
         ''''
         updates the availability of the LOCAL employee instance that the GUI uses
         '''
@@ -207,8 +207,8 @@ class Controller:
         '''
 
         # deamon condition to indicate it should close when main thread closes too
-        t = threading.Thread(target=self.communicate_server, daemon=True)
-        t.start()
+        tread = threading.Thread(target=self.communicate_server, daemon=True)
+        tread.start()
         if self.close:
             self.cursor.close()
             self.db.close()
@@ -260,9 +260,9 @@ class Controller:
         """ TO BE CONNECTED TO SETTINGS PAGE """
         self.tasks_dict = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
 
-    def update_levels_enum(self) -> Enum:
+    def update_levels_enum(self) -> None:
         self.Levels = Enum("Level", {key: value for key, value in self.levels_dict.items()})
 
-    def update_tasks_enum(self) -> Enum:
+    def update_tasks_enum(self) -> None:
         self.Tasks = Enum("Task", {key: value for key, value in self.tasks_dict.items()})
 
