@@ -12,40 +12,46 @@ from classes.GUI.GUI_availability import Availability
 from classes.GUI.GUI_team import EmployeeMatch
 from classes.GUI.GUI_weight import Weight
 from classes.GUI.GUI_settings import Settings
-
+from classes.representation.controller import LOCK, Controller
 from classes.representation.controller import Controller
+from logos.images import *
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, generator):
         super().__init__()
-        self.setWindowTitle("Consilium")
+        self.setWindowTitle("Shifter")
         self.setGeometry(100, 100, 875, 625)
 
-        self.Com = Controller(1)
+        self.location = 1
+        self.Com = Controller(generator, self.location)
 
-        self.shifts_button = NavigationOptions()
+        self.shifts_button = NavigationOptions(SCHEDULELOGO)
         self.shifts_button.clicked.connect(self.change_page)
         self.shifts_button.index = 1
 
-        self.employee_button = NavigationOptions()
+        self.employee_button = NavigationOptions(EMPLOYEESLOGO)
         self.employee_button.clicked.connect(self.change_page)
         self.employee_button.index = 2
 
-        self.availability_button = NavigationOptions()
+        self.availability_button = NavigationOptions(CHOOSELOGO)
         self.availability_button.clicked.connect(self.change_page)
         self.availability_button.index = 3
 
-        self.team_button = NavigationOptions()
+        self.team_button = NavigationOptions(RELATIONLOGO)
         self.team_button.clicked.connect(self.change_page)
         self.team_button.index = 4
 
-        self.weight_button = NavigationOptions()
+        self.weight_button = NavigationOptions(MONEYLOGO)
         self.weight_button.clicked.connect(self.change_page)
         self.weight_button.index = 5
 
-        self.settings_button = NavigationOptions()
+        self.settings_button = NavigationOptions(SETTINGSLOGO)
         self.settings_button.clicked.connect(self.change_page)
         self.settings_button.index = 6
+
+        self.confirm_button = NavigationOptions(VINKJELOGO)
+        self.confirm_button.clicked.connect(self.generate)
+        self.confirm_button.index = 7
 
 
         self.navigation_bar = QVBoxLayout()
@@ -58,6 +64,7 @@ class MainWindow(QMainWindow):
         self.navigation_bar.addWidget(self.team_button)
         self.navigation_bar.addWidget(self.weight_button)
         self.navigation_bar.addWidget(self.settings_button)
+        self.navigation_bar.addWidget(self.confirm_button)
 
         self.welcome_widget = Welcome()
         self.shift_widget = Shifts(self.Com)
@@ -89,6 +96,10 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(main_widget)
 
+    def generate(self):
+        self.Com.generate()
+        sys.exit(window.exec())
+
     def change_page(self) -> None:
         index = self.sender().index
         self.pages.setCurrentWidget(self.pages.widget(index))
@@ -101,6 +112,7 @@ class MainWindow(QMainWindow):
         """
         pass
     def aboutToQuit(self):
+        print('close me pls')
         Controller.close = True
 
 if __name__ == "__main__":

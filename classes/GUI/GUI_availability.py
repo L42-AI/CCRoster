@@ -1,7 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLabel, QLineEdit, QPushButton, QWidget,
-                               QComboBox, QCheckBox, QSizePolicy, QStackedWidget)
+                               QComboBox, QCheckBox, QSizePolicy, QStackedWidget,
+                               QLayout)
 
 
 from classes.representation.controller import Controller
@@ -18,7 +19,7 @@ class Availability(QWidget):
 
 
         self.tasktypes = {'Allround': 1}
-        self.timeslots = ["7:00-12:00", "12:00-18:00"]
+        self.timeslots = []
         self.selected_employee: Employee = None
         self.amount_of_weeks = 4
 
@@ -55,13 +56,10 @@ class Availability(QWidget):
     """ Init """
 
     def init_timeslot_dict(self) -> dict:
-        self.timeslots_dict = {}
+        self.timeslots_dict = {task: [] for task in self.tasktypes.values()}
         shift_list: list[Shift] = self.Controller.get_shift_list()
 
         for shift in shift_list:
-
-            if shift.task not in self.timeslots_dict:
-                self.timeslots_dict[shift.task] = []
 
             self.timeslots_dict[shift.task].append(shift)
 
@@ -69,19 +67,29 @@ class Availability(QWidget):
         self.task_combobox = QComboBox()
         self.task_combobox.setFixedWidth(150)
         self.task_combobox.activated.connect(self.update_shift_display)
-        for task in self.tasktypes.keys():
-            self.task_combobox.addItem(task)
+        self.task_combobox = self.fill_tasktype_combobox(self.task_combobox)
 
         self.timeslots_layout = QVBoxLayout()
-        for timeslot in self.timeslots:
-            timeslot_label = QLabel(timeslot)
-            self.timeslots_layout.addWidget(timeslot_label)
+        self.timeslots_layout = self.fill_timeslot_display_layout(self.timeslots_layout)
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Shifts"))
         layout.addWidget(self.task_combobox)
         layout.addLayout(self.timeslots_layout)
 
+        return layout
+
+    def fill_tasktype_combobox(self, combobox: QComboBox) -> QComboBox:
+        combobox.addItems(self.tasktypes.keys())
+        return combobox
+
+    def fill_timeslot_display_layout(self, layout: QVBoxLayout) -> QVBoxLayout:
+        existant = set()
+        for shift in self.timeslots:
+            if tuple((shift.start_time, shift.end_time)) not in existant:
+                existant.add(tuple((shift.start_time, shift.end_time)))
+                timeslot_label = QLabel(self.display_time(shift.start_time) + ' - ' + self.display_time(shift.end_time))
+                layout.addWidget(timeslot_label)
         return layout
 
     def init_mid_layout(self) -> QVBoxLayout:
@@ -324,6 +332,27 @@ class Availability(QWidget):
 
     def update_shift_display(self):
         selected_task = self.task_combobox.currentText()
+        self.init_timeslot_dict()
+        self.timeslots = self.set_timeslot_list(selected_task)
+
+        self.clear_layout(self.timeslots_layout)
+        self.timeslots_layout = self.fill_timeslot_display_layout(self.timeslots_layout)
+
+
+    def set_timeslot_list(self, selected_task: str) -> list[Shift]:
         tasknum = self.tasktypes[selected_task]
-        self.timeslots = self.timeslots_dict[tasknum]
-        print(self.timeslots)
+        return self.timeslots_dict[tasknum]
+
+    def clear_layout(self, layout: QLayout) -> None:
+        # Remove and delete all the widgets in the layout
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+    def clear_schedule_shifts(self, layout: QStackedWidget) -> None:
+        pass
+
+    def display_time(self, time: str) -> str:
+        return f'{time[:2]}:{time[2:]}'
