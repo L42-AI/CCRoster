@@ -4,9 +4,8 @@ import time
 from enum import Enum
 from datetime import date, timedelta
 
-from classes.representation.generator import Generator
 from classes.representation.employee import Employee
-from classes.representation.shift import ShiftData
+from classes.representation.dataclasses import Shift, Availability
 
 from data.assign import employee_list, shift_list
 from data.queries import db_cursor, downloading_availability, downloading_shifts, downloading_employees
@@ -20,7 +19,7 @@ class Controller:
         self.location = location
 
         self.employee_list: list[Employee] = employee_list
-        self.shift_list: list[ShiftData] = shift_list
+        self.shift_list: list[Shift] = shift_list
         self.name_to_id = {}
 
         # Set tasks and levels
@@ -104,7 +103,6 @@ class Controller:
     def generate(self):
         self.generator.improve()
 
-
     def create_employee(self, lname: str, fname: str, hourly_wage: int, level: int, tasks: int):
         for task in tasks:
             employee = Employee(
@@ -173,7 +171,7 @@ class Controller:
         start_time, end_time = self.get_start_and_finish_time(time)
 
         self.shift_list.append(
-            ShiftData(
+            Shift(
             start = start_time,
             end = end_time,
             day = day,
@@ -187,7 +185,7 @@ class Controller:
         self.queue.put(("INSERT INTO Shifts (location, week, day, start, end, task) VALUES (%s, %s, %s, %s, %s, %s)", (self.location, week, day, start_time, end_time, task)))
 
     def delete_shift(self, time: str) -> None:
-        self.to_delete: list[ShiftData] = []
+        self.to_delete: list[Shift] = []
         start_time, end_time = self.get_start_and_finish_time(time)
 
         for shift_instance in self.shift_list:

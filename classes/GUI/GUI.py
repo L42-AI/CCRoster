@@ -16,13 +16,16 @@ from classes.representation.controller import LOCK, Controller
 from logos.images import *
 
 class MainWindow(QMainWindow):
-    def __init__(self, generator):
+    def __init__(self):
         super().__init__()
-        self.setWindowTitle("Shifter")
-        self.setGeometry(100, 100, 875, 625)
 
         self.location = 1
         self.Controller = Controller(self.location)
+
+    def initUI(self) -> None:
+
+        self.setWindowTitle("Shifter")
+        self.setGeometry(100, 100, 875, 625)
 
         self.shifts_button = NavigationOptions(SCHEDULELOGO)
         self.shifts_button.clicked.connect(self.change_page)

@@ -1,5 +1,4 @@
 from data.assign import employee_list
-from classes.representation.GUI_output import DAILY_SHIFTS
 from data.queries import *
 
 class MalusCalculator:

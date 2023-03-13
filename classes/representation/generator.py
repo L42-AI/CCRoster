@@ -1,9 +1,9 @@
-from datetime import *
+from datetime import datetime
 import numpy as np
 import random
 
 from classes.representation.maluscalc import MalusCalculator
-from data.assign import *
+from data.assign import employee_list, shift_list
 class Generator:
     def __init__(self) -> None:
         self.shifts: list[tuple] = shift_list # shift list from assign with shift instances
@@ -49,7 +49,7 @@ class Generator:
 
     """ METHODS """
 
-    def __downloading_availabilities(self, shift: tuple[datetime.datetime, datetime.datetime, int]):
+    def __downloading_availabilities(self, shift: tuple[datetime, datetime, int]):
         """"
         this method is only used to develop the generator, later, the info will actually be downlaoded
         for now it just returns a hardcoded list with availability

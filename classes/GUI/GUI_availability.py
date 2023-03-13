@@ -5,12 +5,11 @@ from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout,
                                QLayout)
 
 import copy
-from datetime import date, time, timedelta
+from datetime import timedelta
 
 from classes.representation.controller import Controller
 from classes.representation.employee import Employee
-from classes.representation.shift import Shift
-from classes.representation.shift import ShiftData
+from classes.representation.dataclasses import Shift
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -219,7 +218,7 @@ class Availability(QWidget):
         self.shift_dict = {task: [] for task in self.tasks.values()}
 
         # Get shifts from the controller
-        shift_list: list[ShiftData] = self.Controller.get_shift_list()
+        shift_list: list[Shift] = self.Controller.get_shift_list()
 
         # Fill shift dict
         [self.shift_dict[shift.task].append(shift) for shift in shift_list]
@@ -283,7 +282,7 @@ class Availability(QWidget):
         self.schedule_widget
         pass
 
-    def set_shift_list(self, selected_task: str) -> list[ShiftData]:
+    def set_shift_list(self, selected_task: str) -> list[Shift]:
         tasknum = self.tasks[selected_task]
         return self.shift_dict[tasknum]
 

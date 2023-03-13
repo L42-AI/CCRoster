@@ -1,7 +1,7 @@
 import random
 from data.queries import db_cursor
 
-from classes.representation.availabilty import Availability
+from classes.representation.dataclasses import Availability
 
 class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict, wage: float, level, task, location) -> None:
