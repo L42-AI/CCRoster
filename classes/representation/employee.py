@@ -1,6 +1,6 @@
 import random
-from datetime import date, time
-from classes.representation.availability import Availability
+from datetime import datetime
+from classes.representation.dataclasses import Availability
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:

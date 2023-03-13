@@ -2,22 +2,23 @@ import datetime
 import numpy as np
 import random
 
-from classes.representation.maluscalc import MalusCalculator
-from data.assign import *
+
+from classes.representation.employee import Employee
+from data.assign import employee_list, shift_list
 
 OFFLINE = True
 class Generator:
     def __init__(self) -> None:
         self.shifts: list[tuple] = shift_list # shift list from assign with shift instances
-        self.avalabilities: list[list] = self.init_availability()
-        self.workload: dict = self.init_workload()
-        self.schedule: list[tuple[int, int]] = self.init_schedule()
+        self.avalabilities = self.init_availability()
+        self.workload = self.init_workload()
+        self.schedule = self.init_schedule()
         self.id_employee = self.init_id_to_employee()
         self.improve()
 
     """ INIT """
 
-    def init_availability(self) -> list[list]:
+    def init_availability(self) -> list[list[int]]:
         """
         Initiate the availability list
         """
@@ -63,7 +64,7 @@ class Generator:
         else:
 
             # when not offline, employees get their key as id
-            for employee in enumerate(employee_list):
+            for index, employee in enumerate(employee_list):
                 id_employee[employee.get_id()] = employee
 
         return id_employee
