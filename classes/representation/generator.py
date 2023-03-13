@@ -2,18 +2,16 @@ import datetime
 import numpy as np
 import random
 
-
-from classes.representation.employee import Employee
-from data.assign import employee_list, shift_list
+from data.assign import *
 
 OFFLINE = True
 class Generator:
     def __init__(self) -> None:
         self.shifts: list[tuple] = shift_list # shift list from assign with shift instances
-        self.avalabilities = self.init_availability()
-        self.workload = self.init_workload()
-        self.schedule = self.init_schedule()
-        self.id_employee = self.init_id_to_employee()
+        self.avalabilities: list[list] = self.init_availability()
+        self.workload: dict = self.init_workload()
+        self.schedule: list[tuple[ShiftData, Employee.id]] = self.init_schedule()
+        self.id_employee: dict[Employee.id:Employee] = self.init_id_to_employee()
         self.improve()
 
     """ INIT """
@@ -126,7 +124,7 @@ class Generator:
             if self.__workload(possible_employee, shift_to_replace.start):
 
                 # add shift to workload dictionary
-                self.schedule[index] = (possible_employee, cost)
+                self.schedule[index] = (shift_to_replace, possible_employee)
     """ Helper methods """
 
     def __random_shift(self) -> tuple[tuple[int, int], int]:
