@@ -1,108 +1,81 @@
-from datetime import date, timedelta
+from datetime import *
 import numpy as np
 import random
 
 from classes.representation.maluscalc import MalusCalculator
-from classes.algorithms.switch import Switch
-from classes.representation.GUI_output import SCHEDULE_DAYS, DAILY_SHIFTS, EMPLOYEE_PER_SHIFT
-from data.queries import *
-
+from data.assign import *
 class Generator:
     def __init__(self) -> None:
-        self.db, self.cursor = db_cursor()
-        self.available_employees = [] # list with all employees that can work the shift with the same index in schedule
-        self.schedule = [] # array with shifts that need to be filled
-        self.location = None
-        self.availability =  0
-        # self.improve()
+        self.shifts: list[tuple] = self.init_shifts()
+        self.avalabilities: list[list] = self.init_availability()
+        self.work_load: dict = self.init_work_load()
+        self.schedule: list[tuple[int, int]] = self.init_schedule()
+        self.improve()
+
 
     """ INIT """
 
-    def init_schedule(self) -> object:
+    def init_shifts(self) -> list[tuple]:
         """
-        Initiate the schedule
+        Initiate the shifts
         """
 
-        # get list of tuples of shifts needed
-        shifts_needed = downloading_shifts(self.db, self.cursor, self.location)
-        columns = len(shifts_needed[1]) + 1 # from shifts needed we do not need start and end but we add 3 new
-        schedule = np.zeros((len(shifts_needed), columns))
+        # create the list with shift info per shift needed in a schedule
+        shifts: list[tuple] = [(x.start, x.end, x.task) for x in shift_list]
 
-        # transfer to np.array
-        days = set()
-        shift = 0
-        for _, row in enumerate(shifts_needed):
-            # set the day
-            week = row[0]
-            day = row[1]
+        return shifts
 
-            # count what shift it is
-            if (week, day) not in days:
-                shift = 0
-                days.add((week, day))
-            else:
-                shift += 1
-            task = row[4]
+    def init_availability(self) -> list[list]:
+        """
+        Initiate the availability list
+        """
 
-            # add info to schedule
-            ## week, day, shift, task, employee_id, index
-            schedule[_] = (week, day, shift, task, 0, int(_))
+        availabilities: list[list[int]] = []
 
-            # collect all employees that can work this shift
-            self.available_employees.append(employee_per_shift(self.db, self.cursor, schedule[_]))
+        # go over each shift and download the employees that can work that shift
+        for shift in self.shifts:
+            available_employees = self.__downloading_availabilities(shift)
+            availabilities.append(available_employees)
 
+        return availabilities
+
+    def init_work_load(self) -> dict:
+        work_load = {}
+        for employee in employee_list:
+
+            # each employee will have a list with shift objects that correspond to the shifts he is scheduled for
+            work_load[employee.get_id()] = []
+
+        return work_load
+
+    def init_schedule(self) -> list[tuple[int, int]]:
+        schedule: list[tuple[int, int]] = []
+
+        for index in range(len(self.shifts)):
+
+            # for the initialisation, place employee number 0 with wage 999
+            schedule.append((0, 999))
         return schedule
-
-    """ GET """
-
-    def get_date(self) -> object:
-        """
-        Find the current date
-        """
-        return date.today()
-
-    def get_day(self, date) -> str:
-        """
-        Find the day of a certain date
-        """
-        return date.strftime("%A")
-
-    def get_start_day(self) -> object:
-        """
-        Find date of start of schedule as the first Monday of the current month
-        """
-        return self.get_schedule_boundary(start=True)
-
-    def get_end_day(self) -> object:
-        """
-        Find date of end of schedule as the first Monday of the next month
-        """
-        return self.get_schedule_boundary(start=False)
-
-    def get_schedule_boundary(self, start):
-        """
-        Find date of start or end of schedule
-        """
-
-        # Set todays date
-        today = date.today()
-
-        if start:
-            # Set date of the first day of the month
-            interest_date = date(today.year, today.month, 1)
-        else:
-            # Set date of the first day of the next month
-            next_month_date = today.replace(day=28) + timedelta(days=4)
-            interest_date = date(next_month_date.year, next_month_date.month, 1)
-
-        # Find closest Monday and set output date
-        days_to_monday = (7 - interest_date.weekday()) % 7
-        interest_date = interest_date + timedelta(days=days_to_monday)
-        return interest_date
-
 
     """ METHODS """
 
+    def __downloading_availabilities(self, shift: tuple[datetime, datetime, int]):
+        """"
+        this method is only used to develop the generator, later, the info will actually be downlaoded
+        for now it just returns a hardcoded list with availability
+        """
+        downloaded_availabilities = []
+        for index, employee in enumerate(employee_list):
+
+            # employee.availability is a list with tuples corresponding with datetimes they can work
+            for available_shift in employee.availability:
+
+                if (*available_shift, employee.get_tasks()) == shift:
+
+                    # for now, use index as employee id since downloading the key from the server obviously does not work
+                    downloaded_availabilities.append((index + 1, employee.get_wage()))
+
+        return downloaded_availabilities
 
     def improve(self) -> None:
         for i in range(500):
@@ -118,24 +91,55 @@ class Generator:
         '''
 
         # pick a shift to replace
-        shift_to_replace = random.choice(self.schedule)
+        shift_to_replace, index = self.__random_shift()
 
-        # calculate the cost and find what employee previously had that shift
-        MC = MalusCalculator(self.schedule, self.db, self.cursor)
-        old_cost = MC.get_wage_costs_per_week(self.schedule)
-        old_employee = shift_to_replace[4]
+        # pick an employee that can work that shift
+        possible_employee = self.__random_employee(index)
 
-        # get index of the choice so we can find what employees can work
-        index = int(shift_to_replace[5])
+        # get the duration of the shift
+        minutes = self.__duration_in_minutes(shift_to_replace[0], shift_to_replace[1])
+        # print(possible_employee)
 
-        # use available_employees dict to pick from list with employees that can work that shift
-        employee_for_shift = random.choice(self.available_employees[index])
-        employee, wage = employee_for_shift
+        # # calculate the cost and find what employee previously had that shift
+        # MC = MalusCalculator(self.schedule, self.db, self.cursor)
+        # old_cost = MC.get_wage_costs_per_week(self.schedule)
+        # old_employee = shift_to_replace[4]
 
-        # replace employee with new employee
-        self.schedule[index][4] = employee
-        new_cost = MC.get_wage_costs_per_week(self.schedule)
+        # # get index of the choice so we can find what employees can work
+        # index = int(shift_to_replace[5])
 
-        # check if improvement worked, if not, place old employee back
-        if new_cost['schedule'] > old_cost['schedule']:
-            self.schedule[index][4] = old_employee
+        # # use available_employees dict to pick from list with employees that can work that shift
+        # employee_for_shift = random.choice(self.available_employees[index])
+        # employee, wage = employee_for_shift
+
+        # # replace employee with new employee
+        # self.schedule[index][4] = employee
+        # new_cost = MC.get_wage_costs_per_week(self.schedule)
+
+        # # check if improvement worked, if not, place old employee back
+        # if new_cost['schedule'] > old_cost['schedule']:
+        #     self.schedule[index][4] = old_employee
+
+    def __random_shift(self) -> tuple[tuple[int, int], int]:
+        """
+        returns a tuple with inside (1) a tuple containing shift info and (2) an index
+        """
+        # print(self.shifts[0])
+        index = random.randint(0, len(self.shifts) - 1)
+        # print(index)
+        shift = self.shifts[index]
+        return shift, index
+
+    def __random_employee(self, index) -> tuple[int, int]:
+        """
+        returns a tuple with integers corresponding to an employee's id and wage
+        """
+        id_wage = random.choice(self.avalabilities[index])
+        return id_wage
+
+    def __duration_in_minutes(self, start, end) -> int:
+
+        difference_in_minutes = (end - start).total_seconds() // 60  # difference in minutes
+
+        print(difference_in_minutes)
+        raise

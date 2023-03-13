@@ -1,5 +1,5 @@
 import random
-from data.queries import db_cursor
+from datetime import date, time
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
@@ -7,15 +7,13 @@ class Employee:
         self.lname = lname
         self.name= fname + " " + lname
         self.id = None
-        self.availability = av
+        self.availability: list[list[date, time, time, int]] = av
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
-        self.tasks = task
+        self.tasks = 1 if task=='everything' else 0
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
-
-        self.db, self.cursor = db_cursor()
 
         # self.upload_employee()
         # self.upload_availability()
@@ -105,4 +103,7 @@ class Employee:
 
     def get_week_max(self, week) -> int:
         return self.weekly_max.get(week)
+
+    def get_id(self) -> int:
+        return self.id
 
