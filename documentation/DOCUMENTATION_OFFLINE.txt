@@ -6,26 +6,31 @@ passen we dan waar nodig is sql en gui aan
 
 in assign.py worden employees toegevoegd aan employee_list. de availability kwarg is een tuple met 
 daarin een datetime voor de start en datetime voor het einde vd beschikbaarheid op die dag. In de init
-van employee wordt deze tuple gebruikt om de self.availability te vullen met objecten vd Availability class
+van employee wordt deze tuple gebruikt om de self.availability te vullen met objecten vd Availability class.
 de dictionary met weekly_max is nu even omgeschreven waardoor het niet week0 gebruikt maar week 14 tm 17, want dit zijn
 de kalenderweken vd dummy data die we gebruiken en zoals we hadden bedacht is het voor later handig als we echte data gebruiken ipv dag 0 week 0
 
 
-generator.py begint met het initialiseren van self.shifts, een lijst met shift objecten. Daarna self.availabilities, een lijst met daarin lijsten gevuld met tuples (id, wage).
-het aanmaken van deze lijst gebeurt oa door __downloading_availabilities aan te roepen. Kan je vergeten maar wil je weten waarom: dit is zodat de methode werkt met input die hetzelfde format 
-heeft als de return statement van een sql query. Nu heb ik dus met een beetje een omweg de availability gehardcoded, maar hierdoor hoeven we later minder te herschrijven en het is relatief simpel
-Iig, dat is self.availabilities. Self.workload is een dictionary die bij gaat houden tijdens het verbeteren van het rooster hoeveel shifts een werknemer in elke week heeft op dat moment.
-Vandaar dat de weekly max is omgeschreven naar kalenderweken. Die worden hier als key gebruikt omdat het heel makkelijk is om die op te vragen van een datetime. Alternatief was om uit te reken 
-hoeveel weken er in de planning periode zaten en dan elke datum te koppelen aan de hoeveelste week (4 maart wordt week 0, 11 maart week 1) maar dit leek mij een beetje omslachtig. De dictionary 
-heeft dus als key een employee.id, met als value een dictionary met als key kalenderweek en value shift objecten (aantal wordt dus zoals jij zei berekent met len())
+generator.py begint met het initialiseren van self.shifts, een lijst met shift objecten. Daarna self.availabilities, een lijst met daarin lijsten
+gevuld met tuples (id, wage) die staan voor werknemers die de desbetreffende shift kunnen werken. het aanmaken van deze lijst gebeurt oa door 
+__downloading_availabilities aan te roepen. Kan je vergeten maar wil je weten waarom: dit is zodat de methode werkt met input die hetzelfde format 
+heeft als de return statement van een sql query. Nu heb ik dus met een beetje een omweg de availability gehardcoded, maar hierdoor hoeven we later 
+minder te herschrijven en het is relatief simpel. Iig, dat is self.availabilities. 
+
+Self.workload is een dictionary die bij gaat houden tijdens het verbeteren van het rooster hoeveel shifts een werknemer in elke week heeft op dat moment.
+Vandaar dat de weekly max is omgeschreven naar kalenderweken. Die worden hier als key gebruikt omdat het heel makkelijk is om die op te vragen van een datetime.
+Alternatief was om uit te reken hoeveel weken er in de planning periode zaten en dan elke datum te koppelen aan de hoeveelste week (4 maart wordt week 0, 11 maart week 1)
+maar dit leek mij een beetje omslachtig. De dictionary heeft dus als key een employee.id, met als value een dictionary met als key kalenderweek en value
+shift objecten (aantal wordt dus zoals jij zei berekent met len())
 
 self.schedule is een lijst waar tuples met shift objecten en employee.id. Deze wordt standaard gevult met voor elke shift de tuple(888, 999). Aangezien in 
-de data die wij gebruiken niemand meer dan 999 zal verdienen in een shift, wordt deze eruit gefilterd. Later kunnen we dit ofc veranderen naar math.inf als we grootverdieners gaan inroosteren
-self.id_employee is een dict waar het Employee object kan worden opgehaald met zijn/haar id
+de data die wij gebruiken niemand meer dan 999 zal verdienen in een shift, wordt deze eruit gefilterd. Later kunnen we dit ofc veranderen naar math.inf 
+als we grootverdieners gaan inroosteren. Self.id_employee is een dict waar het Employee object kan worden opgehaald met zijn/haar id
 
 improve roept mutate een x aantal keer aan
 mutate kiest een random shift om te vervangen. shift_to_replace is shift object. Via self.availabilities kan hierna een 
 employee worden gekozen. possible_employee is daarom de id van employees en niet het hele object. Vervolgens wordt het aantal minuten van een shift berekend
-zodat het loon kan worden berekend (minuten ipv uren omdat je time(9, 30) matig werkte met rekenen om half 10 aan te duiden). Daarna wordt de cost vergeleken met de huidige cost. 
-als deze lager is wordt de check gedaan of de werkdruk van een werknemer niet wordt overschreven dmv __workload. In __workload wordt ook automatisch de self.workload geupdated
-wanneer iemand daadwerkelijk de shift krijgt. Als alle checks goed zijn wordt op de juiste plek in schedule de shift die gewerkt gaat worden met de corresponderende werknemer gezet in de vorm van een tuple
+zodat het loon kan worden berekend (minuten ipv uren omdat je time(9, 30) matig werkte met rekenen om half 10 aan te duiden). Daarna wordt de cost 
+vergeleken met de huidige cost. Als deze lager is wordt de check gedaan of de werkdruk van een werknemer niet wordt overschreven dmv __workload.
+In __workload wordt ook automatisch de self.workload geupdated wanneer iemand daadwerkelijk de shift krijgt. Als alle checks goed zijn wordt op 
+de juiste plek in schedule de shift die gewerkt gaat worden met de corresponderende werknemer gezet in de vorm van een tuple
