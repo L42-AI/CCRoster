@@ -33,12 +33,15 @@ class Generator:
         for employee in employee_list:
 
             for availability in employee.availability:
+
+                # Check for start and end of availability
                 if shift.start > availability.start:
                     continue
                 elif shift.end < availability.end:
                     continue
                 else:
                     available_employees.append(employee)
+
         return available_employees
 
 
