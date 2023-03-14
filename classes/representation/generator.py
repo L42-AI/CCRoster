@@ -7,7 +7,7 @@ from classes.representation.employee import Employee
 
 from data.assign import employee_list, shift_list
 
-OFFLINE = True
+OFFLINE = True # employee.id is downloaded form server, so when offline, use index of employee object in employeelist as id
 class Generator:
     def __init__(self) -> None:
         self.shifts = shift_list # shift list from assign with shift instances
