@@ -63,7 +63,7 @@ class Generator:
 
         return availabilities
 
-    def init_workload_dict(self) -> dict[Employee.id: Shift]:
+    def init_workload_dict(self) -> dict[int: Shift]:
         workload = {}
         for index, employee in enumerate(self.employee_list):
 
