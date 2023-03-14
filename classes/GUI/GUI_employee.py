@@ -107,6 +107,9 @@ class AddEmployee(QWidget):
         [self.employee_level_input.addItem(level.name) for level in self.Levels]
 
     def update_task_layout(self) -> None:
+
+        """ ADD CLEAR LAYOUT LINE """
+
         [self.employee_task_layout.addWidget(QCheckBox(task.name)) for task in self.Tasks]
 
     def update_levels(self) -> None:
@@ -118,6 +121,9 @@ class AddEmployee(QWidget):
         self.Tasks = self.Controller.get_Tasks_enum()
 
     def update_employees_display(self):
+
+        self.employee_list.clear()
+
         employees = self.Controller.employees_input()
         self.employee_list.addItems(employees)
 
@@ -180,7 +186,7 @@ class AddEmployee(QWidget):
             if task_checkbox.isChecked():
                 task_checkbox.setChecked(False)
 
-    def __get_list_item_info(self, item: QListWidgetItem) -> tuple:
+    def __get_list_item_info(self, item: QListWidgetItem) -> tuple[str,str,str,str,str]:
         """ Retrieve the info of the selected list item """
         # Extract text of selected item
         selected_str = item.text()
@@ -192,7 +198,7 @@ class AddEmployee(QWidget):
 
         return first_name, last_name, wage, level, tasks
 
-    def __get_input_fields(self) -> tuple:
+    def __get_input_fields(self) -> tuple[str,str,str,str,list[str]]:
         """ Get input fields """
         # Get start and end time inputs
         first_name = self.employee_first_name_input.text()
