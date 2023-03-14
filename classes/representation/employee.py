@@ -26,8 +26,8 @@ class Employee:
         Initiates the availability list of an employee with data objects"""
         availability = []
         for entry in av:
-            start_datetime = entry[0]
-            end_datetime = entry[1]
+            start_datetime = entry.start
+            end_datetime = entry.end
             availability.append(Availability(start=start_datetime, end=end_datetime))
         return availability
 
