@@ -9,7 +9,7 @@ from datetime import timedelta
 
 from classes.representation.controller import Controller
 from classes.representation.employee import Employee
-from classes.representation.dataclasses import Shift
+from classes.representation.dataclasses import Shift, Availability
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -21,22 +21,17 @@ class Availability(QWidget):
 
         self.start_date = self.Controller.get_start_date()
         self.end_date = self.Controller.get_end_date()
-
-        self.update_tasks()
-        self.update_shift_dict()
-        self.update_employee_dict()
-
-        self.selected_employee: Employee = None
         self.amount_of_weeks = int((self.end_date - self.start_date).days / 7)
 
+        self.Tasks = self.Controller.get_Tasks_enum()
+
+        self.selected_employee: Employee = None
+
         """ TEMPORARY """
-        self.shifts = self.set_shift_list('Allround')
-        self.employees = self.set_employee_list('Allround')
+        self.shifts = self.Controller.get_shift_list_from('Allround')
+        self.employees = self.Controller.get_employee_list_from('Allround')
 
         self.init_UI()
-
-        self.update_schedule_slots()
-
 
     """ Init """
 
@@ -81,6 +76,8 @@ class Availability(QWidget):
             week_widget.setLayout(week_layout)
 
             self.schedule_widget.addWidget(week_widget)
+
+        self.update_schedule_slots()
 
         """ Schedule layout """
 
@@ -214,43 +211,13 @@ class Availability(QWidget):
         """ FOR FUTURE CONNECTION WITH SETTINGS PAGE """
         self.tasks = {'Allround': 1, 'Begels': 2, 'Koffie': 3, 'Kassa': 4}
 
-    def update_shift_dict(self) -> None:
-        """ Update the dictionary containing all shifts """
-        # Set empty dict
-        self.shift_dict = {task: [] for task in self.tasks.values()}
-
-        # Get shifts from the controller
-        shift_list: list[Shift] = self.Controller.get_shift_list()
-
-        # Fill shift dict
-        [self.shift_dict[shift.task].append(shift) for shift in shift_list]
-
-    def update_employee_dict(self) -> None:
-        """ Update the dictionary containing all shifts """
-        # Set empty dict
-        self.employee_dict = {task: [] for task in self.tasks.values()}
-
-        # Get employees from the controller
-        employee_list: list[Employee] = self.Controller.get_employee_list()
-
-        # Fill employee dict
-        """ SLECHT GECODE, CLASSES KRIJGEN REFERENCES IN MUTABLE OBJECTS """
-        for employee in employee_list:
-            task_num = self.tasks[employee.tasks]
-            self.employee_dict[task_num].append(employee.name)
-
     def update_shift_display(self):
         """ Update the shifts displayed in the GUI """
 
-        # Update both dicts
-        self.update_employee_dict()
-        self.update_shift_dict()
-
-
         # Find the selected task and make lists of shifts and employees
         selected_task = self.task_combobox.currentText()
-        self.shifts = self.set_shift_list(selected_task)
-        self.employees = self.set_employee_list(selected_task)
+        self.shifts = self.Controller.get_shift_list_from(selected_task)
+        self.employees = self.Controller.get_employee_list_from(selected_task)
 
         self.update_timeslot_display_layout()
         self.update_employee_combobox()
@@ -258,7 +225,9 @@ class Availability(QWidget):
     def update_task_combobox(self) -> None:
         self.task_combobox.clear()
 
-        self.task_combobox.addItems(self.tasks.keys())
+        self.Tasks = self.Controller.get_Tasks_enum()
+
+        self.task_combobox.addItems(list(self.Tasks.__members__))
 
     def update_employee_combobox(self) -> None:
         self.employee_combo.clear()
@@ -287,14 +256,6 @@ class Availability(QWidget):
         self.shifts
         self.schedule_widget
         pass
-
-    def set_shift_list(self, selected_task: str) -> list[Shift]:
-        tasknum = self.tasks[selected_task]
-        return self.shift_dict[tasknum]
-
-    def set_employee_list(self, selected_task: str) -> list[Employee]:
-        tasknum = self.tasks[selected_task]
-        return self.employee_dict[tasknum]
 
     """ Get """
 
@@ -373,25 +334,22 @@ class Availability(QWidget):
         if self.selected_employee != None:
 
             # Find sending checkbox
-            checkbox = self.sender()
+            checkbox: QCheckBox = self.sender()
 
             # Extract info
-            week_num = checkbox.week
-            day = checkbox.day
-            timeslot_num = checkbox.timeslot
+            shift: Shift = checkbox.shift
 
-            # Create timeslot
-            timeslot = [week_num, day, timeslot_num]
+            availability = Availability(shift.start, shift.end)
 
             # append or remove timeslot from availability depending on checkbox state state
             if checkbox.isChecked():
-                if timeslot not in self.selected_employee.availability:
-                    self.selected_employee.availability.append(timeslot)
-                    self.Controller.edit_employee_availability(timeslot, add=True)
+                if availability not in self.selected_employee.availability:
+                    self.selected_employee.availability.append(availability)
+                    self.Controller.edit_employee_availability(availability, add=True)
             else:
-                if timeslot in self.selected_employee.availability:
-                    self.selected_employee.availability.remove(timeslot)
-                    self.Controller.edit_employee_availability(timeslot, add=False)
+                if availability in self.selected_employee.availability:
+                    self.selected_employee.availability.remove(availability)
+                    self.Controller.edit_employee_availability(availability, add=False)
 
     def clear_layout(self, layout: QLayout, skip=0) -> None:
         # Remove and delete all the widgets in the layout

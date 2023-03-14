@@ -8,7 +8,6 @@ from classes.representation.controller import Controller
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 class Shifts(QWidget):
-    update_signal = Signal()
     def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
@@ -149,7 +148,7 @@ class Shifts(QWidget):
         self.start_time_edit.clear()
         self.end_time_edit.clear()
 
-        self.update_signal.emit()
+        self.Controller.update_shift_dict()
 
     def edit_time_slot(self, item: QListWidgetItem) -> None:
 
@@ -191,7 +190,7 @@ class Shifts(QWidget):
             self.start_time_edit.clear()
             self.end_time_edit.clear()
 
-            self.update_signal.emit()
+            self.Controller.update_shift_dict()
 
     def delete_selected_time_slot(self) -> None:
         # Get selected time slot
@@ -213,7 +212,7 @@ class Shifts(QWidget):
             self.start_time_edit.clear()
             self.end_time_edit.clear()
 
-            self.update_signal.emit()
+            self.Controller.update_shift_dict()
 
     def all_weeks_checkbox_clicked(self) -> None:
         checkbox = self.sender()

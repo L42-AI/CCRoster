@@ -7,7 +7,6 @@ from classes.representation.controller import Controller
 
 
 class AddEmployee(QWidget):
-    update_signal = Signal()
     def __init__(self, Con, parent=None) -> None:
         super().__init__(parent)
 
@@ -133,7 +132,7 @@ class AddEmployee(QWidget):
         self.employee_list.addItem(str(fields))
         self.__clear_input_fields()
 
-        self.update_signal.emit()
+        self.Controller.update_employee_dict()
 
     def edit_employee(self, item: QListWidgetItem) -> None:
         fields = self.__get_list_item_info(item)
@@ -160,7 +159,7 @@ class AddEmployee(QWidget):
             self.employee_list.addItem(str(new_fields))
             self.__clear_input_fields()
 
-            self.update_signal.emit()
+            self.Controller.update_employee_dict()
 
     def delete_selected_employee(self) -> None:
         item = self.employee_list.currentItem()
@@ -173,7 +172,7 @@ class AddEmployee(QWidget):
             self.delete_employee_button.setEnabled(False)
             self.__clear_input_fields()
 
-            self.update_signal.emit()
+            self.Controller.update_employee_dict()
 
     def __clear_input_fields(self) -> None:
         """ Clear all input fields """

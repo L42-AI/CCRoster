@@ -18,10 +18,6 @@ class Controller:
         # self.generator = generator
         self.location = location
 
-        self.employee_list: list[Employee] = employee_list
-        self.shift_list: list[Shift] = shift_list
-        self.name_to_id = {}
-
         # Set tasks and levels
         """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
         self.update_levels()
@@ -31,6 +27,12 @@ class Controller:
         """ TEMPORARY UNTIL CONNECTED TO SETTINGS PAGE """
         self.update_levels_enum()
         self.update_tasks_enum()
+
+        self.employee_list: list[Employee] = employee_list
+        self.shift_list: list[Shift] = shift_list
+        self.update_employee_dict(self.employee_list)
+        self.update_shift_dict(self.shift_list)
+        self.name_to_id = {}
 
         self.db, self.cursor = db_cursor()
         self.availability = downloading_availability(self.db, self.cursor, location)
@@ -79,6 +81,14 @@ class Controller:
     def get_Tasks_enum(self) -> Enum:
         return self.Tasks
 
+    def get_shift_list_from(self, task: str) -> list[Shift]:
+        task_num: int = self.Tasks[task].value
+        return self.shift_dict[task_num]
+
+    def get_employee_list_from(self, task: str) -> list[Employee]:
+        task_num: int = self.Tasks[task].value
+        return self.employee_dict[task_num]
+
     """ Input methods for the GUI"""
 
     def shifts_input(self):
@@ -97,6 +107,21 @@ class Controller:
             fname, lname, hourly, level, task = employee
             employees[_] = f'NAAM:{fname} {lname} SALARIS: {hourly} LEVEL: {level} TAAK: {task}'
         return employees
+
+    """" Update """
+
+    def update_employee_dict(self, employee_list: list[Employee]) -> dict[int: list[Shift]]:
+        self.employee_dict = {task.value: [] for task in self.Tasks}
+
+        for employee in employee_list:
+            for task in employee.tasks:
+                task_num = self.Tasks[task].value
+                self.employee_dict[task_num].append(employee)
+
+    def update_shift_dict(self, shift_list: list[Shift]) -> dict[int: list[Shift]]:
+        self.shift_dict = {task.value: [] for task in self.Tasks}
+
+        [self.shift_dict[shift.task].append(shift) for shift in shift_list]
 
     """ Methods """
 
@@ -123,24 +148,25 @@ class Controller:
             # add employee in database
             self.queue.put(("INSERT INTO Employee (fname, lname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)", (lname, fname, hourly_wage, level, task, self.location)))
 
-    def edit_employee_availability(self, employee: Employee, availability_slot: list[int], add: bool):
+    def edit_employee_availability(self, employee: Employee, availability: Availability, add: bool):
         '''
         method that changes the availability from an employee both locally and online
         '''
 
         # collect info for queries
         id = employee.id
-        week = availability_slot[0]
-        day = availability_slot[1]
-        shift = availability_slot[2]
+        availability_start = availability.start
+        availability_end = availability.end
 
         # add or remove employee both locally and in the database
+        """ FIX NEEDED FOR SERVER INTERACTION """
+        """ AVAILABILITY NOT SLOT ANYMORE BUT OBJECT """
         if add:
-            employee.availability.append(availability_slot)
-            self.queue.put(("INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"), (id, week, day, shift, employee.weekly_max[week]))
+            employee.availability.append(availability)
+            # self.queue.put(("INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"), (id, week, day, shift, employee.weekly_max[week]))
         else:
-            employee.availability.remove(availability_slot)
-            self.queue.put(("DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "), (id, week, day, shift))
+            employee.availability.remove(availability)
+            # self.queue.put(("DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "), (id, week, day, shift))
 
     def delete_employee(self, fname, lname):
         '''

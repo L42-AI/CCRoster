@@ -22,9 +22,9 @@ class MainWindow(QMainWindow):
         self.location = 1
         self.Controller = Controller(self.location)
 
-        self.initUI()
+        self.init_UI()
 
-    def initUI(self) -> None:
+    def init_UI(self) -> None:
 
         self.setWindowTitle("Shifter")
         self.setGeometry(100, 100, 875, 625)
@@ -77,9 +77,6 @@ class MainWindow(QMainWindow):
         self.relation_widget = EmployeeMatch(self.Controller)
         self.weight_widget = Generate(self.Controller)
         self.settings_widget = Settings()
-
-        self.shift_widget.update_signal.connect(self.availability_widget.update_shift_dict)
-        self.employee_widget.update_signal.connect(self.availability_widget.update_employee_dict)
 
         self.pages = QStackedWidget()
         self.pages.addWidget(self.welcome_widget)
