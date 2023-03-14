@@ -32,17 +32,21 @@ class Generator:
 
         for employee in employee_list:
 
-            for availability in employee.availability:
-
-                # Check for start and end of availability
-                if shift.start > availability.start:
-                    continue
-                elif shift.end < availability.end:
-                    continue
-                else:
-                    available_employees.append(employee)
+            if self.__availability_between(employee, shift):
+                available_employees.append(employee)
 
         return available_employees
+
+    def __availability_between(self, employee: Employee, shift: Shift) -> bool:
+        for availability in employee.availability:
+
+            # Check for start and end of availability
+            if shift.start > availability.start:
+                return False
+            elif shift.end < availability.end:
+                return False
+            else:
+                return True
 
 
     def init_availabilities_list(self) -> list[list[int]]:
@@ -70,7 +74,7 @@ class Generator:
                 workload[employee.get_id()] = []
         return workload
 
-    def init_schedule(self) -> list[tuple[Shift, int]]:
+    def init_schedule_list(self) -> list[tuple[Shift, int]]:
         schedule: list[tuple[int, int]] = []
 
         for index in range(len(self.shift_list)):
@@ -81,7 +85,7 @@ class Generator:
             schedule.append((employee_id, wage))
         return schedule
 
-    def init_id_to_employee(self) -> dict[int: Employee]:
+    def init_id_to_employee_dict(self) -> dict[int: Employee]:
         """
         returns dictionary that stores employees with their id as key
         """
