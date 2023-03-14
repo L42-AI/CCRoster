@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QApplication, QVBoxLayout, QHBoxLayout, QLabel, Q
                                QGridLayout, QScrollArea, QDialog)
 from PySide6.QtCore import Qt, QRect, QPoint
 from PySide6.QtGui import QPen, QPainter, QPalette, QBrush
+from datetime import datetime, time
 import re
 import sys
 # from classes.representation.controller import Controller
@@ -33,7 +34,6 @@ import sys
 #         layout = QGridLayout(self)
 #         layout.addWidget(Sheet, 1,1,1,1)
 
-
 class ShiftSheet(QScrollArea):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -50,6 +50,9 @@ class ShiftSheet(QScrollArea):
         # Add the container widget to the scroll area
         self.setWidget(self.shift_grid_container)
 
+        for shift_widget in shift_list:
+            self.place_shift(shift_widget)
+
         # Set the background color and draw lines
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -58,18 +61,32 @@ class ShiftSheet(QScrollArea):
 
     """ Init """
 
+    def place_shift(self, Shift):
+        for cell_num in range(self.shift_grid.count()):
+            widget = self.shift_grid.itemAt(cell_num).widget()
+            if widget.time == Shift.start.time():
+                index = self.shift_grid.indexOf(widget)
+                row, col, _, colspan = self.shift_grid.getItemPosition(index)
+                print(row, col, _, colspan)
+                shift_duration_minutes = (Shift.end - Shift.start).total_seconds() / 60
+                rowspan = int(shift_duration_minutes / 15) + 1
+                self.shift_grid.addWidget(Shift, row , col, rowspan, colspan)
+
     def create_shift_grid(self) -> QGridLayout:
         grid = QGridLayout()
         grid.setSpacing(0)
+        grid.setContentsMargins(0,0,0,0)
 
         # Add labels to the grid
-        for row in range(5):
-            for col in range(96):
-                label = ClickableLabel(f"")
-                label.position = (row + 1) * (col + 1)
-                label.setAlignment(Qt.AlignCenter)
-                label.clicked.connect(self.add_blue_widget_to_cell)
-                grid.addWidget(label, row, col)
+        for col in range(5):
+            for row in range(96):
+                widget = ClickableWidget()
+                widget.position = (row + 1) * (col + 1)
+                hour = row // 4
+                minute = (row % 4) * 15
+                widget.time = time(hour, minute)
+                widget.clicked.connect(self.add_shift_widget)
+                grid.addWidget(widget, row, col)
 
         return grid
 
@@ -93,10 +110,10 @@ class ShiftSheet(QScrollArea):
                 x = grid.cellRect(row, col).x()
                 y = grid.cellRect(row, col).y()
 
-                painter.drawLine(x, y, x + width, y)
+                painter.drawLine(x, y, x, y + height)
 
-                if row == grid.rowCount() - 1:
-                    painter.drawLine(x, y + height, x + width, y + height)
+                if col == grid.columnCount() - 1:
+                    painter.drawLine(x + width, y, x + width, y + height)
 
     def dot_gray_lines(self, painter: QPainter, grid: QGridLayout)-> None:
         width = grid.cellRect(0, 0).width()
@@ -108,112 +125,92 @@ class ShiftSheet(QScrollArea):
                 x = grid.cellRect(row, col).x()
                 y = grid.cellRect(row, col).y()
 
-                if col == 0 or col % 12 == 0:
+                if row == 0 or row % 12 == 0:
                     painter.setPen(QPen(Qt.gray, 3, Qt.DotLine))
-                elif col % 4 == 0:
+                elif row % 4 == 0:
                     painter.setPen(QPen(Qt.gray, 2, Qt.DotLine))
                 else:
                     painter.setPen(QPen(Qt.gray, 1, Qt.DotLine))
 
-                painter.drawLine(x, y, x , y + height)
+                painter.drawLine(x, y, x + width, y)
 
-                if col == grid.columnCount() - 1:
+                if row == grid.rowCount() - 1:
                     painter.setPen(QPen(Qt.gray, 3, Qt.DotLine))
-                    painter.drawLine(x + width, y, x + width, y + height)
+                    painter.drawLine(x, y + height, x + width, y + height)
 
 
-    def add_blue_widget_to_cell(self):
+    def add_shift_widget(self):
         # Create blue widget
         label = self.sender()
-        blue_widget = OptionWidget(self)
-        print(blue_widget.pos())
-        blue_widget.setStyleSheet("background-color: magenta;")
+        Shift = ShiftWidget(self)
         index = self.shift_grid.indexOf(label)
-        row, col, rowspan, colspan = self.shift_grid.getItemPosition(index)
-        self.shift_grid.addWidget(blue_widget, row, col, rowspan, colspan)
+        row, col, _, colspan = self.shift_grid.getItemPosition(index)
+        shift_duration_minutes = (Shift.end - Shift.start).total_seconds() / 60
+        rowspan = int(shift_duration_minutes / 15)
+        self.shift_grid.addWidget(Shift, row + 1, col, rowspan, colspan)
 
-        # Make the blue widget draggable horizontally
-        blue_widget.setMouseTracking(True)
-        blue_widget.mousePressEvent = self.start_drag
-        # blue_widget.mouseMoveEvent = self.do_drag
-        # blue_widget.mouseReleaseEvent = self.end_drag
-
-    def start_drag(self, event):
-        # print(self)
-        print('EVENT POSITION')
-        print(event.pos())
-        self.dragged_widget = self.sender()
-        print(self.dragged_widget)
-        self.dragged_widget.mouse_pos = event.pos()
-        print(event)
-        self.dragged_widget.start_colspan = self.shift_grid.columnSpan(self.shift_grid.indexOf(self.dragged_widget))[1]
-
-    def do_drag(self, event):
-        if not hasattr(self, 'dragged_widget'):
-            return
-
-        widget = self.dragged_widget
-        delta = event.pos() - widget.mouse_pos
-
-        # Calculate the new geometry of the widget after drag
-        new_geometry = widget.geometry()
-        new_geometry.setLeft(new_geometry.left() + delta.x())
-        new_geometry.setRight(new_geometry.right() + delta.x())
-
-        # Find the columns that the widget is intersecting with
-        cell_width = self.shift_grid.cellRect(0, 0).width()
-        col_start = max(0, (new_geometry.left() // cell_width) - widget.start_col)
-        col_end = max(0, (new_geometry.right() // cell_width) - widget.start_col)
-
-        # Update the column span of the widget to span the intersecting columns
-        new_colspan = widget.start_colspan + col_end - col_start
-        self.shift_grid.addWidget(widget, self.shift_grid.row(widget), widget.start_col, 1, new_colspan)
-
-        # Update the geometry of the widget and its mouse position
-        new_geometry.setLeft(widget.start_col * cell_width)
-        new_geometry.setRight((widget.start_col + new_colspan) * cell_width)
-        widget.setGeometry(new_geometry)
-        widget.mouse_pos = event.pos()
-
-    def end_drag(self, event):
-        pass
-
-class OptionWidget(QWidget):
+class ShiftWidget(QWidget):
     clicked = Signal()
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, start, end, parent=None) -> None:
         super().__init__(parent)
-        # self.setStyleSheet("background-color: lightblue;")
         self.setContentsMargins(0,0,0,0)
+
+        self.setStyleSheet("background-color: lightblue;")
+
+        self.start = start
+        self.end = end
+
+        display_start = self.start.time().strftime("%H:%M")
+        display_end = self.end.time().strftime("%H:%M")
+
+        self.shift_time_display = QLabel(f'{display_start} - {display_end}')
+        self.shift_time_display.setAlignment(Qt.AlignHCenter)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0,0,0,0)
         layout.setSpacing(0)
-        layout.addWidget(QLabel(''))
+        layout.addWidget(self.shift_time_display)
 
     def mousePressEvent(self, event):
-        self.clicked.emit()
+        self.show_info("Allround")
         super().mousePressEvent(event)
 
-    def show_info(self, time, role):
-        dialog = QDialog()
+    def show_info(self, role):
+        self.dialog = QDialog()
         layout = QVBoxLayout()
 
-        time_label = QLabel(f"Time: {time}")
+        display_start = self.start.time().strftime("%H:%M")
+        display_end = self.end.time().strftime("%H:%M")
+
+        time_label = QLabel(f"Time: {display_start} - {display_end}")
         role_label = QLabel(f"Role: {role}")
 
         delete_button = QPushButton("Delete")
-        delete_button.clicked.connect(self.deleteLater)
+        delete_button.clicked.connect(self.delete)
 
         layout.addWidget(time_label)
         layout.addWidget(role_label)
         layout.addWidget(delete_button)
 
-        dialog.setLayout(layout)
-        dialog.exec()
+        self.dialog.setLayout(layout)
+        self.dialog.exec()
 
-class ClickableLabel(QLabel):
+    def delete(self) -> None:
+        self.dialog.deleteLater()
+        self.deleteLater()
+
+
+class ClickableWidget(QWidget):
     clicked = Signal()
 
     def mousePressEvent(self, event):
         self.clicked.emit()
         super().mousePressEvent(event)
+
+shift_list = []
+shift_list.append(ShiftWidget(start=datetime(2023,2,2,7,00), end=datetime(2023,2,2,12,00)))
+shift_list.append(ShiftWidget(start=datetime(2023,2,2,13,00), end=datetime(2023,2,2,14,00)))
+shift_list.append(ShiftWidget(start=datetime(2023,2,2,14,00), end=datetime(2023,2,2,18,00)))
+shift_list.append(ShiftWidget(start=datetime(2023,2,2,19,00), end=datetime(2023,2,2,20,00)))
+shift_list.append(ShiftWidget(start=datetime(2023,2,2,21,00), end=datetime(2023,2,2,23,00)))
