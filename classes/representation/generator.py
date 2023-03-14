@@ -25,14 +25,7 @@ class Generator:
     """ Niet zeker of dit is wat je bedoelde, zo niet haal het lekker weg """
     def init_availabilities_list_luka(self) -> list[list[Employee]]:
 
-        availabilities = []
-
-        for shift in self.shift_list:
-
-            available_employees = self.__find_available_employees_for(shift)
-            availabilities.append(available_employees)
-
-        return availabilities
+        return [self.__find_available_employees_for(shift) for shift in shift_list]
 
     def __find_available_employees_for(self, shift: Shift) -> list[Employee]:
         available_employees = []
