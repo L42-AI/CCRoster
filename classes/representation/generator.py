@@ -1,5 +1,4 @@
-from datetime import datetime
-import numpy as np
+import datetime
 import random
 
 from classes.representation.dataclasses import Shift, Availability
@@ -10,115 +9,82 @@ from data.assign import employee_list, shift_list
 OFFLINE = True # employee.id is downloaded form server, so when offline, use index of employee object in employeelist as id
 class Generator:
     def __init__(self) -> None:
-        self.shift_list = shift_list # shift list from assign with shift instances
-        self.employee_list = employee_list
-
-        self.avalabilities = self.init_availabilities_list()
-        self.workload = self.init_workload_dict()
-        self.schedule = self.init_schedule_list()
-        self.id_employee = self.init_id_to_employee_dict()
+        self.shifts = shift_list # shift list from assign with shift instances
+        self.employees = employee_list
+        self.avalabilities = self.init_availability()
+        self.workload = self.init_workload()
+        self.schedule = self.init_schedule()
+        self.id_employee = self.init_id_to_employee()
         self.improve()
 
     """ INIT """
 
-    """ Luka versie """
-    """ Niet zeker of dit is wat je bedoelde, zo niet haal het lekker weg """
-    def init_availabilities_list_luka(self) -> list[list[Employee]]:
-
-        return [self.__find_available_employees_for(shift) for shift in shift_list]
-
-    def __find_available_employees_for(self, shift: Shift) -> list[Employee]:
-        available_employees = []
-
-        for employee in employee_list:
-
-            if self.__availability_between(employee, shift):
-                available_employees.append(employee)
-
-        return available_employees
-
-    def __availability_between(self, employee: Employee, shift: Shift) -> bool:
-        for availability in employee.availability:
-
-            # Check for start and end of availability
-            if shift.start > availability.start:
-                return False
-            elif shift.end < availability.end:
-                return False
-            else:
-                return True
-
-
-    def init_availabilities_list(self) -> list[list[int]]:
+    def init_availability(self) -> list[list[int]]:
         """
         Initiate the availability list
         """
 
-        availabilities = []
+        availabilities: list[list[int]] = []
 
         # go over each shift and download the employees that can work that shift
-        for shift in self.shift_list:
-            available_employees = self.__downloading_availability_list(shift)
+        for shift in self.shifts:
+            available_employees = self.__downloading_availabilities(shift)
             availabilities.append(available_employees)
 
         return availabilities
 
-    def init_workload_dict(self) -> dict[Employee.id: Shift]:
+    def init_workload(self) -> dict:
         workload = {}
-        for index, employee in enumerate(self.employee_list):
+        for index, employee in enumerate(self.employees):
 
             # each employee will have a list with shift objects that correspond to the shifts he is scheduled for
             if OFFLINE:
-                workload[index] = []
+                workload[index] = {}
             else:
-                workload[employee.get_id()] = []
+                workload[employee.get_id()] = {}
         return workload
 
-    def init_schedule_list(self) -> list[tuple[Shift, int]]:
+    def init_schedule(self) -> list[tuple[Shift, int]]:
         schedule: list[tuple[int, int]] = []
 
-        for index in range(len(self.shift_list)):
+        for index in range(len(self.shifts)):
 
             # for the initialisation, place employee number 0 with wage 999
-            employee_id = 888
-            wage = 999
-            schedule.append((employee_id, wage))
+            schedule.append((888, 999))
         return schedule
 
-    def init_id_to_employee_dict(self) -> dict[int: Employee]:
+    def init_id_to_employee(self) -> dict[int: Employee]:
         """
         returns dictionary that stores employees with their id as key
         """
 
         id_employee = {}
         if OFFLINE:
-            for index, employee in enumerate(self.employee_list):
+            for index, employee in enumerate(self.employees):
                 id_employee[index] = employee
         else:
 
             # when not offline, employees get their key as id
-            for index, employee in enumerate(self.employee_list):
+            for index, employee in enumerate(self.employees):
                 id_employee[employee.get_id()] = employee
 
         return id_employee
     """ METHODS """
 
-    def __downloading_availability_list(self, shift: Shift) -> list[tuple[int, float]]:
+    def __downloading_availabilities(self, shift: tuple[datetime.datetime, datetime.datetime, int]):
         """"
         this method is only used to develop the generator, later, the info will actually be downlaoded
         for now it just returns a hardcoded list with availability
         """
 
-        # shift in the format of availability data that employees have
-        shift_info = (shift.start, shift.end, shift.task)
 
         downloaded_availabilities = []
-        for index, employee in enumerate(self.employee_list):
+        for index, employee in enumerate(self.employees):
 
             # employee.availability is a list with Availability objects corresponding with datetimes they can work
             for workable_shift in employee.availability:
 
-                if (workable_shift.start, workable_shift.end, employee.get_tasks()) == shift_info:
+                if self.__possible_shift(workable_shift, employee, shift):
 
                     if OFFLINE:
                         # for now, use index as employee id since downloading the key from the server obviously does not work
@@ -134,7 +100,7 @@ class Generator:
         print(self.schedule)
 
 
-    def mutate(self): # this will probably be a class one day.......   One day....
+    def mutate(self): # this will probably be a class one day...
         '''
         makes mutations to the schedule but remembers original state and returns to it if
         change is not better. So no deepcopies needed :0
@@ -162,14 +128,24 @@ class Generator:
                 self.schedule[index] = (shift_to_replace, possible_employee)
     """ Helper methods """
 
+    def __possible_shift(self, workable_shift: Availability, employee: Employee, shift: Shift):
+
+        if workable_shift.start < shift.start:
+            return False
+        if workable_shift.end > shift.end:
+            return False
+        if employee.get_tasks() != shift.task:
+            return False
+        return True
+
     def __random_shift(self) -> tuple[tuple[int, int], int]:
         """
         returns a tuple with inside (1) a tuple containing shift info and (2) an index
         """
 
-        index = random.randint(0, len(self.shift_list) - 1)
+        index = random.randint(0, len(self.shifts) - 1)
 
-        shift = self.shift_list[index]
+        shift = self.shifts[index]
 
         return shift, index
 
