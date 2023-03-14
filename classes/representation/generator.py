@@ -19,18 +19,12 @@ class Generator:
 
     """ INIT """
 
-    def init_availability(self) -> list[list[int]]:
+    def init_availability(self) -> list[list[int, int]]:
         """
-        Initiate the availability list
+        Initiate the availability list, consists of tuples of id's and wages
         """
 
-        availabilities: list[list[int]] = []
-
-        # go over each shift and download the employees that can work that shift
-        for shift in self.shifts:
-            available_employees = self.__downloading_availabilities(shift)
-            availabilities.append(available_employees)
-
+        availabilities: list[list[int, int]] = [self.__downloading_availabilities(shift) for shift in self.shifts]
         return availabilities
 
     def init_workload(self) -> dict:
