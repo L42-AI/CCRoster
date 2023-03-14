@@ -46,7 +46,7 @@ class Generator:
                 workload[employee.get_id()] = {}
         return workload
 
-    def init_schedule(self) -> list[tuple[Shift, Employee.id]]:
+    def init_schedule(self) -> list[tuple[Shift, int]]:
         schedule: list[tuple[int, int]] = []
 
         for index in range(len(self.shifts)):
@@ -55,7 +55,7 @@ class Generator:
             schedule.append((888, 999))
         return schedule
 
-    def init_id_to_employee(self) -> dict[Employee.id: Employee]:
+    def init_id_to_employee(self) -> dict[int: Employee]:
         """
         returns dictionary that stores employees with their id as key
         """
