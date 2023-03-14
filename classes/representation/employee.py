@@ -8,7 +8,7 @@ class Employee:
         self.lname = lname
         self.name= fname + " " + lname
         self.id: int = None
-        self.availability: list[Availability] = self.init_availability(av)
+        self.availability = av
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
@@ -18,19 +18,6 @@ class Employee:
 
         # self.upload_employee()
         # self.upload_availability()
-
-    """ Init """
-
-    def init_availability(self, av):
-        """
-        Initiates the availability list of an employee with data objects"""
-        availability = []
-        for entry in av:
-            start_datetime = entry.start
-            end_datetime = entry.end
-            availability.append(Availability(start=start_datetime, end=end_datetime))
-        return availability
-
 
     """ Get """
     def get_name(self):
