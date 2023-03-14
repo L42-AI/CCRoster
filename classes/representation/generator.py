@@ -2,7 +2,7 @@ from datetime import datetime
 import numpy as np
 import random
 
-from classes.representation.dataclasses import Shift
+from classes.representation.dataclasses import Shift, Availability
 from classes.representation.employee import Employee
 
 from data.assign import employee_list, shift_list
@@ -21,12 +21,40 @@ class Generator:
 
     """ INIT """
 
+    """ Luka versie """
+    """ Niet zeker of dit is wat je bedoelde, zo niet haal het lekker weg """
+    def init_availabilities_list_luka(self) -> list[list[Employee]]:
+
+        availabilities = []
+
+        for shift in self.shift_list:
+
+            available_employees = self.__find_available_employees_for(shift)
+            availabilities.append(available_employees)
+
+        return availabilities
+
+    def __find_available_employees_for(self, shift: Shift) -> list[Employee]:
+        available_employees = []
+
+        for employee in employee_list:
+
+            for availability in employee.availability:
+                if shift.start > availability.start:
+                    continue
+                elif shift.end < availability.end:
+                    continue
+                else:
+                    available_employees.append(employee)
+        return available_employees
+
+
     def init_availabilities_list(self) -> list[list[int]]:
         """
         Initiate the availability list
         """
 
-        availabilities: list[list[int]] = []
+        availabilities = []
 
         # go over each shift and download the employees that can work that shift
         for shift in self.shift_list:
