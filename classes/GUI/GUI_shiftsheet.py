@@ -64,13 +64,16 @@ class ShiftSheet(QScrollArea):
     def place_shift(self, Shift):
         for cell_num in range(self.shift_grid.count()):
             widget = self.shift_grid.itemAt(cell_num).widget()
+            if not isinstance(widget, ClickableWidget):
+                continue
             if widget.time == Shift.start.time():
                 index = self.shift_grid.indexOf(widget)
                 row, col, _, colspan = self.shift_grid.getItemPosition(index)
-                print(row, col, _, colspan)
                 shift_duration_minutes = (Shift.end - Shift.start).total_seconds() / 60
-                rowspan = int(shift_duration_minutes / 15) + 1
+                rowspan = int(shift_duration_minutes / 15)
+                print(row, col, rowspan, colspan)
                 self.shift_grid.addWidget(Shift, row , col, rowspan, colspan)
+                break
 
     def create_shift_grid(self) -> QGridLayout:
         grid = QGridLayout()
@@ -89,6 +92,21 @@ class ShiftSheet(QScrollArea):
                 grid.addWidget(widget, row, col)
 
         return grid
+
+
+
+    def add_shift_widget(self):
+        # Create blue widget
+        grid_slot = self.sender()
+        gridslot_hour = grid_slot.time.hour
+        gridslot_minute = grid_slot.time.minute
+        Shift = ShiftWidget(datetime(2023,2,2,gridslot_hour,gridslot_minute), datetime(2023,2,2,gridslot_hour + 2,gridslot_minute), self)
+        index = self.shift_grid.indexOf(grid_slot)
+        row, col, _, colspan = self.shift_grid.getItemPosition(index)
+        shift_duration_minutes = (Shift.end - Shift.start).total_seconds() / 60
+        rowspan = int(shift_duration_minutes / 15)
+        self.shift_grid.addWidget(Shift, row, col, rowspan, colspan)
+
 
     def paintEvent(self, event) -> None:
         grid = self.shift_grid
@@ -138,17 +156,6 @@ class ShiftSheet(QScrollArea):
                     painter.setPen(QPen(Qt.gray, 3, Qt.DotLine))
                     painter.drawLine(x, y + height, x + width, y + height)
 
-
-    def add_shift_widget(self):
-        # Create blue widget
-        label = self.sender()
-        Shift = ShiftWidget(self)
-        index = self.shift_grid.indexOf(label)
-        row, col, _, colspan = self.shift_grid.getItemPosition(index)
-        shift_duration_minutes = (Shift.end - Shift.start).total_seconds() / 60
-        rowspan = int(shift_duration_minutes / 15)
-        self.shift_grid.addWidget(Shift, row + 1, col, rowspan, colspan)
-
 class ShiftWidget(QWidget):
     clicked = Signal()
 
@@ -156,7 +163,7 @@ class ShiftWidget(QWidget):
         super().__init__(parent)
         self.setContentsMargins(0,0,0,0)
 
-        self.setStyleSheet("background-color: lightblue;")
+        self.setStyleSheet("background-color: lightblue; border: 1px solid black;")
 
         self.start = start
         self.end = end
