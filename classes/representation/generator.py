@@ -90,10 +90,12 @@ class Generator:
         return downloaded_availabilities
 
     def improve(self) -> None:
-        for i in range(5000):
+        for i in range(50):
             self.mutate()
 
-        print(self.schedule)
+        # Format and print the schedule
+        for shift, employee in self.schedule:
+            print(f"{shift} - {employee}")
 
     
     def mutate(self):  # this will probably be a class one day...

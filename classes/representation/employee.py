@@ -51,3 +51,6 @@ class Employee:
     def get_id(self) -> int:
         return self.id
 
+    def __str__(self) -> str:
+        return f"{self.name} (ID: {self.id})"
+
