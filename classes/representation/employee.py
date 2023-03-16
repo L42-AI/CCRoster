@@ -8,13 +8,8 @@ class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict, wage: float, level, task, location) -> None:
         self.fname = fname
         self.lname = lname
-<<<<<<< HEAD
-        self.name= fname + " " + lname
-        self.id: int = None
-=======
         self.name = fname + " " + lname
         self.id = None
->>>>>>> 1fd44bd519f620e10daa2cf00b701a995dbd0d7d
         self.availability = av
         self.wage = wage
         self.weekly_max = maximum
@@ -26,8 +21,6 @@ class Employee:
         # self.upload_employee()
         # self.upload_availability()
 
-<<<<<<< HEAD
-=======
     """ Upload """
     def upload_employee(self):
 
@@ -84,7 +77,6 @@ class Employee:
                 self.availability.append(entry)
 
 
->>>>>>> 1fd44bd519f620e10daa2cf00b701a995dbd0d7d
     """ Get """
     def get_name(self):
         return self.name
