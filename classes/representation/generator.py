@@ -16,8 +16,6 @@ class Generator:
         self.workload = self.init_workload()
         self.schedule = self.init_schedule()
         self.id_employee = self.init_id_to_employee()
-        print(type(self.__get_random_shift()[1]))
-        raise
         self.print_schedule()
         self.improve()
 
