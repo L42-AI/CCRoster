@@ -48,7 +48,7 @@ class Generator:
 
             # for the initialisation, place a dummy employee with id -1 and wage 999
             dummy_employee = Employee("Dummy", "Employee", [], 999, 999, 1, "Allround", 1)
-            schedule.append((shift, None))
+            schedule.append((shift, dummy_employee))
         return schedule
 
     def init_id_to_employee(self) -> dict[int, Employee]:
@@ -117,11 +117,12 @@ class Generator:
         # get the duration of the shift
         shift_duration_hours = self.__get_duration_in_hours(shift_to_replace.start, shift_to_replace.end)
 
-        # use minutes to calculate cost
-        cost = self.__compute_cost(shift_duration_hours, possible_employee.get_wage())  # Access the wage directly
+        # use hours to calculate cost
+        new_cost = self.__compute_cost(shift_duration_hours, possible_employee.get_wage())  # Access the wage directly
 
         # check if costs are lower with this employee than previous
-        if cost < self.schedule[index][1].get_wage():
+        current_cost = self.schedule[index][1].get_wage()
+        if new_cost < current_cost:
 
             # check if employee is not crossing weekly_max and place shift into workload
             if self.__workload(possible_employee, shift_to_replace.start):
