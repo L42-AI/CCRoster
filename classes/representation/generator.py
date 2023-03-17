@@ -32,6 +32,7 @@ class Generator:
         workload = {}
         for index, employee in enumerate(self.employees):
 
+            """ De values zijn at the moment dicts, weet niet of dat je bedoeling is """
             # each employee will have a list with shift objects that correspond to the shifts he is scheduled for
             if OFFLINE:
                 workload[index] = {}
@@ -42,11 +43,11 @@ class Generator:
     def init_schedule(self) -> list[tuple[Shift, Employee]]:
         schedule: list[tuple[Shift, Employee]] = []
 
-        for index in range(len(self.shifts)):
+        for shift in self.shifts:
 
             # for the initialisation, place a dummy employee with id -1 and wage 999
             dummy_employee = Employee("Dummy", "Employee", [], 999, 999, 1, "everything", 1)
-            schedule.append((self.shifts[index], dummy_employee))
+            schedule.append((shift, dummy_employee))
         return schedule
 
     def init_id_to_employee(self) -> dict[int, Employee]:
@@ -74,6 +75,8 @@ class Generator:
         for now it just returns a hardcoded list with availability
         """
 
+
+        """ Deze method heeft nog wat dubbele code """
         downloaded_availabilities = []
         for index, employee in enumerate(self.employees):
 
@@ -97,7 +100,6 @@ class Generator:
         for shift, employee in self.schedule:
             print(f"{shift} - {employee}")
 
-    
     def mutate(self):  # this will probably be a class one day...
         '''
         makes mutations to the schedule but remembers original state and returns to it if
