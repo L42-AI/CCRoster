@@ -3,7 +3,7 @@ from datetime import datetime
 from classes.representation.dataclasses import Availability
 
 class Employee:
-    def __init__(self, fname, lname, av, maximum, wage, level, task, location) -> None:
+    def __init__(self, fname, lname, av, maximum, wage, level, tasks, location) -> None:
         self.fname = fname
         self.lname = lname
         self.name= fname + " " + lname
@@ -12,7 +12,7 @@ class Employee:
         self.wage = wage
         self.weekly_max = maximum
         self.level = level
-        self.tasks = 1 if task=='everything' else 0
+        self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
         self.add_remove_timeslot = []
 
