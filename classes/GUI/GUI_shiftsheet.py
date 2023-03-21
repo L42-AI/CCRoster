@@ -1,10 +1,14 @@
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QApplication, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QWidget, QListWidget, QComboBox,
-                               QGridLayout, QScrollArea, QDialog)
+                               QGridLayout, QScrollArea, QDialog, QTimeEdit, QDateEdit,
+                               QDateTimeEdit, QCalendarWidget)
 from PySide6.QtCore import Qt, QRect, QPoint
 from PySide6.QtGui import QPen, QPainter, QPalette, QBrush
-from datetime import datetime, time
+from datetime import datetime, time, date
+
+from classes.GUI.GUI_calendar import Calendar
+
 import re
 import sys
 # from classes.representation.controller import Controller
@@ -193,10 +197,19 @@ class ShiftWidget(QWidget):
         time_label = QLabel(f"Time: {display_start} - {display_end}")
         role_label = QLabel(f"Role: {role}")
 
+        time_edit = QTimeEdit()
+        date_edit = QDateEdit()
+        self.datetime_edit = Calendar()
+
         delete_button = QPushButton("Delete")
         delete_button.clicked.connect(self.delete)
 
+        save_button = QPushButton("save")
+        save_button.clicked.connect(self.save)
+
         layout.addWidget(time_label)
+        layout.addWidget(time_edit)
+        layout.addWidget(date_edit)
         layout.addWidget(role_label)
         layout.addWidget(delete_button)
 
