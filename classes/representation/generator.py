@@ -16,8 +16,8 @@ class Generator:
         self.workload = self.init_workload()
         self.schedule = self.init_schedule()
         self.id_employee = self.init_id_to_employee()
-        self.print_schedule()
         self.improve()
+        self.print_schedule()
 
     """ INIT """
 
