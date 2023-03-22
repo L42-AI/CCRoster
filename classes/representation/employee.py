@@ -4,14 +4,15 @@ from classes.representation.dataclasses import Availability
 import uuid
 
 class Employee:
-    def __init__(self, fname, lname, av, maximum, wage, level, tasks, location) -> None:
+    def __init__(self, fname, lname, av, maximum, minimum, wage, level, tasks, location) -> None:
         self.fname = fname
         self.lname = lname
         self.name = f'{fname} {lname}'
-        self.id = str(uuid.uuid4())
+        self.id = None
         self.availability = av
         self.wage = wage
         self.weekly_max = maximum
+        self.weekly_min = minimum
         self.level = level
         self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
