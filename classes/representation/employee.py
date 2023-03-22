@@ -1,13 +1,14 @@
 import random
 from datetime import datetime
 from classes.representation.dataclasses import Availability
+import uuid
 
 class Employee:
     def __init__(self, fname, lname, av, maximum, wage, level, tasks, location) -> None:
         self.fname = fname
         self.lname = lname
-        self.name= fname + " " + lname
-        self.id: int = None
+        self.name = f'{fname} {lname}'
+        self.id = str(uuid.uuid4())
         self.availability = av
         self.wage = wage
         self.weekly_max = maximum
@@ -48,7 +49,7 @@ class Employee:
     def get_week_max(self, week) -> int:
         return self.weekly_max.get(week)
 
-    def get_id(self) -> int:
+    def get_id(self) -> str:
         return self.id
 
     def __str__(self) -> str:
