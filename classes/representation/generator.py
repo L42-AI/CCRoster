@@ -144,6 +144,7 @@ class Generator:
         for i in range(200):
             self.mutate()
 
+
     def print_schedule(self) -> None:
         # Format and print the schedule
         for i, info in enumerate(self.schedule):
@@ -151,10 +152,11 @@ class Generator:
             # self.passed_hard_constraints(i)
             print(shift_id, employee_id, wage)
 
-
-    def get_wage(self) -> float:
-        wage_cost = MalusCalc.wage_cost(self.schedule)
-        return wage_cost
+        self.total_costs = MalusCalc.total_costs(self.schedule, self.employees)
+        print(self.total_costs)
+    # def get_wage(self) -> float:
+    #     wage_cost = MalusCalc.wage_cost(self.schedule)
+    #     return wage_cost
 
     def mutate(self):  # this will probably be a class one day...
         '''
@@ -175,7 +177,6 @@ class Generator:
         new_cost = self.__compute_cost(shift_duration_hours, possible_employee, shift_to_replace.start)  # Access the wage directly
 
         # check if costs are lower with this employee than previous
-        print(self.schedule[index])
         current_cost = self.schedule[index][2]
         if new_cost < current_cost:
 
