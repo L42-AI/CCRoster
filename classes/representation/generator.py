@@ -22,6 +22,7 @@ class Generator:
         self.id_shift = self.init_id_to_shift()
         self.id_wage = self.init_id_to_wage()
         self.time_conflict_dict = self.init_shifts_with_same_time()
+        print(self.time_conflict_dict)
 
         self.availabilities = self.init_availability()
         self.workload = self.init_workload()
@@ -40,14 +41,14 @@ class Generator:
 
     """ INIT DATA STRUCTURES """
 
-    def init_employees_id_offline(self):
+    def init_employees_id_offline(self) -> None:
         """
         temporary method to assign id's to employees
         """
         for id, employee in enumerate(self.employees):
             employee.id = id
 
-    def init_shifts_id_offline(self):
+    def init_shifts_id_offline(self) -> None:
         """
         temporary method to assign id's to shifts
         """
@@ -71,7 +72,7 @@ class Generator:
 
     def init_availability(self) -> list[list[int]]:
         """
-        Initiate the availability list, consists of employee objects
+        Initiate the availability list, consists of employee ids
         """
         return [self.get_employee_list(shift) for shift in self.shifts]
 
@@ -81,21 +82,20 @@ class Generator:
     def init_schedule(self) -> list[tuple[int, None]]:
         return [(shift.get_id(), None) for shift in self.shifts]
 
-    def init_shifts_with_same_time(self) -> dict[int, set[int]]:
-        time_conflict_dict = {}
+    def init_shifts_with_same_time(self) -> dict[int, list[int]]:
+
+        time_conflict_dict = {shift.get_id(): [] for shift in self.shifts}
+
         for shift_1 in self.shifts:
-            time_conflict_dict[shift_1.get_id()] = set()
+
             for shift_2 in self.shifts:
                 if shift_1 is shift_2:
                     continue
-                if shift_1.start <= shift_2.start <= shift_1.end <= shift_2.end >= shift_1.start:
-                    time_conflict_dict[shift_1.get_id()].add(shift_2.get_id())
-                elif shift_1.start >= shift_2.start <= shift_1.end >= shift_2.end >= shift_1.start:
-                    time_conflict_dict[shift_1.get_id()].add(shift_2.get_id())
-                elif shift_1.start >= shift_2.start <= shift_1.end <= shift_2.end >= shift_1.start:
-                    time_conflict_dict[shift_1.get_id()].add(shift_2.get_id())
-                elif shift_1.start <= shift_2.start <= shift_1.end >= shift_2.end >= shift_1.start:
-                    time_conflict_dict[shift_1.get_id()].add(shift_2.get_id())
+                if shift_1.end < shift_2.start:
+                    continue
+                if shift_1.start < shift_2.end:
+                    time_conflict_dict[shift_1.get_id()].append(shift_2.get_id())
+
         return time_conflict_dict
 
     """ GET """
@@ -130,7 +130,7 @@ class Generator:
 
         return downloaded_availabilities
 
-    def get_colliding_shifts(self, shift_id: int) -> set[int]:
+    def get_colliding_shifts(self, shift_id: int) -> list[int]:
         return self.time_conflict_dict.get(shift_id)
 
 
@@ -170,11 +170,8 @@ class Generator:
         # pick an employee that can work that shift
         possible_employee_id = self.__get_random_employee(index)  # Updated to get only the Employee object
 
-        # get the duration of the shift
-        shift_duration_hours = shift_to_replace.duration
-
-        # use hours to calculate cost
-        new_cost = self.__compute_cost(shift_duration_hours, possible_employee_id, shift_to_replace.get_id())  # Access the wage directly
+        # use duration to calculate cost
+        new_cost = self.__compute_cost(shift_to_replace.duration, possible_employee_id, shift_to_replace.get_id())  # Access the wage directly
 
         # check if costs are lower with this employee than previous
         shift_id, current_employee_id = self.schedule[index]
