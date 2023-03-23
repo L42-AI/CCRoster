@@ -4,6 +4,8 @@ import random
 from classes.representation.dataclasses import Shift, Availability
 from classes.representation.employee import Employee
 from classes.representation.malus_calc import MalusCalc
+from classes.representation.greedy import Greedy
+
 
 from data.assign import employee_list, shift_list
 
@@ -23,6 +25,11 @@ class Generator:
         self.workload = self.init_workload()
 
         self.schedule = self.init_schedule_empty()
+
+        # # Greedy fill methods
+        # self.schedule = Greedy.fill_employees(self.schedule, self.employees)
+        # self.schedule = Greedy.fill_shifts(self.schedule, self.shifts, self.availabilities)
+
         self.fill_schedule_based_on_shifts()
         self.improve()
         self.print_schedule()
