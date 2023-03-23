@@ -13,7 +13,6 @@ class Shift:
     end: datetime
     task: int
     location: int
-    id: int
 
     def __post_init__(self) -> None:
         self.duration = (self.end - self.start).total_seconds() / 3600
@@ -22,3 +21,6 @@ class Shift:
         start_time = self.start.strftime("%m-%d %H:%M")
         end_time = self.end.strftime("%m-%d %H:%M")
         return f"Task {self.task}, {start_time} - {end_time}"
+    
+    def get_id(self) -> int:
+        return self.id
