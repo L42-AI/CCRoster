@@ -200,7 +200,7 @@ class Generator:
         shift_end_minute = shift.end.minute
 
         for i, match_shift in enumerate(self.shifts):
-            if match_shift.start.day == shift_day and shift != match_shift:
+            if match_shift.start.day == shift_start_day and shift != match_shift:
                 if employee_id == self.schedule[i][1]:
                     return False
         return True
