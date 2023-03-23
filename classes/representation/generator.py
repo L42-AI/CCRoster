@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 from classes.representation.dataclasses import Shift, Availability
@@ -23,6 +23,9 @@ class Generator:
         self.workload = self.init_workload()
 
         self.schedule = self.init_schedule_empty()
+        self.equal_shift_length: dict[int: bool] = self.init_equal_shifts_lenght() # DEZE RETURNT NU EEN DICT IPV BOOL
+        self.shifts_sorted_by_length: dict[int: int] = self.init_shifts_sorted_by_lenght() # DEZE IS NU EIG VOOR SAUS EN TOCH NOG NIET AF
+        print(self.equal_shift_length)
         self.fill_schedule_based_on_shifts()
         self.improve()
         self.print_schedule()
@@ -61,6 +64,31 @@ class Generator:
     def init_workload(self) -> dict[int, dict[int, list]]:
         return {employee.get_id() : {} for employee in self.employees}
 
+    def init_equal_shifts_lenght(self) -> dict[int, bool]:
+        """
+        method checks if shifts are of the same lenght, if not, longer shifts may need different initialisations
+        """
+
+        '''LET OP, DIT RETURNT NU EEN DICT, MAAR WE KUNNEN HIER DUS GEWOON EEN FALSE OF TRUE VAN MAKEN OMDAT WE VOOR DE EERSTE OPTIE GAAN'''
+
+        shift_lenghts = {}
+        for shift in self.shifts:
+            task = shift.get_task()
+            time_delta = shift.end - shift.start
+            if task not in shift_lenghts:
+                shift_lenghts[task] = time_delta
+
+            # store False if shift has other lenght
+            elif shift_lenghts[task] != time_delta:
+                shift_lenghts[task] = False
+
+        # mask if the shifts are the same
+        return {task: td != False for task, td in shift_lenghts.items()}
+
+    def init_shifts_sorted_by_lenght(self):
+
+        indexes_list = [i for i in range(len(self.shifts))]
+        sorted_index = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
 
     """ GET """
 
@@ -72,7 +100,7 @@ class Generator:
 
     def get_workload(self, id: int) -> dict[int, list]:
         return self.workload.get(id)
-    
+
     def get_weeknumber(self, moment: datetime) -> int:
         return moment.isocalendar()[1]
 
@@ -118,6 +146,8 @@ class Generator:
 
 
     """ DEZE WORDT NIET GEBUIKT, KAN WEG? """
+    '''DENK HET WEL..? VGM GAAN WE ALTIJD WEL EEN GREEDY GEBRUIKEN MAAR WE KUNNEN M HOUDEN MOCHTEN WE ZONDER GREEDY WILLEN TESTEN VOOR IETS OID
+        OF VERPLAATSTEN NAAR DELETE.PY'''
     def init_schedule(self) -> list[tuple[Shift, Employee]]:
         schedule: list[tuple[Shift, Employee]] = []
 
@@ -139,7 +169,7 @@ class Generator:
         for i, info in enumerate(self.schedule):
             shift_id, employee_id, wage = info
             # self.passed_hard_constraints(i)
-            print(shift_id, employee_id, wage)
+            print(shift_id, employee_id)
 
         self.total_costs = MalusCalc.total_costs(self.schedule, self.employees)
         print(self.total_costs)

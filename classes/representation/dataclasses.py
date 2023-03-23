@@ -25,3 +25,6 @@ class Shift:
     
     def get_id(self) -> str:
         return self.id
+
+    def get_task(self) -> int:
+        return self.task
