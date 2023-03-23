@@ -4,7 +4,7 @@ from classes.representation.dataclasses import Availability
 import uuid
 
 class Employee:
-    def __init__(self, fname, lname, av, maximum, minimum, wage, level, tasks, location) -> None:
+    def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], minimum: dict[int, int], wage: float, level: int, tasks: list[int], location: str) -> None:
         self.fname = fname
         self.lname = lname
         self.name = f'{fname} {lname}'
@@ -22,18 +22,15 @@ class Employee:
         # self.upload_availability()
 
     """ Get """
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
 
-    def get_full_av(self) -> set:
+    def get_av(self) -> list[Availability]:
         return self.availability
 
-    def get_av(self) -> list[int]:
+    def get_random_av(self) -> Availability:
         if len(self.availability) > 0:
             return random.choice(self.availability)
-
-    def get_name(self, name) -> str:
-        return name
 
     def get_wage(self) -> float:
         return float(self.wage)
@@ -44,11 +41,17 @@ class Employee:
     def get_tasks(self) -> int:
         return self.tasks
 
-    def get_week_max_dict(self) -> dict:
+    def get_week_max_dict(self) -> dict[int, int]:
         return self.weekly_max
 
     def get_week_max(self, week) -> int:
         return self.weekly_max.get(week)
+
+    def get_week_min_dict(self) -> dict[int, int]:
+        return self.weekly_min
+
+    def get_week_min(self, week) -> int:
+        return self.weekly_min.get(week)
 
     def get_id(self) -> str:
         return self.id

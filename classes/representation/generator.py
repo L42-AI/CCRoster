@@ -17,17 +17,18 @@ class Generator:
 
         self.id_employee = self.init_id_to_employee()
         self.id_shift = self.init_id_to_shift()
+        self.id_wage = self.init_id_to_wage()
 
         self.availabilities = self.init_availability()
         self.workload = self.init_workload()
+
         self.schedule = self.init_schedule_empty()
-        self.id_wage = self.init_id_wage()
         self.fill_schedule_based_on_shifts()
         self.improve()
         self.print_schedule()
         # print(f'Wage cost = €{self.get_wage()}')
 
-    """ INIT """
+    """ INIT DATA STRUCTURES """
 
     def init_employees_id_offline(self):
         """
@@ -36,25 +37,65 @@ class Generator:
         for id, employee in enumerate(self.employees):
             employee.id = id
 
-    def init_id_to_employee(self) -> dict[str, Employee]:
+    def init_id_to_employee(self) -> dict[int, Employee]:
         """
         returns dictionary that stores employees with their id as key
         """
         return {employee.get_id(): employee for employee in self.employees}
 
-    def init_id_to_shift(self) -> dict[str, Shift]:
+    def init_id_to_shift(self) -> dict[int, Shift]:
         """
         returns dictionary that stores employees with their id as key
         """
         return {shift.get_id(): shift for shift in self.shifts}
 
-    def get_shift(self, id: str) -> Shift:
+    def init_id_to_wage(self) -> dict[int, float]:
+        return {employee.get_id(): employee.get_wage() for employee in self.employees}
+
+    def init_availability(self) -> list[list[int]]:
+        """
+        Initiate the availability list, consists of employee objects
+        """
+        return [self.get_employee_list(shift) for shift in self.shifts]
+
+    def init_workload(self) -> dict[int, dict[int, list]]:
+        return {employee.get_id() : {} for employee in self.employees}
+
+
+    """ GET """
+
+    def get_shift(self, id: int) -> Shift:
         return self.id_shift.get(id)
 
-    def get_employee(self, id: str) -> Employee:
+    def get_employee(self, id: int) -> Employee:
         return self.id_employee.get(id)
 
-    def init_schedule_empty(self) -> list[tuple[str, None]]:
+    def get_workload(self, id: int) -> dict[int, list]:
+        return self.workload.get(id)
+    
+    def get_weeknumber(self, moment: datetime) -> int:
+        return moment.isocalendar()[1]
+
+    def get_employee_list(self, shift: Shift) -> list[int]:
+        """
+        this method is only used to develop the generator, later, the info will actually be downloaded
+        for now it just returns a hardcoded list with availability
+        """
+
+        downloaded_availabilities = []
+        for employee in self.employees:
+
+            # employee.availability is a list with Availability objects corresponding with datetimes they can work
+            for workable_shift in employee.availability:
+
+                if self.__possible_shift(workable_shift, employee, shift):
+                    downloaded_availabilities.append(employee.get_id())
+
+        return downloaded_availabilities
+
+    """ SCHEDULE """
+
+    def init_schedule_empty(self) -> list[tuple[int, None]]:
         return [(shift.get_id(), None) for shift in self.shifts]
 
     def fill_schedule_based_on_employees(self) -> None:
@@ -69,39 +110,14 @@ class Generator:
 
         indexes_list = [i for i in range(len(self.shifts))]
         sorted_index = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
-        print(sorted_index)
 
         for index in sorted_index:
             random_employee = self.__get_random_employee(index)
             wage = self.id_wage[random_employee]
             self.schedule[index] = (self.shifts[index], random_employee, wage)
-            # for i, tuple_info in enumerate(self.schedule):
-            #     shift = self.get_shift(tuple_info[0])
-            #     if shift is self.shifts[index]:
-            #         random_employee = self.__get_random_employee(index)
-            #         self.schedule[i] = (shift.get_id(), random_employee.get_id())
 
-    # def fill_schedule_based_on_shifts(self) -> None:
 
-    #     shift_availability_dict: dict[Shift.id: list[Employee.id]] = {}
-    #     self.schedule: dict[Shift.id: Employee.id] = {}
-
-    #     sorted_dict = dict(sorted(shift_availability_dict.items(), key=lambda x: len(shift_availability_dict[x])))
-
-    #     for shift_id in sorted_dict:
-    #         self.schedule[shift_id] = self.__get_random_employee(shift_id)
-
-    def init_availability(self) -> list[list[Employee]]:
-        """
-        Initiate the availability list, consists of employee objects
-        """
-
-        availabilities: list[list[Employee]] = [self.downloading_availabilities(shift) for shift in self.shifts]
-        return availabilities
-
-    def init_workload(self) -> dict[str, dict]:
-        return {employee.get_id() : {} for employee in self.employees}
-
+    """ DEZE WORDT NIET GEBUIKT, KAN WEG? """
     def init_schedule(self) -> list[tuple[Shift, Employee]]:
         schedule: list[tuple[Shift, Employee]] = []
 
@@ -112,38 +128,11 @@ class Generator:
             schedule.append((shift, dummy_employee, 999))
         return schedule
 
-    def init_id_wage(self):
-        id_wage = {}
-        for employee in self.employees:
-            id_wage[employee.get_id()] = employee.get_wage()
-
-        return id_wage
-
     """ METHODS """
-
-    def downloading_availabilities(self, shift: Shift) -> list[Employee]:
-        """
-        this method is only used to develop the generator, later, the info will actually be downloaded
-        for now it just returns a hardcoded list with availability
-        """
-
-
-        """ Deze method heeft nog wat dubbele code """
-        downloaded_availabilities = []
-        for employee in self.employees:
-
-            # employee.availability is a list with Availability objects corresponding with datetimes they can work
-            for workable_shift in employee.availability:
-
-                if self.__possible_shift(workable_shift, employee, shift):
-
-                    downloaded_availabilities.append(employee.get_id())
-        return downloaded_availabilities
 
     def improve(self) -> None:
         for i in range(200):
             self.mutate()
-
 
     def print_schedule(self) -> None:
         # Format and print the schedule
@@ -154,9 +143,6 @@ class Generator:
 
         self.total_costs = MalusCalc.total_costs(self.schedule, self.employees)
         print(self.total_costs)
-    # def get_wage(self) -> float:
-    #     wage_cost = MalusCalc.wage_cost(self.schedule)
-    #     return wage_cost
 
     def mutate(self):  # this will probably be a class one day...
         '''
@@ -168,23 +154,23 @@ class Generator:
         shift_to_replace, index = self.__get_random_shift()
 
         # pick an employee that can work that shift
-        possible_employee = self.__get_random_employee(index)  # Updated to get only the Employee object
+        possible_employee_id = self.__get_random_employee(index)  # Updated to get only the Employee object
 
         # get the duration of the shift
         shift_duration_hours = self.__get_duration_in_hours(shift_to_replace.start, shift_to_replace.end)
 
         # use hours to calculate cost
-        new_cost = self.__compute_cost(shift_duration_hours, possible_employee, shift_to_replace.start)  # Access the wage directly
+        new_cost = self.__compute_cost(shift_duration_hours, possible_employee_id, shift_to_replace.start)  # Access the wage directly
 
         # check if costs are lower with this employee than previous
         current_cost = self.schedule[index][2]
         if new_cost < current_cost:
 
             # check if employee is not crossing weekly_max and place shift into workload
-            if self.__workload(possible_employee, shift_to_replace.start):
+            if self.__workload(possible_employee_id, shift_to_replace.start):
 
                 # add shift to workload dictionary
-                self.schedule[index] = (shift_to_replace, possible_employee, new_cost)
+                self.schedule[index] = (shift_to_replace, possible_employee_id, new_cost)
 
     """ HARD CONSTRAINTS """
 
@@ -232,9 +218,9 @@ class Generator:
 
         return shift, index
 
-    def __get_random_employee(self, index) -> Employee:
+    def __get_random_employee(self, index) -> int:
         """
-        returns an Employee object
+        returns an employee id
         """
         return random.choice(self.availabilities[index])
 
@@ -250,54 +236,59 @@ class Generator:
         weekly min, the first shifts are 'free'
         """
 
-        possible_employee_object: Employee = self.id_employee[possible_employee_id]
-        weeknumber: int = shift.isocalendar()[1]
-        weekly_min: int = possible_employee_object.weekly_min[weeknumber]
-        wage: int = self.id_wage[possible_employee_id]
+        possible_employee_object = self.get_employee(possible_employee_id)
+        employee_shifts = self.get_workload(possible_employee_id)
+        weeknumber = self.get_weeknumber(shift)
+        weekly_min = possible_employee_object.get_week_min(weeknumber)
+        wage = possible_employee_object.get_wage()
 
         # if week not in workload, number of shifts that week == 0
-        if weeknumber not in self.workload[possible_employee_id] and weekly_min > 0:
+        if weeknumber not in employee_shifts and weekly_min > 0:
 
             # this shift the worker works for 'free'
             return 0
 
         # check if worker is under his/hers weely min
-        if len(self.workload[possible_employee_id][weeknumber]) < weekly_min:
+        elif len(employee_shifts[weeknumber]) < weekly_min:
             return 0
 
-        # if weekly_min is reached, calculate the wage it will cost normal way
-        return wage * hours # Multiply duration with hourly wage to get total pay
+        else:
+            # if weekly_min is reached, calculate the wage it will cost normal way
+            return wage * hours # Multiply duration with hourly wage to get total pay
 
-    def __workload(self, possible_employee_id: int, shift: datetime) -> bool:
+    def __workload(self, possible_employee_id: int, shift_moment: datetime) -> bool:
         """
         returns True if the employee is allowed to work that shift given his/hers weekly max
         """
 
-        possible_employee_object = self.id_employee[possible_employee_id]
-        self.__update_workload(possible_employee_id, shift, add=True)
+        possible_employee_object = self.get_employee(possible_employee_id)
+        possible_employee_workload = self.get_workload(possible_employee_id)
+        
+        self.__update_workload(possible_employee_id, shift_moment, add=True)
 
         # get the week and check how many shifts the person is working that week
-        weeknumber = shift.isocalendar()[1]
+        weeknumber = self.get_weeknumber(shift_moment)
 
-        if possible_employee_object.get_week_max(weeknumber) > len(self.workload[possible_employee_id][weeknumber]):
+        if possible_employee_object.get_week_max(weeknumber) > len(possible_employee_workload[weeknumber]):
             return True
+        else:
+            # if the person will not take on the shift, delete it from the workload
+            self.__update_workload(possible_employee_id, shift_moment)
+            return False
 
-        # if the person will not take on the shift, delete it from the workload
-        self.__update_workload(possible_employee_id, shift)
-        return False
-
-    def __update_workload(self, employee_key: int, shift: datetime, add=False) -> None:
+    def __update_workload(self, employee_id: int, shift: datetime, add=False) -> None:
         """
         updates workload dictionary when an employee takes on a new shift
         """
         # get the week number of the shift
-        weeknumber = shift.isocalendar()[1]
+        weeknumber = self.get_weeknumber(shift)
+        employee_workload = self.get_workload(employee_id)
 
-        if weeknumber not in self.workload[employee_key]:
-            self.workload[employee_key] = {weeknumber: []}
+        if weeknumber not in employee_workload:
+            employee_workload = {weeknumber: []}
 
         if add:
             # add a shift to the workload of that employee that week
-            self.workload[employee_key][weeknumber].append(shift)
+            employee_workload[weeknumber].append(shift)
         else:
-            self.workload[employee_key][weeknumber].remove(shift)
+            employee_workload[weeknumber].remove(shift)
