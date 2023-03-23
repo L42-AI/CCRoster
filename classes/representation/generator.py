@@ -101,7 +101,7 @@ class Generator:
     def fill_schedule_based_on_employees(self) -> None:
         # Sort on availability to first do people with little availability
         sorted_employees = sorted(self.employees, key=lambda employee: len(employee.availability))
-        
+
         for i, employee in enumerate(sorted_employees):
             shift_id = self.schedule[i][0]
             self.schedule[i] = (shift_id, employee.get_id())
