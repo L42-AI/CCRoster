@@ -37,6 +37,13 @@ class Generator:
         for id, employee in enumerate(self.employees):
             employee.id = id
 
+    def init_shifts_id_offline(self):
+        """
+        temporary method to assign id's to shifts
+        """
+        for id, shift in enumerate(self.shifts):
+            shift.id = id
+
     def init_id_to_employee(self) -> dict[int, Employee]:
         """
         returns dictionary that stores employees with their id as key
@@ -104,9 +111,10 @@ class Generator:
         sorted_employees = sorted(self.employees, key=lambda employee: len(employee.availability))
 
         for i, employee in enumerate(sorted_employees):
-            shift_id = self.schedule[i][0]
-            self.schedule[i] = (shift_id, employee.get_id())
+            self.schedule[i][1] = employee.get_id()
 
+
+    """ WAGE NOG WEGHALEN UIT SELF.SCHEDULE """
     def fill_schedule_based_on_shifts(self) -> None:
 
         indexes_list = [i for i in range(len(self.shifts))]
@@ -290,24 +298,6 @@ class Generator:
             self.__update_workload(possible_employee_id, shift_id)
             return False
 
-    def __update_workload(self, employee_id: int, shift: datetime, add=False) -> None:
-        """
-        updates workload dictionary when an employee takes on a new shift
-        """
-        # get the week number of the shift
-        weeknumber = self.get_weeknumber(shift)
-        employee_workload = self.get_workload(employee_id)
-
-        if weeknumber not in employee_workload:
-            employee_workload = {weeknumber: []}
-
-        if add:
-            # add a shift to the workload of that employee that week
-            employee_workload[weeknumber].append(shift)
-        else:
-            employee_workload[weeknumber].remove(shift)
-
-    """ update workload met ids """
     def __update_workload(self, employee_id: int, shift_id: int, add=False) -> None:
         """
         updates workload dictionary when an employee takes on a new shift
