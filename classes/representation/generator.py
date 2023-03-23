@@ -58,7 +58,7 @@ class Generator:
         """
         return [self.get_employee_list(shift) for shift in self.shifts]
 
-    def init_workload(self) -> dict[int, dict[int, list]]:
+    def init_workload(self) -> dict[int, dict[int, list[int]]]:
         return {employee.get_id() : {} for employee in self.employees}
 
 
@@ -73,8 +73,9 @@ class Generator:
     def get_workload(self, id: int) -> dict[int, list]:
         return self.workload.get(id)
     
-    def get_weeknumber(self, moment: datetime) -> int:
-        return moment.isocalendar()[1]
+    def get_weeknumber(self, shift_id: int) -> int:
+        shift_obj = self.get_shift(shift_id)
+        return shift_obj.start.isocalendar()[1]
 
     def get_employee_list(self, shift: Shift) -> list[int]:
         """
@@ -181,10 +182,23 @@ class Generator:
 
     def same_day(self, index: int) -> bool:
         shift_id, employee_id = self.schedule[index]
+    
         if employee_id is None:
             return False
+        
         shift = self.get_shift(shift_id)
-        shift_day = shift.start.day
+        employee = self.get_employee(employee_id)
+
+        employee
+    
+        shift_start_day = shift.start.day
+        shift_start_hour = shift.start.hour
+        shift_start_minute = shift.start.minute
+    
+        shift_end_day = shift.end.day
+        shift_end_hour = shift.end.hour
+        shift_end_minute = shift.end.minute
+
         for i, match_shift in enumerate(self.shifts):
             if match_shift.start.day == shift_day and shift != match_shift:
                 if employee_id == self.schedule[i][1]:
@@ -230,7 +244,7 @@ class Generator:
         """
         return (end - start).total_seconds() / 3600  # difference in hours
 
-    def __compute_cost(self, hours: float, possible_employee_id: int, shift: datetime) -> float:
+    def __compute_cost(self, hours: float, possible_employee_id: int, shift_id: int) -> float:
         """
         returns the total pay using the wage and shift in hours. Also takes into account that if an employee has a
         weekly min, the first shifts are 'free'
@@ -238,7 +252,7 @@ class Generator:
 
         possible_employee_object = self.get_employee(possible_employee_id)
         employee_shifts = self.get_workload(possible_employee_id)
-        weeknumber = self.get_weeknumber(shift)
+        weeknumber = self.get_weeknumber(shift_id)
         weekly_min = possible_employee_object.get_week_min(weeknumber)
         wage = possible_employee_object.get_wage()
 
@@ -256,7 +270,7 @@ class Generator:
             # if weekly_min is reached, calculate the wage it will cost normal way
             return wage * hours # Multiply duration with hourly wage to get total pay
 
-    def __workload(self, possible_employee_id: int, shift_moment: datetime) -> bool:
+    def __workload(self, possible_employee_id: int, shift_id: int) -> bool:
         """
         returns True if the employee is allowed to work that shift given his/hers weekly max
         """
@@ -264,16 +278,16 @@ class Generator:
         possible_employee_object = self.get_employee(possible_employee_id)
         possible_employee_workload = self.get_workload(possible_employee_id)
         
-        self.__update_workload(possible_employee_id, shift_moment, add=True)
+        self.__update_workload(possible_employee_id, shift_id, add=True)
 
         # get the week and check how many shifts the person is working that week
-        weeknumber = self.get_weeknumber(shift_moment)
+        weeknumber = self.get_weeknumber(shift_id)
 
         if possible_employee_object.get_week_max(weeknumber) > len(possible_employee_workload[weeknumber]):
             return True
         else:
             # if the person will not take on the shift, delete it from the workload
-            self.__update_workload(possible_employee_id, shift_moment)
+            self.__update_workload(possible_employee_id, shift_id)
             return False
 
     def __update_workload(self, employee_id: int, shift: datetime, add=False) -> None:
@@ -292,3 +306,21 @@ class Generator:
             employee_workload[weeknumber].append(shift)
         else:
             employee_workload[weeknumber].remove(shift)
+
+    """ update workload met ids """
+    def __update_workload(self, employee_id: int, shift_id: int, add=False) -> None:
+        """
+        updates workload dictionary when an employee takes on a new shift
+        """
+        # get the week number of the shift
+        weeknumber = self.get_weeknumber(shift_id)
+        employee_workload = self.get_workload(employee_id)
+
+        if weeknumber not in employee_workload:
+            employee_workload = {weeknumber: []}
+
+        if add:
+            # add a shift to the workload of that employee that week
+            employee_workload[weeknumber].append(shift_id)
+        else:
+            employee_workload[weeknumber].remove(shift_id)
