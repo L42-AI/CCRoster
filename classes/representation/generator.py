@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 import random
+import copy
 
 from classes.representation.dataclasses import Shift, Availability
 from classes.representation.employee import Employee
 from classes.representation.malus_calc import MalusCalc
+from classes.representation.greedy import Greedy
+
 
 from data.assign import employee_list, shift_list
 
@@ -14,89 +17,68 @@ class Generator:
         self.shifts = shift_list  # shift list from assign with shift instances
         self.employees = employee_list
         self.init_employees_id_offline()
+        self.init_shifts_id_offline()
+        self.update_highest_priority_list()
 
-        self.id_employee = self.init_id_to_employee()
-        self.id_shift = self.init_id_to_shift()
-        self.id_wage = self.init_id_to_wage()
+        self.id_employee = {employee.get_id(): employee for employee in self.employees}
+        self.id_shift = {shift.get_id(): shift for shift in self.shifts}
+        self.id_wage = {employee.get_id(): employee.get_wage() for employee in self.employees}
+        self.time_conflict_dict = self.init_coliding_dict()
 
-        self.availabilities = self.init_availability()
+        self.availabilities = [self.get_employee_list(shift) for shift in self.shifts]
+        self.actual_availabilities = [[0, set(shift_availability)] for shift_availability in self.availabilities]
+
+        # self.actual_availabilities = self.init_actual_availability_dict()
         self.workload = self.init_workload()
+        self.schedule = [(shift.get_id(), None) for shift in self.shifts]
 
-        self.schedule = self.init_schedule_empty()
-        self.equal_shift_length: dict[int: bool] = self.init_equal_shifts_lenght() # DEZE RETURNT NU EEN DICT IPV BOOL
-        self.shifts_sorted_by_length: dict[int: int] = self.init_shifts_sorted_by_lenght() # DEZE IS NU EIG VOOR SAUS EN TOCH NOG NIET AF
-        print(self.equal_shift_length)
-        self.fill_schedule_based_on_shifts()
-        self.improve()
+        self.greedy_fill()
         self.print_schedule()
+
+        # Greedy fill methods
+        # self.schedule = Greedy.fill_employees(self.schedule, self.employees)
+        # self.schedule = Greedy.fill_shifts(self.schedule, self.shifts, self.availabilities)
+
+        # self.improve()
         # print(f'Wage cost = €{self.get_wage()}')
 
     """ INIT DATA STRUCTURES """
 
-    def init_employees_id_offline(self):
+    def init_employees_id_offline(self) -> None:
         """
         temporary method to assign id's to employees
         """
-        for id, employee in enumerate(self.employees):
-            employee.id = id
+        for id_, employee in enumerate(self.employees):
+            employee.id = id_
 
-    def init_shifts_id_offline(self):
+    def init_shifts_id_offline(self) -> None:
         """
         temporary method to assign id's to shifts
         """
-        for id, shift in enumerate(self.shifts):
-            shift.id = id
-
-    def init_id_to_employee(self) -> dict[int, Employee]:
-        """
-        returns dictionary that stores employees with their id as key
-        """
-        return {employee.get_id(): employee for employee in self.employees}
-
-    def init_id_to_shift(self) -> dict[int, Shift]:
-        """
-        returns dictionary that stores employees with their id as key
-        """
-        return {shift.get_id(): shift for shift in self.shifts}
-
-    def init_id_to_wage(self) -> dict[int, float]:
-        return {employee.get_id(): employee.get_wage() for employee in self.employees}
-
-    def init_availability(self) -> list[list[int]]:
-        """
-        Initiate the availability list, consists of employee objects
-        """
-        return [self.get_employee_list(shift) for shift in self.shifts]
+        for id_, shift in enumerate(self.shifts):
+            shift.id = id_
 
     def init_workload(self) -> dict[int, dict[int, list[int]]]:
-        return {employee.get_id() : {} for employee in self.employees}
+        workload_dict = {}
+        for employee in self.employees:
+            workload_dict[employee.get_id()] = {weeknum: [] for weeknum in employee.availability}
+        return workload_dict
 
-    def init_equal_shifts_lenght(self) -> dict[int, bool]:
-        """
-        method checks if shifts are of the same lenght, if not, longer shifts may need different initialisations
-        """
+    def init_coliding_dict(self) -> dict[int, list[int]]:
 
-        '''LET OP, DIT RETURNT NU EEN DICT, MAAR WE KUNNEN HIER DUS GEWOON EEN FALSE OF TRUE VAN MAKEN OMDAT WE VOOR DE EERSTE OPTIE GAAN'''
+        time_conflict_dict = {shift.get_id(): [] for shift in self.shifts}
 
-        shift_lenghts = {}
-        for shift in self.shifts:
-            task = shift.get_task()
-            time_delta = shift.end - shift.start
-            if task not in shift_lenghts:
-                shift_lenghts[task] = time_delta
+        for i, shift_1 in enumerate(self.shifts):
 
-            # store False if shift has other lenght
-            elif shift_lenghts[task] != time_delta:
-                shift_lenghts[task] = False
+            for shift_2 in self.shifts[i+1:]:
+                if shift_1.end < shift_2.start:
+                    continue
+                if shift_1.start < shift_2.end:
+                    time_conflict_dict[shift_1.get_id()].append(shift_2.get_id())
+                    time_conflict_dict[shift_2.get_id()].append(shift_1.get_id())
 
-        # mask if the shifts are the same
-        return {task: td != False for task, td in shift_lenghts.items()}
-
-    def init_shifts_sorted_by_lenght(self):
-
-        indexes_list = [i for i in range(len(self.shifts))]
-        sorted_index = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
-
+        return time_conflict_dict
+    
     """ GET """
 
     def get_shift(self, id: int) -> Shift:
@@ -122,52 +104,153 @@ class Generator:
         for employee in self.employees:
 
             # employee.availability is a list with Availability objects corresponding with datetimes they can work
-            for workable_shift in employee.availability:
+            for weeknum in employee.availability:
+                for workable_shift in employee.availability[weeknum]:
 
-                if self.__possible_shift(workable_shift, employee, shift):
-                    downloaded_availabilities.append(employee.get_id())
+                    if self.__possible_shift(workable_shift, employee, shift):
+                        downloaded_availabilities.append(employee.get_id())
 
         return downloaded_availabilities
 
-    """ SCHEDULE """
+    def get_colliding_shifts(self, shift_id: int) -> list[int]:
+        return self.time_conflict_dict.get(shift_id)
 
-    def init_schedule_empty(self) -> list[tuple[int, None]]:
-        return [(shift.get_id(), None) for shift in self.shifts]
-
-    def fill_schedule_based_on_employees(self) -> None:
-        # Sort on availability to first do people with little availability
-        sorted_employees = sorted(self.employees, key=lambda employee: len(employee.availability))
-
-        for i, employee in enumerate(sorted_employees):
-            self.schedule[i][1] = employee.get_id()
-
-
-    """ WAGE NOG WEGHALEN UIT SELF.SCHEDULE """
-    def fill_schedule_based_on_shifts(self) -> None:
-
-        indexes_list = [i for i in range(len(self.shifts))]
-        sorted_index = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
-
-        for index in sorted_index:
-            random_employee = self.__get_random_employee(index)
-            wage = self.id_wage[random_employee]
-            self.schedule[index] = (self.shifts[index], random_employee, wage)
-
-
-    """ DEZE WORDT NIET GEBUIKT, KAN WEG? """
-    '''DENK HET WEL..? VGM GAAN WE ALTIJD WEL EEN GREEDY GEBRUIKEN MAAR WE KUNNEN M HOUDEN MOCHTEN WE ZONDER GREEDY WILLEN TESTEN VOOR IETS OID
-        OF VERPLAATSTEN NAAR DELETE.PY'''
-    def init_schedule(self) -> list[tuple[Shift, Employee]]:
-        schedule: list[tuple[Shift, Employee]] = []
-
-        for i, shift in enumerate(self.shifts):
-
-            # for the initialisation, place a dummy employee with id -1 and wage 999
-            dummy_employee = Employee("Dummy", "Employee", [], 999, 999, 1, "Allround", 1)
-            schedule.append((shift, dummy_employee, 999))
-        return schedule
+    def set_shift_occupation(self, shift_id: int, occupied: bool) -> None:
+        if occupied:
+            self.actual_availabilities[shift_id][0] = 1
+        else: 
+            self.actual_availabilities[shift_id][0] = 0
 
     """ METHODS """
+
+    def schedule_in(self, employee_id: int, index: int) -> None:
+        shift_id = self.schedule[index][0]
+        self.schedule[index] = (shift_id, employee_id)
+        self.__update_workload(employee_id, shift_id, add=True)
+
+        week_num = self.get_weeknumber(shift_id)
+        employee_obj = self.get_employee(employee_id)
+
+        if len(self.workload[employee_id][week_num]) == employee_obj.get_week_max(week_num):
+            self.update_availabilty(employee_id, shift_id, added=True, max_hit=True)
+        else:
+            self.update_availabilty(employee_id, shift_id, added=True, max_hit=False)
+
+    def schedule_out(self, index: int) -> None:
+        shift_id, employee_id = self.schedule[index]
+        self.schedule[index] = (shift_id, None)
+        self.__update_workload(employee_id, shift_id, add=False)
+    
+        self.update_availabilty(employee_id, shift_id, added=False,)
+
+    def update_availabilty(self, employee_id: int, shift_id: int, added: bool, max_hit: bool = False) -> None:
+
+        self.set_shift_occupation(shift_id, added)
+        
+        coliding_shifts = self.get_colliding_shifts(shift_id)
+
+        if added:
+            for coliding_shift_id in coliding_shifts:
+                if employee_id in self.actual_availabilities[coliding_shift_id][1]:
+                    self.actual_availabilities[coliding_shift_id][1].remove(employee_id)
+        
+            if max_hit:
+                for availability in self.actual_availabilities:
+                    if employee_id in availability[1]:
+                        availability[1].remove(employee_id)
+        else:
+            for availability in self.actual_availabilities:
+                if employee_id in availability[1]:
+                    availability[1].add(employee_id)
+    
+    # def greedy_fill(self) -> None:
+
+    #     indexes_list = [i for i in range(len(shift_list))]
+
+    #     sorted_indexes = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
+
+    #     added = 0
+
+    #     # while added < len(self.schedule):
+    #     for i in range(100):
+    #         for index in sorted_indexes:
+    #             if self.schedule[index][1] is not None:
+    #                 continue
+    
+    #             weeknum = self.get_weeknumber(index)
+
+    #             self.compute_priority(weeknum)
+    #             self.update_highest_priority_list()
+
+    #             selected_employee = self.priority_list[0]
+    #             self.schedule_in(selected_employee.id, index)
+
+    #             if not self.passed_hard_constraints(index):
+    #                 self.schedule_out(index)
+    #             else:
+    #                 added += 1
+
+    def greedy_fill(self) -> None:
+
+        indexes_list = [i for i in range(len(shift_list))]
+
+        # while added < len(self.schedule):
+        for _ in range(10):
+            sorted_indexes = sorted(indexes_list, key = lambda i: len(self.actual_availabilities[i][1]) if self.actual_availabilities[i][0] == 0 else 999)
+            print(self.actual_availabilities)
+            # print(sorted_indexes)
+            for index in sorted_indexes:
+                if self.schedule[index][1] is not None:
+                    continue
+                if len(self.actual_availabilities[sorted_indexes[0]]) < 2:
+                    index = sorted_indexes[0]
+                elif len(self.actual_availabilities[sorted_indexes[0]]) < 1:
+                    raise LookupError('No availabilities for shift!')
+
+                weeknum = self.get_weeknumber(index)
+
+                self.compute_priority(weeknum)
+                self.update_highest_priority_list()
+
+                print(self.actual_availabilities)
+                print(index)
+                possible_employees = self.actual_availabilities[index][1]
+                selected_employee = random.choice(tuple(possible_employees))
+                
+                for employee in possible_employees:
+                    if self.get_employee(employee).priority < self.get_employee(selected_employee).priority:
+                        selected_employee = employee
+                
+                self.schedule_in(selected_employee, index)
+
+                if not self.passed_hard_constraints(index):
+                    self.schedule_out(index)
+
+    def compute_priority(self, weeknum) -> None:
+        for employee in self.employees:
+            workload = self.get_workload(employee.id)
+            week_max = employee.get_week_max(weeknum)
+            week_min = employee.get_week_min(weeknum)
+
+            if weeknum in employee.availability:
+                availability_priority = (len(employee.availability[weeknum]) - week_max)
+                week_min_priority = (len(workload[weeknum]) - week_min)
+                week_max_priority = (week_max - len(workload[weeknum]))
+            
+                if availability_priority < 1:
+                    availability_priority = -99
+                if week_min_priority < 0:
+                    week_min_priority = -150
+                if week_max_priority < 1:
+                    week_max_priority = -99
+                
+                employee.priority = availability_priority + week_min_priority - week_max_priority
+                # print(employee.name, employee.priority, week_min, week_max, len(workload[weeknum]))
+            else:
+                employee.priority = 999
+
+    def update_highest_priority_list(self) -> None:
+        self.priority_list = sorted(self.employees, key = lambda employee: employee.priority)
 
     def improve(self) -> None:
         for i in range(200):
@@ -176,12 +259,22 @@ class Generator:
     def print_schedule(self) -> None:
         # Format and print the schedule
         for i, info in enumerate(self.schedule):
-            shift_id, employee_id, wage = info
-            # self.passed_hard_constraints(i)
-            print(shift_id, employee_id)
+            shift_id, employee_id = info
+            shift = self.get_shift(shift_id)
+            employee = self.get_employee(employee_id)
+            print(shift, employee)
 
-        self.total_costs = MalusCalc.total_costs(self.schedule, self.employees)
+        self.total_costs = self.wage_cost()
         print(self.total_costs)
+
+    def wage_cost(self) -> int:
+        total_cost = 0
+        for shift_id, employee_id in self.schedule:
+            shift = self.get_shift(shift_id)
+            employee = self.get_employee(employee_id)
+            cost = shift.duration * employee.get_wage()
+            total_cost += cost
+        return total_cost
 
     def mutate(self):  # this will probably be a class one day...
         '''
@@ -195,55 +288,46 @@ class Generator:
         # pick an employee that can work that shift
         possible_employee_id = self.__get_random_employee(index)  # Updated to get only the Employee object
 
-        # get the duration of the shift
-        shift_duration_hours = self.__get_duration_in_hours(shift_to_replace.start, shift_to_replace.end)
-
-        # use hours to calculate cost
-        new_cost = self.__compute_cost(shift_duration_hours, possible_employee_id, shift_to_replace.start)  # Access the wage directly
+        # use duration to calculate cost
+        new_cost = self.__compute_cost(shift_to_replace.duration, possible_employee_id, shift_to_replace.get_id())  # Access the wage directly
 
         # check if costs are lower with this employee than previous
-        current_cost = self.schedule[index][2]
+        shift_id, current_employee_id = self.schedule[index]
+        current_employee_obj = self.get_employee(current_employee_id)
+        shift_obj = self.get_shift(shift_id)
+        current_cost = current_employee_obj.wage * shift_obj.duration
+
         if new_cost < current_cost:
 
             # check if employee is not crossing weekly_max and place shift into workload
-            if self.__workload(possible_employee_id, shift_to_replace.start):
+            if self.__workload(possible_employee_id, shift_to_replace.get_id()):
 
                 # add shift to workload dictionary
-                self.schedule[index] = (shift_to_replace, possible_employee_id, new_cost)
+                if self.passed_hard_constraints(index):
+                    self.schedule[index] = (shift_to_replace.get_id(), possible_employee_id)
 
     """ HARD CONSTRAINTS """
 
     def passed_hard_constraints(self, index: int) -> bool:
-        if not self.same_day(index):
+        if not self.same_time(index):
+            # print('not passed')
             return False
-        print('yes')
-
-    def same_day(self, index: int) -> bool:
-        shift_id, employee_id = self.schedule[index]
-    
-        if employee_id is None:
-            return False
-        
-        shift = self.get_shift(shift_id)
-        employee = self.get_employee(employee_id)
-
-        employee
-    
-        shift_start_day = shift.start.day
-        shift_start_hour = shift.start.hour
-        shift_start_minute = shift.start.minute
-    
-        shift_end_day = shift.end.day
-        shift_end_hour = shift.end.hour
-        shift_end_minute = shift.end.minute
-
-        for i, match_shift in enumerate(self.shifts):
-            if match_shift.start.day == shift_start_day and shift != match_shift:
-                if employee_id == self.schedule[i][1]:
-                    return False
+        # print('passed')
         return True
 
+    def same_time(self, index: int) -> bool:
+        shift_id, employee_id = self.schedule[index]
 
+        if employee_id is None:
+            raise ValueError('No employee in the schedule')
+
+        colliding_shifts = self.get_colliding_shifts(shift_id)
+        for colliding_shift_id in colliding_shifts:
+            if self.schedule[colliding_shift_id][1] == employee_id:
+                return False
+        
+        return True
+        
     """ Helper methods """
 
     def __possible_shift(self, workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
@@ -275,12 +359,6 @@ class Generator:
         returns an employee id
         """
         return random.choice(self.availabilities[index])
-
-    def __get_duration_in_hours(self, start: datetime, end: datetime) -> float:
-        """
-        returns the number of hours in a shift using the start and end datetime objects
-        """
-        return (end - start).total_seconds() / 3600  # difference in hours
 
     def __compute_cost(self, hours: float, possible_employee_id: int, shift_id: int) -> float:
         """
@@ -314,14 +392,13 @@ class Generator:
         """
 
         possible_employee_object = self.get_employee(possible_employee_id)
-        possible_employee_workload = self.get_workload(possible_employee_id)
-        
+
         self.__update_workload(possible_employee_id, shift_id, add=True)
 
         # get the week and check how many shifts the person is working that week
         weeknumber = self.get_weeknumber(shift_id)
 
-        if possible_employee_object.get_week_max(weeknumber) > len(possible_employee_workload[weeknumber]):
+        if possible_employee_object.get_week_max(weeknumber) > len(self.workload[possible_employee_id][weeknumber]):
             return True
         else:
             # if the person will not take on the shift, delete it from the workload
@@ -334,13 +411,12 @@ class Generator:
         """
         # get the week number of the shift
         weeknumber = self.get_weeknumber(shift_id)
-        employee_workload = self.get_workload(employee_id)
 
-        if weeknumber not in employee_workload:
-            employee_workload = {weeknumber: []}
+        if weeknumber not in self.workload[employee_id]:
+            self.workload[employee_id] = {weeknumber: []}
 
         if add:
             # add a shift to the workload of that employee that week
-            employee_workload[weeknumber].append(shift_id)
+            self.workload[employee_id][weeknumber].append(shift_id)
         else:
-            employee_workload[weeknumber].remove(shift_id)
+            self.workload[employee_id][weeknumber].remove(shift_id)

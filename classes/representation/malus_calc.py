@@ -1,9 +1,9 @@
 
 class MalusCalc:
-    def wage_cost(schedule) -> int:
+    def wage_cost(schedule, shifts_id_dict, employees_id_dict) -> int:
         total_cost = 0
-        for shift, employee in schedule:
-            cost = shift.duration * employee.get_wage()
+        for shift_id, employee_id in schedule:
+            cost = shifts_id_dict[shift_id].duration * employees_id_dict[employee_id].get_wage()
             total_cost += cost
         return total_cost
 

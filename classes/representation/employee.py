@@ -9,17 +9,37 @@ class Employee:
         self.lname = lname
         self.name = f'{fname} {lname}'
         self.id = None
-        self.availability = av
+        self.availability = self.sort_availability(av)
         self.wage = wage
         self.weekly_max = maximum
         self.weekly_min = minimum
         self.level = level
         self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
+        self.priority = 0
         self.add_remove_timeslot = []
 
         # self.upload_employee()
         # self.upload_availability()
+
+    """ Compute availability """
+
+    def get_weeknumber(self, shift_id: int) -> int:
+        shift_obj = self.get_shift(shift_id)
+        return shift_obj.start.isocalendar()[1]
+
+
+    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+        availability_dict = {}
+        
+        for availability in av:
+            weeknum = availability.start.isocalendar()[1]
+
+            if weeknum not in availability_dict:
+                availability_dict[weeknum] = []
+
+            availability_dict[weeknum].append(availability)
+        return availability_dict
 
     """ Get """
     def get_name(self) -> str:
