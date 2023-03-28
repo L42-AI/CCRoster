@@ -33,7 +33,11 @@ class Generator:
 
         # self.greedy_fill()
         self.random_fill()
-        self.print_schedule()
+
+        print(self.compute_replacement_factor(self.actual_availabilities))
+        print(self.compute_wage_cost(self.schedule))
+
+        # self.print_schedule()
 
         # self.improve()
         # print(f'Wage cost = €{self.get_wage()}')
@@ -180,7 +184,7 @@ class Generator:
         # while added < len(self.schedule):
         for _ in range(10):
             sorted_indexes = sorted(indexes_list, key = lambda i: len(self.actual_availabilities[i][1]) if self.actual_availabilities[i][0] == 0 else 999)
-            print(self.actual_availabilities)
+            # print(self.actual_availabilities)
             # print(sorted_indexes)
             for index in sorted_indexes:
                 if self.schedule[index][1] is not None:
@@ -195,8 +199,8 @@ class Generator:
                 self.compute_priority(weeknum)
                 self.update_highest_priority_list()
 
-                print(self.actual_availabilities)
-                print(index)
+                # print(self.actual_availabilities)
+                # print(index)
                 possible_employees = self.actual_availabilities[index][1]
                 selected_employee = random.choice(tuple(possible_employees))
                 
@@ -241,23 +245,48 @@ class Generator:
 
     def print_schedule(self) -> None:
         # Format and print the schedule
-        for i, info in enumerate(self.schedule):
-            shift_id, employee_id = info
+        for shift_id, employee_id in self.schedule:
             shift = self.get_shift(shift_id)
             employee = self.get_employee(employee_id)
             print(shift, employee)
 
-        self.total_costs = self.wage_cost()
-        print(self.total_costs)
 
-    def wage_cost(self) -> int:
+    """ COST FUNCTION """
+
+    # Idea:
+    # cost = weight * team_strength + weigth * wage_cost + weigth * replacement_factor
+
+    def compute_wage_cost(self, schedule:list[tuple[int, int]]) -> float:
         total_cost = 0
-        for shift_id, employee_id in self.schedule:
+        for shift_id, employee_id in schedule:
             shift = self.get_shift(shift_id)
             employee = self.get_employee(employee_id)
             cost = shift.duration * employee.get_wage()
             total_cost += cost
-        return total_cost
+        return round(total_cost, 2)
+    
+    def compute_replacement_factor(self, availabilities_list: list[list[int, list[int]]]) -> float:
+        def find_min_and_max(availabilities_list) -> tuple[int, int]:
+            max_len = len(availabilities_list[0][1])
+            min_len = max_len
+
+            # Loop over the rest of the nested lists and update max_len and min_len if necessary
+            for sublist in availabilities_list[1:]:
+                length = len(sublist[1])
+                if length > max_len:
+                    max_len = length
+                elif length < min_len:
+                    min_len = length
+
+            return max_len, min_len
+        
+        max_len, min_len = find_min_and_max(availabilities_list)
+        
+        return (max_len - min_len) / max(1, min_len)
+
+    def compute_team_strength(self) -> float:
+        ...
+
 
     def mutate(self):  # this will probably be a class one day...
         '''

@@ -29,8 +29,8 @@ employee_list.append(Employee('Isabella', 'Koster', [Availability(start=datetime
                                                      Availability(start=datetime(2023,2,4,8,3), end=datetime(2023,2,4,13,30))],
                                                      {5:2, 1:2, 2:2, 3:2}, {5:1, 1:1, 2:1, 3:1}, 11, 1, [1], 'coffee_company'))
 
-employee_list.append(Employee('Alexandra', 'Offringa', [],
-                                                       {5:0, 1:0, 2:0, 3:0}, {5:1, 1:1, 2:1, 3:1}, 15.5, 1, [1], 'coffee_company'))
+employee_list.append(Employee('Alexandra', 'Offringa', [Availability(start=datetime(2023,2,3,0), end=datetime(2023,2,3,23,59))],
+                                                       {5:1, 1:0, 2:0, 3:0}, {5:1, 1:1, 2:1, 3:1}, 15.5, 1, [1], 'coffee_company'))
 
 employee_list.append(Employee('Pim', 'Putman', [Availability(start=datetime(2023,1,30,0), end=datetime(2023,1,30,14)),
                                                 Availability(start=datetime(2023,1,31,0), end=datetime(2023,1,31,23,59))],
