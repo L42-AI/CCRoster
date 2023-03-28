@@ -1,7 +1,6 @@
 import random
 from datetime import datetime
 from classes.representation.dataclasses import Availability
-import uuid
 
 class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], minimum: dict[int, int], wage: float, level: int, tasks: list[int], location: str) -> None:

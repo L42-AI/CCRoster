@@ -32,7 +32,8 @@ class Generator:
         self.workload = self.init_workload()
         self.schedule = [(shift.get_id(), None) for shift in self.shifts]
 
-        self.greedy_fill()
+        # self.greedy_fill()
+        self.random_fill()
         self.print_schedule()
 
         # Greedy fill methods
@@ -163,32 +164,19 @@ class Generator:
                 if employee_id in availability[1]:
                     availability[1].add(employee_id)
     
-    # def greedy_fill(self) -> None:
+    def random_fill(self) -> None:
 
-    #     indexes_list = [i for i in range(len(shift_list))]
+        added = 0
+        while added < len(self.schedule):
+            index = random.randint(0, len(self.schedule) - 1)
 
-    #     sorted_indexes = sorted(indexes_list, key = lambda i: len(self.availabilities[i]))
+            if self.schedule[index][1] is not None:
+                continue
 
-    #     added = 0
+            selected_employee = random.choice(self.employees)
+            self.schedule_in(selected_employee.id, index)
 
-    #     # while added < len(self.schedule):
-    #     for i in range(100):
-    #         for index in sorted_indexes:
-    #             if self.schedule[index][1] is not None:
-    #                 continue
-    
-    #             weeknum = self.get_weeknumber(index)
-
-    #             self.compute_priority(weeknum)
-    #             self.update_highest_priority_list()
-
-    #             selected_employee = self.priority_list[0]
-    #             self.schedule_in(selected_employee.id, index)
-
-    #             if not self.passed_hard_constraints(index):
-    #                 self.schedule_out(index)
-    #             else:
-    #                 added += 1
+            added += 1
 
     def greedy_fill(self) -> None:
 
