@@ -28,17 +28,12 @@ class Generator:
         self.availabilities = [self.get_employee_list(shift) for shift in self.shifts]
         self.actual_availabilities = [[0, set(shift_availability)] for shift_availability in self.availabilities]
 
-        # self.actual_availabilities = self.init_actual_availability_dict()
         self.workload = self.init_workload()
         self.schedule = [(shift.get_id(), None) for shift in self.shifts]
 
         # self.greedy_fill()
         self.random_fill()
         self.print_schedule()
-
-        # Greedy fill methods
-        # self.schedule = Greedy.fill_employees(self.schedule, self.employees)
-        # self.schedule = Greedy.fill_shifts(self.schedule, self.shifts, self.availabilities)
 
         # self.improve()
         # print(f'Wage cost = €{self.get_wage()}')
