@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 def run() -> None:
     plot_dict = {}
-
     for i in tqdm(range(10000)):
         G = Generator()
         cost = str(G.total_costs)
@@ -14,14 +13,13 @@ def run() -> None:
             plot_dict[cost] = 1
         else:
             plot_dict[cost] += 1
-
     
-    # print(set(cost_list))
+    print(plot_dict.keys())
     plot(plot_dict, title='costs over 10000 iters')
 
 """ PLOT """
 
-def plot(plot_dict, title) -> None:
+def plot(plot_dict: dict[int, int], title: str) -> None:
     plt.bar(plot_dict.keys(), plot_dict.values())
     plt.title(title)
     plt.show()
