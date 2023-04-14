@@ -20,9 +20,11 @@ class Generator:
         self.init_shifts_id_offline()
         self.update_highest_priority_list()
 
-        self.id_employee = {employee.get_id(): employee for employee in self.employees}
+        self.id_employee = {
+            employee.get_id(): employee for employee in self.employees}
         self.id_shift = {shift.get_id(): shift for shift in self.shifts}
-        self.id_wage = {employee.get_id(): employee.get_wage() for employee in self.employees}
+        self.id_wage = {employee.get_id(): employee.get_wage()
+                        for employee in self.employees}
         self.time_conflict_dict = self.init_coliding_dict()
 
         self.availabilities = {shift.id: self.get_employee_list(shift) for shift in self.shifts}
@@ -39,7 +41,8 @@ class Generator:
 
         # self.print_schedule()
 
-        # self.improve()
+        self.improve()
+        self.total_costs = self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees)
         # print(f'Wage cost = €{self.get_wage()}')
 
     """ INIT DATA STRUCTURES """
@@ -78,7 +81,7 @@ class Generator:
                     time_conflict_dict[shift_2.id].append(shift_1.id)
 
         return time_conflict_dict
-    
+
     """ GET """
 
     def get_shift(self, id: int) -> Shift:
@@ -89,7 +92,7 @@ class Generator:
 
     def get_workload(self, id: int) -> dict[int, list]:
         return self.workload.get(id)
-    
+
     def get_weeknumber(self, shift_id: int) -> int:
         shift_obj = self.get_shift(shift_id)
         return shift_obj.start.isocalendar()[1]
@@ -117,7 +120,7 @@ class Generator:
     def set_shift_occupation(self, shift_id: int, occupied: bool) -> None:
         if occupied:
             self.actual_availabilities[shift_id][0] = 1
-        else: 
+        else:
             self.actual_availabilities[shift_id][0] = 0
 
     """ METHODS """
@@ -133,7 +136,8 @@ class Generator:
         if len(self.workload[employee_id][week_num]) == emlployee_week_max:
             self.update_availabilty(employee_id, shift_id, added=True, max_hit=True)
         else:
-            self.update_availabilty(employee_id, shift_id, added=True, max_hit=False)
+            self.update_availabilty(
+                employee_id, shift_id, added=True, max_hit=False)
 
     def schedule_out(self, shift_id: int) -> None:
         employee_id = self.schedule[shift_id]
@@ -145,14 +149,15 @@ class Generator:
     def update_availabilty(self, employee_id: int, shift_id: int, added: bool, max_hit: bool = False) -> None:
 
         self.set_shift_occupation(shift_id, added)
-        
+
         coliding_shifts = self.get_colliding_shifts(shift_id)
 
         if added:
             for coliding_shift_id in coliding_shifts:
                 if employee_id in self.actual_availabilities[coliding_shift_id][1]:
-                    self.actual_availabilities[coliding_shift_id][1].remove(employee_id)
-        
+                    self.actual_availabilities[coliding_shift_id][1].remove(
+                        employee_id)
+
             if max_hit:
                 for shift_id in self.actual_availabilities:
                     if employee_id in self.actual_availabilities[shift_id][1]:
@@ -217,28 +222,34 @@ class Generator:
             week_min = employee.get_week_min(weeknum)
 
             if weeknum in employee.availability:
-                availability_priority = (len(employee.availability[weeknum]) - week_max)
+                availability_priority = (
+                    len(employee.availability[weeknum]) - week_max)
                 week_min_priority = (len(workload[weeknum]) - week_min)
                 week_max_priority = (week_max - len(workload[weeknum]))
-            
+
                 if availability_priority < 1:
                     availability_priority = -99
                 if week_min_priority < 0:
                     week_min_priority = -150
                 if week_max_priority < 1:
                     week_max_priority = -99
-                
-                employee.priority = availability_priority + week_min_priority - week_max_priority
+
+                employee.priority = availability_priority + \
+                    week_min_priority - week_max_priority
                 # print(employee.name, employee.priority, week_min, week_max, len(workload[weeknum]))
             else:
                 employee.priority = 999
 
     def update_highest_priority_list(self) -> None:
-        self.priority_list = sorted(self.employees, key = lambda employee: employee.priority)
+        self.priority_list = sorted(
+            self.employees, key=lambda employee: employee.priority)
 
     def improve(self) -> None:
-        for _ in range(200):
+        for i in range(2000):
+            # print(i)
             self.mutate()
+        # print(self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees))
+   
 
     def print_schedule(self) -> None:
         # Format and print the schedule
@@ -248,13 +259,12 @@ class Generator:
 
     """ COST FUNCTION """
 
-    # Idea:
-    # cost = weight * team_strength + weigth * wage_cost + weigth * replacement_factor
+
 
     def compute_wage_cost(self, schedule:dict[int, int]) -> float:
         total_cost = 0
         for shift_id, employee_id in schedule.items():
-            total_cost += self.__compute_cost(employee_id, shift_id)
+            total_cost += self.__compute_cost(shift_id, employee_id)
         return round(total_cost, 2)
     
     @staticmethod
@@ -279,13 +289,12 @@ class Generator:
     @staticmethod
     def standard_cost(employee_list: list[Employee]):
         """
-        calculates the standard costs of all employees
+        calculates the total costs of a schedule
         """
         # calculate the starting costs
-        total = sum([sum(employee.weekly_min.values()) * employee.get_wage() for employee in employee_list])
+        total = sum([sum(employee.weekly_min.values()) * employee.get_wage()  for employee in employee_list])
 
         return round(total, 2)
-
 
     def mutate(self):  # this will probably be a class one day...
         '''
@@ -294,27 +303,87 @@ class Generator:
         '''
 
         # pick a shift to replace
-        replace_shift_id = self.__get_random_shift()
+        shift_to_replace_id = self.__get_random_shift()
+        current_employee_id = self.schedule[shift_to_replace_id]
+        shift_obj = self.id_shift[shift_to_replace_id]
 
         # pick an employee that can work that shift
-        replace_employee_id = self.__get_random_employee(replace_shift_id)  # Updated to get only the Employee object
+        possible_employee_id = self.__get_random_employee(
+            shift_to_replace_id, current_employee_id)  # Updated to get only the Employee object
 
         # use duration to calculate cost
-        new_cost = self.__compute_cost(replace_employee_id, replace_shift_id)  # Access the wage directly
+        new_cost = self.__compute_cost(
+            shift_to_replace_id, possible_employee_id)  # Access the wage directly
 
         # check if costs are lower with this employee than previous
-        current_employee_id = self.schedule[replace_shift_id]
-
-        current_cost = self.__compute_cost(current_employee_id, replace_shift_id)
+        current_employee_obj = self.get_employee(current_employee_id)
+        current_cost = current_employee_obj.wage * shift_obj.duration
 
         if new_cost < current_cost:
 
             # check if employee is not crossing weekly_max and place shift into workload
-            if self.__workload(replace_employee_id, replace_shift_id):
+            if self.__workload(possible_employee_id, shift_to_replace_id): # can this be shift_id?
 
                 # add shift to workload dictionary
-                if self.passed_hard_constraints(replace_shift_id):
-                    self.schedule[replace_shift_id] = replace_employee_id
+                if self.passed_hard_constraints(shift_to_replace_id):
+                    self.schedule[shift_to_replace_id] = possible_employee_id
+
+            else:
+                # print('starting')
+                # print(possible_employee_id, shift_to_replace_id)
+                # print(self.schedule)
+                # print(' ------------------------------------------------------- ')
+
+                # get the total schedule costs before changes:
+                total_costs_old = self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees)
+
+                # make changes
+                undo_update = self.mutate_max_workload(possible_employee_id, shift_to_replace_id) # new worker has updated his workload, old worker had that shift removed from workload
+                total_costs_new = self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees)
+
+                # compare costs
+                if total_costs_new > total_costs_old:
+                    for update in undo_update:
+                        # update the temporarly placed worker's workload
+                        employee_id, shift_id = update
+
+                        # remove current worker from schedule and update workload
+                        self.__update_workload( self.schedule[shift_id], shift_id, add=False)
+                        self.schedule[shift_id] = employee_id
+                        self.__update_workload(employee_id, shift_id, add=True)
+                        
+                #     print('did not improve')
+                # print(self.schedule)
+                # print('done')
+    def mutate_max_workload(self, possible_employee_id, shift_to_replace_id):
+        '''
+        Method gets called when mutate wants to schedule a worker for a shift but the worker is already
+        working his/hers max. This method will replace one of his/her shifts to check if that will be cheaper
+        '''
+
+        undo_update: tuple(int, int) = []
+
+        # get the shortest shift the busy person is working
+        shortest_shift_id = sorted(self.shifts, key=lambda x: x.duration)[0].id
+
+        if shift_to_replace_id == shortest_shift_id:
+            return
+
+        # pick new employee to work the shortest shift
+        shortest_shift_employee_id = self.__get_random_employee(shortest_shift_id, possible_employee_id)
+
+        if self.__workload(shortest_shift_employee_id, shortest_shift_id):
+            if self.passed_hard_constraints(shortest_shift_id):
+
+                # store the changes ('old employee, shift')
+                undo_update.append((self.schedule[shortest_shift_id], shortest_shift_id))
+                self.__update_workload(shortest_shift_employee_id, shortest_shift_id, add=True)
+                self.__update_workload(possible_employee_id, shift_to_replace_id, add=False)
+                self.schedule[shortest_shift_id] = shortest_shift_employee_id
+        else:
+            self.mutate_max_workload(shortest_shift_employee_id, shortest_shift_id)
+
+        return undo_update
 
     """ HARD CONSTRAINTS """
 
@@ -333,9 +402,9 @@ class Generator:
         for colliding_shift_id in colliding_shifts:
             if self.schedule[colliding_shift_id] == employee_id:
                 return False
-        
+
         return True
-        
+
     """ Helper methods """
 
     def __possible_shift(self, workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
@@ -357,28 +426,32 @@ class Generator:
         """
         return random.choice(self.shifts).get_id()
 
-    def __get_random_employee(self, shift_id: int) -> int:
+        random_shift = random.choice(self.shifts.keys())
+
+        return random_shift
+
+    def __get_random_employee(self, shift_to_replace_id, current_id) -> int:
         """
         returns an employee id
         """
-        return random.choice(self.availabilities[shift_id])
 
-    def __compute_cost(self, employee_id: int, shift_id: int) -> float:
+        # make sure we do not select current employee
+        choices = set(self.availabilities[shift_to_replace_id]) - set([current_id,])
+        return random.choice(list(choices))
+
+    def __compute_cost(self, shift: int, possible_employee_id: int) -> float:
         """
         returns the total pay using the wage and shift in hours. Also takes into account that if an employee has a
         weekly min, the first shifts are 'free'
         """
 
-        employee_object = self.get_employee(employee_id)
-        shift_object = self.get_shift(shift_id)
-
-        employee_workload = self.get_workload(employee_id)
-        hourly_wage = employee_object.get_wage()
-
-        weeknumber = self.get_weeknumber(shift_id)
-        weekly_min = employee_object.get_week_min(weeknumber)
-        hours = shift_object.duration
-        
+        possible_employee_object = self.get_employee(possible_employee_id)
+        employee_shifts = self.get_workload(possible_employee_id)
+        weeknumber = self.get_weeknumber(shift)
+        weekly_min = possible_employee_object.get_week_min(weeknumber)
+        hours = self.get_shift(shift).duration
+        wage = possible_employee_object.get_wage()
+        employee_workload = self.workload[possible_employee_id]
 
         # if week not in workload, number of shifts that week == 0
         if weeknumber not in employee_workload and weekly_min > 0:
@@ -392,7 +465,7 @@ class Generator:
 
         else:
             # if weekly_min is reached, calculate the wage it will cost normal way
-            return hourly_wage * hours # Multiply duration with hourly wage to get total pay
+            return wage * hours  # Multiply duration with hourly wage to get total pay
 
     def __workload(self, possible_employee_id: int, shift_id: int) -> bool:
         """

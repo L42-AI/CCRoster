@@ -7,7 +7,7 @@ class MalusCalc:
             total_cost += cost
         return total_cost
 
-    def total_costs(schedule, employees):
+    def standard_costs(schedule, employees):
         """
         calculates the total costs of a schedule
         """
