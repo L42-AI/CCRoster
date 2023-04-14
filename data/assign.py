@@ -56,7 +56,7 @@ employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(start=datet
                                                         {5:2, 1:2, 2:2, 3:2}, {5:1, 1:1, 2:1, 3:1}, 30, 1, [1], 'coffee_company'))
 
 for day in range(30,32):
-    shift_list.append(Shift(start=datetime(2023, 1, day, 7, 30),
+    shift_list.append(Shift(start=datetime(2023, 1, day, 7, day),
                          end=datetime(2023, 1, day, 13, 0),
                          task=1, location=1))
     shift_list.append(Shift(start=datetime(2023, 1, day, 12, 30),
@@ -64,7 +64,7 @@ for day in range(30,32):
                          task=1, location=1))
 
 for day in range(1,6):
-    shift_list.append(Shift(start=datetime(2023, 2, day, 7, 30),
+    shift_list.append(Shift(start=datetime(2023, 2, day, 7, day),
                          end=datetime(2023, 2, day, 13, 0),
                          task=1, location=1))
     shift_list.append(Shift(start=datetime(2023, 2, day, 12, 30),

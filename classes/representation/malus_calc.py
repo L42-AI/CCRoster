@@ -15,6 +15,6 @@ class MalusCalc:
         total = sum([sum(x.weekly_min.values()) * x.get_wage()  for x in employees])
 
         # add the shift costs
-        total += sum(x[2] for x in schedule)
+        total += sum(x[1] for x in schedule)
 
         return total
