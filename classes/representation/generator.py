@@ -34,8 +34,8 @@ class Generator:
         self.greedy_fill()
         # self.random_fill()
 
-        print(self.compute_replacement_factor(self.actual_availabilities))
-        print(round(self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees), 2))
+        # print(self.compute_replacement_factor(self.actual_availabilities))
+        self.total_costs = round(self.compute_wage_cost(self.schedule) + self.standard_cost(self.employees), 2)
 
         # self.print_schedule()
 
