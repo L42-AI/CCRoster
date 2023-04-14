@@ -25,5 +25,5 @@ def plot(plot_dict: dict[int, int], title: str) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    run()
-    # Generator()
+    # run()
+    Generator()
