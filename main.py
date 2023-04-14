@@ -5,25 +5,25 @@ from tqdm import tqdm
 """ TEST """
 
 def run() -> None:
-    iter_list = []
-    cost_list = []
+    plot_dict = {}
     for i in tqdm(range(10000)):
         G = Generator()
-        cost = G.total_costs
-
-        iter_list.append(i)
-        cost_list.append(cost)
+        cost = str(G.total_costs)
+        if cost not in plot_dict:
+            plot_dict[cost] = 1
+        else:
+            plot_dict[cost] += 1
     
-    print(set(cost_list))
-    plot(cost_list, iter_list, title='costs over 10000 iters')
+    print(plot_dict.keys())
+    plot(plot_dict, title='costs over 10000 iters')
 
 """ PLOT """
 
-def plot(x_list:list, y_list:list, title: str) -> None:
-    plt.bar(x_list, y_list)
+def plot(plot_dict: dict[int, int], title: str) -> None:
+    plt.bar(plot_dict.keys(), plot_dict.values())
     plt.title(title)
     plt.show()
 
 if __name__ == "__main__":
-    # run()
-    Generator()
+    run()
+    # Generator()
