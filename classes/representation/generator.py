@@ -36,9 +36,6 @@ class Generator:
         self.improve()
 
         self.total_costs = self.get_total_cost()
-        print(self.total_costs)
-        for shift in self.schedule:
-            print(f"shift id: {shift}, employee id: {self.schedule[shift]}, employee wage: {self.id_employee[self.schedule[shift]].wage}, duration: {self.id_shift[shift].duration}")
         # [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
 
     """ INIT DATA STRUCTURES """
