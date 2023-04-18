@@ -310,9 +310,6 @@ class Generator:
             if self.passed_hard_constraints(replace_shift_id, replace_employee_id):
                 # print('improvement')
                 self.schedule_swap(replace_shift_id, replace_employee_id)
-                # print('new cost normal swap')
-                # print(self.get_total_cost())
-    
                         
             if self.get_total_cost() > current_cost:
 
