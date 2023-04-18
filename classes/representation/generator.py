@@ -33,11 +33,13 @@ class Generator:
 
         self.greedy_fill()
 
-        # self.improve()
+        self.improve()
 
         self.total_costs = self.get_total_cost()
         print(self.total_costs)
-        [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
+        for shift in self.schedule:
+            print(f"shift id: {shift}, employee id: {self.schedule[shift]}, employee wage: {self.id_employee[self.schedule[shift]].wage}, duration: {self.id_shift[shift].duration}")
+        # [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
 
     """ INIT DATA STRUCTURES """
 
@@ -247,8 +249,9 @@ class Generator:
             self.employees, key=lambda employee: employee.priority)
 
     def improve(self) -> None:
-        for _ in range(200):
+        for _ in range(200000):
             self.mutate()
+            # print(self.get_total_cost())
 
     def print_schedule(self) -> None:
         # Format and print the schedule
@@ -300,40 +303,35 @@ class Generator:
         current_employee_id = self.schedule[replace_shift_id]
         replace_employee_id = self.__get_random_employee(replace_shift_id, current_employee_id)
 
-        current_cost = self.__compute_cost(replace_shift_id, current_employee_id)
-        new_cost = self.__compute_cost(replace_shift_id, replace_employee_id)
+        current_cost = self.get_total_cost()
 
-        if new_cost < current_cost:
+        if self.__check_workload_capacity(replace_shift_id, replace_employee_id):
 
-            # check if employee is not crossing weekly_max and place shift into workload
-            if self.__check_workload_capacity(replace_shift_id, replace_employee_id):
-
-                if self.passed_hard_constraints(replace_shift_id, replace_employee_id):
-                    print('improvement')
-                    self.schedule_swap(replace_shift_id, replace_employee_id)
-
-            else:
-                # print('starting')
-                # print(possible_employee_id, shift_to_replace_id)
-                # print(self.schedule)
-                # print(' ------------------------------------------------------- ')
-
-                # get the total schedule costs before changes:
-                total_costs_old = self.get_total_cost()
-
-                # make changes
-                undo_update = self.mutate_max_workload(replace_shift_id, replace_employee_id) # new worker has updated his workload, old worker had that shift removed from workload
-                total_costs_new = self.get_total_cost()
-
-                # compare costs
-                if total_costs_new > total_costs_old:
-                    for shift_id, employee_id in undo_update:
-                        # swap back
-                        self.schedule_swap(shift_id, employee_id)
+            if self.passed_hard_constraints(replace_shift_id, replace_employee_id):
+                # print('improvement')
+                self.schedule_swap(replace_shift_id, replace_employee_id)
+                # print('new cost normal swap')
+                # print(self.get_total_cost())
+    
                         
-                #     print('did not improve')
-                # print(self.schedule)
-                # print('done')
+            if self.get_total_cost() > current_cost:
+
+                self.schedule_swap(replace_shift_id, current_employee_id)
+        
+        else:
+
+            # try to 'ease' workers workload by having someone else take over the shift, store the changes 
+            undo_update = self.mutate_max_workload(replace_shift_id, replace_employee_id) 
+           
+            total_costs_new = self.get_total_cost()
+
+            # compare costs
+            if total_costs_new > current_cost:
+
+                for shift_id, employee_id in undo_update:
+                    # swap back
+                    self.schedule_swap(shift_id, employee_id)
+
         
     def mutate_extra_employees(self) -> None:
         sorted_shifts = sorted(self.schedule.keys(), key = lambda shift_id: self.actual_availabilities[shift_id][1], reverse=True)
@@ -463,7 +461,7 @@ class Generator:
         # get the week and check how many shifts the person is working that week
         weeknumber = self.get_weeknumber(shift_id)
 
-        if employee_obj.get_week_max(weeknumber) > (len(self.workload[employee_id][weeknumber]) + 1):
+        if employee_obj.get_week_max(weeknumber) > (len(self.workload[employee_id][weeknumber])):
             return True
         else:
             # if the person will not take on the shift, delete it from the workload

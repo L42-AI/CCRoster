@@ -13,9 +13,8 @@ def run() -> None:
             plot_dict[cost] = 1
         else:
             plot_dict[cost] += 1
-    
-    print(plot_dict.keys())
-    plot(plot_dict, title='costs over 10000 iters')
+    print(plot_dict)
+    plt.plot(plot_dict, title='costs over 10000 iters')
 
 """ PLOT """
 
