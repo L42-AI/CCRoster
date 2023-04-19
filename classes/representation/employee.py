@@ -21,11 +21,6 @@ class Employee:
 
     """ Compute availability """
 
-    def get_weeknumber(self, shift_id: int) -> int:
-        shift_obj = self.get_shift(shift_id)
-        return shift_obj.start.isocalendar()[1]
-
-
     def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
         availability_dict = {}
         
@@ -66,7 +61,8 @@ class Employee:
     def get_week_min(self, week) -> int:
         return self.weekly_min.get(week)
 
-    def get_id(self) -> str:
+    @property
+    def id(self) -> str:
         return self.id
 
     def __str__(self) -> str:

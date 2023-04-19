@@ -106,8 +106,7 @@ class Generator:
         if add:
             for coliding_shift_id in coliding_shifts:
                 if employee_id in self.actual_availabilities[coliding_shift_id][1]:
-                    self.actual_availabilities[coliding_shift_id][1].remove(
-                        employee_id)
+                    self.actual_availabilities[coliding_shift_id][1].remove(employee_id)
 
             if max_hit:
                 for shift_id in self.actual_availabilities:
