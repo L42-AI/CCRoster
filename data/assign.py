@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from classes.representation.dataclasses import Shift, Availability
+from classes.representation.shift import Shift
 from classes.representation.employee import Employee
-
+from classes.representation.availability import Availability
 
 employee_list: list[Employee] = []
 shift_list: list[Shift] = []

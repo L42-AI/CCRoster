@@ -1,6 +1,4 @@
-import random
-from datetime import datetime
-from classes.representation.dataclasses import Availability
+from classes.representation.availability import Availability
 
 class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], minimum: dict[int, int], wage: float, level: int, tasks: list[int], location: str) -> None:
@@ -46,10 +44,6 @@ class Employee:
 
     def get_av(self) -> list[Availability]:
         return self.availability
-
-    def get_random_av(self) -> Availability:
-        if len(self.availability) > 0:
-            return random.choice(self.availability)
 
     def get_wage(self) -> float:
         return float(self.wage)
