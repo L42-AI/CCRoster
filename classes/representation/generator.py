@@ -192,9 +192,9 @@ class Generator:
             self.employees, key=lambda employee: employee.priority)
 
     def improve(self) -> None:
-        for _ in range(200):
+        for _ in range(20000):
             self.mutate()
-            # print(self.get_total_cost())
+        print(self.get_total_cost())
 
     def print_schedule(self) -> None:
         # Format and print the schedule
