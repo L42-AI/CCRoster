@@ -9,7 +9,7 @@ from classes.representation.workload import Workload
 
 from classes.representation.malus_calc import MalusCalc
 
-from helpers import get_shift, get_employee, get_weekgit number
+from helpers import get_shift, get_employee, get_weeknumber
 from data.assign import employee_list, shift_list
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
