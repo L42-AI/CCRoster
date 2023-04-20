@@ -4,11 +4,13 @@ import copy
 import itertools
 import math
 
-
-from classes.representation.dataclasses import Shift, Availability
+from classes.representation.shift import Shift
 from classes.representation.employee import Employee
-from classes.representation.malus_calc import MalusCalc
-from classes.representation.greedy import Greedy
+from classes.representation.availability import Availability
+from classes.representation.shift_constraints import ShiftConstrains
+from classes.representation.workload import Workload
+from classes.representation.employee import Employee
+
 from classes.representation.schedule import Schedule
 
 
@@ -281,14 +283,10 @@ class Generator:
             winner = sorted(plants, key= lambda x: x.cost)[0]
             print(winner.cost)
 
-            
-
-
     def print_schedule(self) -> None:
         # Format and print the schedule
         for shift_id, employee_id in self.schedule.schedule.items():
             print(self.get_shift(shift_id), self.get_employee(employee_id))
-
 
     """ COST FUNCTION """
 
@@ -353,7 +351,6 @@ class Generator:
                 self.accept_change(bud_schedule, old_cost, buds, T)
 
         return buds           
-
         
     def mutate_extra_employees(self) -> None:
         sorted_shifts = sorted(self.schedule.schedule.keys(), key = lambda shift_id: self.actual_availabilities[shift_id][1], reverse=True)
@@ -386,7 +383,6 @@ class Generator:
         else:
             self.mutate_max_workload(shortest_shift_id, shortest_shift_employee_id, schedule)
         return schedule
-
 
     """ HARD CONSTRAINTS """
 

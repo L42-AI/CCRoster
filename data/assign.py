@@ -10,8 +10,8 @@ shift_list: list[Shift] = []
 employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(2023,1,30,0), end=datetime(2023,1,30,23,59)),
                                                   Availability(start=datetime(2023,2,1,0), end=datetime(2023,2,1,23,59)),
                                                   Availability(start=datetime(2023,2,2,0), end=datetime(2023,2,2,23,59)),
-                                                   Availability(start=datetime(2023,2,2,0), end=datetime(2023,2,2,23,59)),
-                                                       Availability(start=datetime(2023,2,1,13), end=datetime(2023,2,1,23,59)),
+                                                  Availability(start=datetime(2023,2,2,0), end=datetime(2023,2,2,23,59)),
+                                                  Availability(start=datetime(2023,2,1,13), end=datetime(2023,2,1,23,59)),
                                                   Availability(start=datetime(2023,2,3,0), end=datetime(2023,2,3,23,59))],
                                                   {5:2, 1:2, 2:2, 3:2}, {5:1, 1:1, 2:1, 3:1}, 240, 1, [1], 'coffee_company'))
 
@@ -27,8 +27,8 @@ employee_list.append(Employee("Sophie", "van 't Hullenaar", [Availability(start=
                                                         Availability(start=datetime(2023,2,2,0), end=datetime(2023,2,2,23,59)),
                                                         Availability(start=datetime(2023,1,30,0), end=datetime(2023,1,30,23,59)),
                                                         Availability(start=datetime(2023,2,3,13,3), end=datetime(2023,2,3,23,59)),
-                                                             Availability(start=datetime(2023,2,4,0), end=datetime(2023,2,4,23,59)),
-                                                             Availability(start=datetime(2023,2,5,0), end=datetime(2023,2,5,23,59))],
+                                                        Availability(start=datetime(2023,2,4,0), end=datetime(2023,2,4,23,59)),
+                                                        Availability(start=datetime(2023,2,5,0), end=datetime(2023,2,5,23,59))],
                                                              {5:2, 1:2, 2:2, 3:2}, {5:1, 1:1, 2:1, 3:1}, 12, 1, [1], 'coffee_company'))
 
 employee_list.append(Employee('Isabella', 'Koster', [Availability(start=datetime(2023,2,3,13,3), end=datetime(2023,2,3,23,59)),
