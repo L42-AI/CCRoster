@@ -158,4 +158,21 @@ def get_employee_set(shift: Shift) -> set[int]:
 
     return availabilities
 
+def init_coliding_dict(shifts: list[Shift]) -> dict[int, list[int]]:
+
+    time_conflict_dict = {shift.id: [] for shift in shifts}
+
+    for i, shift_1 in enumerate(shifts):
+
+        for shift_2 in shifts[i+1:]:
+            if shift_1.end < shift_2.start:
+                continue
+            if shift_1.start < shift_2.end:
+                time_conflict_dict[shift_1.id].append(shift_2.id)
+                time_conflict_dict[shift_2.id].append(shift_1.id)
+
+    return time_conflict_dict
+
+time_conflict_dict = init_coliding_dict(shift_list)
 total_availabilities = {shift.id: get_employee_set(shift) for shift in shift_list}
+

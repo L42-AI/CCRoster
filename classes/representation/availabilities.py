@@ -6,7 +6,7 @@ from classes.representation.availability import Availability
 from classes.representation.shift_constraints import ShiftConstrains
 from classes.representation.workload import Workload
 
-from data.assign import employee_list, total_availabilities
+from data.assign import total_availabilities
 
 class Availabilities(dict):
 

@@ -6,18 +6,20 @@ from helpers import get_weeknumber, get_employee
 
 class Workload(dict):
 
-    def __init__(self) -> None:
+    def __init__(self, set_workload=None) -> None:
         super().__init__(self)
 
-        self.init_workload(employee_list)
+        if set_workload is not None:
+            for employee_id in set_workload:
+                self[employee_id] = set_workload[employee_id]
+        else:
+            for employee in employee_list:
+                self[employee.id] = {weeknum: [] for weeknum in employee.availability}
 
         self.update_highest_priority_list()
 
     """ INIT """
 
-    def init_workload(self, employees: list[Employee]) -> dict[int, dict[int, list]]:
-        for employee in employees:
-            self[employee.id] = {weeknum: [] for weeknum in employee.availability}
 
     """ METHODS """
 

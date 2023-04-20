@@ -1,4 +1,5 @@
 from classes.representation.generator import Generator
+from classes.representation.PPA import PlantPropagation
 import cProfile
 import pstats
 from io import StringIO
@@ -29,9 +30,13 @@ def plot_bar(plot_dict: dict[int, int], title: str) -> None:
     plt.title(title)
     plt.show()
 
+NUMBER_OF_PLANTS = 100
+NUMBER_OF_GENS = 10
+
 if __name__ == "__main__":
     if SINGLE:
-        Generator()
+        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+
         pr = cProfile.Profile()
         pr.enable()
 

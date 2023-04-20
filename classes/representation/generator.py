@@ -22,11 +22,9 @@ class Generator:
 
         self.schedule = {shift.id: None for shift in self.shifts}
 
-        self.greedy_fill()
+        # self.improve(2000)
 
-        self.improve(2000)
-
-        self.total_costs = MalusCalc.get_total_cost(self.schedule, self.Workload)
+        # self.total_costs = MalusCalc.get_total_cost(self.schedule, self.Workload)
         # [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
 
     """ Schedule manipulation """
@@ -49,7 +47,7 @@ class Generator:
 
         filled = 0
         while filled < len(self.schedule):
-
+            print(filled)
             sorted_id_list = sorted(self.schedule.keys(), key = lambda shift_id: len(self.Availabilities[shift_id][1]) if self.Availabilities[shift_id][0] == 0 else 999)
 
             for shift_id in sorted_id_list:
@@ -72,7 +70,7 @@ class Generator:
                     if get_employee(employee_id).priority < get_employee(selected_employee_id).priority:
                         selected_employee_id = employee_id
                 
-                if self.ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.schedule):
+                if ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.schedule):
                     self.schedule_in(shift_id, selected_employee_id, fill=True)
                     filled += 1
 
@@ -123,7 +121,7 @@ class Generator:
 
         if self.Workload.check_capacity(replace_shift_id, replace_employee_id):
 
-            if self.ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, self.schedule):
+            if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, self.schedule):
                 # print('improvement')
                 self.schedule_swap(replace_shift_id, replace_employee_id)
                         
@@ -173,7 +171,7 @@ class Generator:
         shortest_shift_employee_id = self.get_random_employee(shortest_shift_id, possible_employee_id)
 
         if self.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
-            if self.ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, self.schedule):
+            if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, self.schedule):
 
                 # store the changes ('old employee, shift')
                 undo_update.append((shortest_shift_id, self.schedule[shortest_shift_id]))
