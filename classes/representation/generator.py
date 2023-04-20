@@ -13,6 +13,7 @@ from helpers import get_shift, get_employee, get_weeknumber
 from data.assign import employee_list, shift_list
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
+OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
 
 class Generator:
     def __init__(self) -> None:
@@ -42,6 +43,8 @@ class Generator:
 
     def get_employee_set(self, shift: Shift) -> set[int]:
         """
+        this method is only used to develop the generator, later, the info will actually be downloaded
+        for now it just returns a hardcoded list with availability
         this method is only used to develop the generator, later, the info will actually be downloaded
         for now it just returns a hardcoded list with availability
         """
