@@ -24,7 +24,7 @@ class Generator:
 
         self.greedy_fill()
 
-        self.improve()
+        self.improve(2000)
 
         self.total_costs = MalusCalc.get_total_cost(self.schedule, self.Workload)
         # [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
@@ -104,8 +104,8 @@ class Generator:
 
     """ MUTATE """
 
-    def improve(self) -> None:
-        for _ in range(20000):
+    def improve(self, iters: int) -> None:
+        for _ in range(iters):
             self.mutate()
         print(MalusCalc.get_total_cost(self.schedule, self.Workload))
 
