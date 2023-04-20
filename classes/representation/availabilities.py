@@ -6,41 +6,28 @@ from classes.representation.availability import Availability
 from classes.representation.shift_constraints import ShiftConstrains
 from classes.representation.workload import Workload
 
-from data.assign import shift_list, employee_list
+from data.assign import employee_list, total_availabilities
 
-class Availabilities:
+class Availabilities(dict):
 
-    def __init__(self) -> None:
+    def __init__(self, availabilities=None) -> None:
+        super().__init__(self)
 
-        self.total = {shift.id: self.get_employee_set(shift) for shift in shift_list}
-        self.actual = {shift_id: [0, availabilities_set] for shift_id, availabilities_set in self.total.items()}
-
-        self.update_highest_priority_list()
+        if availabilities != None:
+            prior_availabilities = availabilities
+        else:
+            prior_availabilities = total_availabilities
+        
+        for shift_id, availabilities_set in prior_availabilities.items():
+            self[shift_id] =  [0, availabilities_set]
 
     """ INIT """
-
-    def get_employee_set(self, shift: Shift) -> set[int]:
-        """
-        this method is only used to develop the generator, later, the info will actually be downloaded
-        for now it just returns a hardcoded list with availability
-        """
-
-        availabilities = set()
-        for employee in employee_list:
-
-            for weeknum in employee.availability:
-                for workable_shift in employee.availability[weeknum]:
-
-                    if self.possible_shift(workable_shift, employee, shift):
-                        availabilities.add(employee.id)
-
-        return availabilities
     
     def set_shift_occupation(self, shift_id: int, occupied: bool) -> None:
         if occupied:
-            self.actual[shift_id][0] = 1
+            self[shift_id][0] = 1
         else:
-            self.actual[shift_id][0] = 0
+            self[shift_id][0] = 0
 
     """ METHODS """
 
@@ -52,17 +39,17 @@ class Availabilities:
 
         if add:
             for coliding_shift_id in coliding_shifts:
-                if employee_id in self.actual[coliding_shift_id][1]:
-                    self.actual[coliding_shift_id][1].remove(employee_id)
+                if employee_id in self[coliding_shift_id][1]:
+                    self[coliding_shift_id][1].remove(employee_id)
 
             if max_hit:
-                for shift_id in self.actual:
-                    if employee_id in self.actual[shift_id][1]:
-                        self.actual[shift_id][1].remove(employee_id)
+                for shift_id in self:
+                    if employee_id in self[shift_id][1]:
+                        self[shift_id][1].remove(employee_id)
         else:
-            for shift_id in self.actual:
-                if employee_id in self.actual[shift_id][1]:
-                    self.actual[shift_id][1].add(employee_id)
+            for shift_id in self:
+                if employee_id in self[shift_id][1]:
+                    self[shift_id][1].add(employee_id)
     
     def compute_priority(self, workload: Workload, weeknum: int) -> None:
         for employee in employee_list:
@@ -84,23 +71,9 @@ class Availabilities:
 
                 employee.priority = availability_priority + \
                     week_min_priority - week_max_priority
-                # print(employee.name, employee.priority, week_min, week_max, len(self.workload[employee.id][weeknum]))
             else:
                 employee.priority = 999
     
     def update_highest_priority_list(self) -> None:
         self.priority_list = sorted(
             employee_list, key=lambda employee: employee.priority)
-
-    def possible_shift(self, workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
-
-        # Check time
-        if workable_shift.start > shift.start or workable_shift.end < shift.end:
-            return False
-
-        # Check task
-        tasks_list = employee.get_tasks()
-        for task in tasks_list:
-            if task == shift.task:
-                return True
-        return False

@@ -7,7 +7,7 @@ from classes.representation.workload import Workload
 
 
 from helpers import get_shift, get_employee, get_weeknumber
-from data.assign import employee_list, shift_list
+from data.assign import employee_list, shift_list, total_availabilities
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
 
@@ -50,22 +50,22 @@ class Generator:
         filled = 0
         while filled < len(self.schedule):
 
-            sorted_id_list = sorted(self.schedule.keys(), key = lambda shift_id: len(self.Availabilities.actual[shift_id][1]) if self.Availabilities.actual[shift_id][0] == 0 else 999)
+            sorted_id_list = sorted(self.schedule.keys(), key = lambda shift_id: len(self.Availabilities[shift_id][1]) if self.Availabilities[shift_id][0] == 0 else 999)
 
             for shift_id in sorted_id_list:
                 if self.schedule[shift_id] != None:
                     continue
                 # if len(self.actual_availabilities[sorted_id_list[0]][1]) < 2:
                 #     shift_id = sorted_id_list[0]
-                elif len(self.Availabilities.actual[shift_id][1]) < 1:
+                elif len(self.Availabilities[shift_id][1]) < 1:
                     raise LookupError('No availabilities for shift!')
 
                 weeknum = get_weeknumber(shift_id)
 
-                self.Availabilities.compute_priority(self.Workload, weeknum)
-                self.Availabilities.update_highest_priority_list()
+                self.Workload.compute_priority(weeknum)
+                self.Workload.update_highest_priority_list()
 
-                possible_employee_list = list(self.Availabilities.actual[shift_id][1])
+                possible_employee_list = list(self.Availabilities[shift_id][1])
                 selected_employee_id = random.choice(possible_employee_list)
                 
                 for employee_id in possible_employee_list:
@@ -190,7 +190,7 @@ class Generator:
         """
 
         shift_id = random.choice(self.shifts).id
-        while len(self.Availabilities.total[shift_id]) < 2:
+        while len(total_availabilities[shift_id]) < 2:
             shift_id = random.choice(self.shifts).id
         return shift_id
 
@@ -200,7 +200,7 @@ class Generator:
         """
         current_employee_id = self.schedule[shift_id]
 
-        choices = self.Availabilities.total[shift_id] - {current_employee_id}
+        choices = total_availabilities[shift_id] - {current_employee_id}
         if not choices:
             raise ValueError("No available employees for shift")
         return random.choice(list(choices))

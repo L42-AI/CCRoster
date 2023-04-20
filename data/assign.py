@@ -127,3 +127,35 @@ for id_, employee in enumerate(employee_list):
 
 for id_, shift in enumerate(shift_list):
     shift.id = id_
+
+def possible_shift(workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
+
+    # Check time
+    if workable_shift.start > shift.start or workable_shift.end < shift.end:
+        return False
+
+    # Check task
+    tasks_list = employee.get_tasks()
+    for task in tasks_list:
+        if task == shift.task:
+            return True
+    return False
+
+def get_employee_set(shift: Shift) -> set[int]:
+    """
+    this method is only used to develop the generator, later, the info will actually be downloaded
+    for now it just returns a hardcoded list with availability
+    """
+
+    availabilities = set()
+    for employee in employee_list:
+
+        for weeknum in employee.availability:
+            for workable_shift in employee.availability[weeknum]:
+
+                if possible_shift(workable_shift, employee, shift):
+                    availabilities.add(employee.id)
+
+    return availabilities
+
+total_availabilities = {shift.id: get_employee_set(shift) for shift in shift_list}
