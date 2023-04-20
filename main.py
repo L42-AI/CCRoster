@@ -1,4 +1,4 @@
-from classes.representation.budding import Generator
+from classes.representation.generator import Generator
 import cProfile
 import pstats
 from io import StringIO
