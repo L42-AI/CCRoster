@@ -50,30 +50,3 @@ class Availabilities(dict):
             for shift_id in self:
                 if employee_id in self[shift_id][1]:
                     self[shift_id][1].add(employee_id)
-    
-    def compute_priority(self, workload: Workload, weeknum: int) -> None:
-        for employee in employee_list:
-            week_max = employee.get_week_max(weeknum)
-            week_min = employee.get_week_min(weeknum)
-
-            if weeknum in employee.availability:
-                availability_priority = (
-                    len(employee.availability[weeknum]) - week_max)
-                week_min_priority = (len(workload[employee.id][weeknum]) - week_min)
-                week_max_priority = (week_max - len(workload[employee.id][weeknum]))
-
-                if availability_priority < 1:
-                    availability_priority = -99
-                if week_min_priority < 0:
-                    week_min_priority = -150
-                if week_max_priority < 1:
-                    week_max_priority = -99
-
-                employee.priority = availability_priority + \
-                    week_min_priority - week_max_priority
-            else:
-                employee.priority = 999
-    
-    def update_highest_priority_list(self) -> None:
-        self.priority_list = sorted(
-            employee_list, key=lambda employee: employee.priority)
