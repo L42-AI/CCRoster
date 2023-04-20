@@ -1,11 +1,6 @@
-import random
-
 from classes.representation.shift import Shift
 from classes.representation.employee import Employee
-from classes.representation.availability import Availability
-from classes.representation.shift_constraints import ShiftConstrains
 
-from classes.representation.malus_calc import MalusCalc
 
 from data.assign import employee_list, shift_list
 

@@ -61,8 +61,8 @@ class Employee:
     def get_week_min(self, week) -> int:
         return self.weekly_min.get(week)
 
-    @property
-    def id(self) -> str:
+
+    def get_id(self) -> str:
         return self.id
 
     def __str__(self) -> str:

@@ -16,8 +16,6 @@ class Workload(dict):
     def init_workload(self, employees: list[Employee]) -> dict[int, dict[int, list]]:
         for employee in employees:
             self[employee.id] = {weeknum: [] for weeknum in employee.availability}
-    
-    """"""
 
     """ METHODS """
 
