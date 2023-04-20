@@ -1,11 +1,5 @@
-from dataclasses import dataclass
 from datetime import datetime
-import uuid
-
-@dataclass
-class Availability:
-    start: datetime
-    end: datetime
+from dataclasses import dataclass
 
 @dataclass
 class Shift:
@@ -15,6 +9,7 @@ class Shift:
     location: int
 
     def __post_init__(self) -> None:
+        self.id = -999
         self.duration = (self.end - self.start).total_seconds() / 3600
 
     def __str__(self) -> str:
@@ -23,4 +18,6 @@ class Shift:
         return f"Task {self.task}, {start_time} - {end_time}"
     
     def get_id(self) -> int:
+        if self.id == -999:
+            raise ValueError('No Valid ID assigned to shift')
         return self.id

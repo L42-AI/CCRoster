@@ -2,94 +2,54 @@ import random
 from datetime import datetime
 from classes.representation.dataclasses import Availability
 
-from classes.representation.dataclasses import Availability
-
 class Employee:
-    def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict, wage: float, level, task, location) -> None:
+    def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], minimum: dict[int, int], wage: float, level: int, tasks: list[int], location: str) -> None:
         self.fname = fname
         self.lname = lname
-        self.name = fname + " " + lname
+        self.name = f'{fname} {lname}'
         self.id = None
-        self.availability = av
+        self.availability = self.sort_availability(av)
         self.wage = wage
         self.weekly_max = maximum
+        self.weekly_min = minimum
         self.level = level
-        self.tasks = 1 if task=='everything' else 0
+        self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
+        self.priority = 0
         self.add_remove_timeslot = []
 
         # self.upload_employee()
         # self.upload_availability()
 
-    """ Upload """
-    def upload_employee(self):
+    """ Compute availability """
 
-        # translate the string to a code corresponding with the location
-        if self.location == 'coffee_company':
-            location = 1
-        if self.tasks == 'Allround':
-            task = 1
+    def get_weeknumber(self, shift_id: int) -> int:
+        shift_obj = self.get_shift(shift_id)
+        return shift_obj.start.isocalendar()[1]
 
-        # add the employee to the database
-        query = "INSERT INTO Employee (lname, fname, hourly, level, task, location) VALUES (%s, %s, %s, %s, %s, %s)"
-        values = (self.lname, self.fname, self.wage, self.level, task, location)
-        self.cursor.execute(query, values)
-        self.id = self.cursor.lastrowid
-        print(self.id)
-        self.db.commit()
 
-    def upload_availability(self):
-        '''
-        removes current availability and replaces it with new one. if there is nothing, it just uploads the availibility. 
-        But when making changes, first everything must be deleted.
-        '''
-        # uploads the availability given in assign
-        query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"
-        for entry in self.availability:
-            values = (self.id, entry[0], entry[1], entry[2], self.weekly_max[entry[0]])
-            self.cursor.execute(query, values)
-        self.db.commit()
+    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+        availability_dict = {}
+        
+        for availability in av:
+            weeknum = availability.start.isocalendar()[1]
 
-    def change_availability(self):
-        '''
-        goes trough a list of changes and applies them to the database
-        '''
-        for change in self.add_remove_timeslot:
-            if change[0] == 'add':
-                query = "INSERT INTO Availability (employee_id, week, day, shift, weekly_max) VALUES (%s, %s, %s, %s, %s)"
-                values = (self.id, change[1][0], change[1][1], change[1][2], self.weekly_max[change[1][0]])
-                self.cursor.execute(query, values)
-            else:
-                query = "DELETE FROM Availability WHERE employee_id = %s AND week = %s AND day = %s AND shift = %s "
-                values = (self.id, change[1][0], change[1][1], change[1][2])
-                self.cursor.execute(query, values)
+            if weeknum not in availability_dict:
+                availability_dict[weeknum] = []
 
-        # clear the list, we do not want to run old commands
-        self.add_remove_timeslot = []
-
-    '''
-    update
-    '''
-    def update_availability(self, availability):
-        self.availability = []
-        for entry in availability:
-            if entry[0] == self.id:
-                self.availability.append(entry)
-
+            availability_dict[weeknum].append(availability)
+        return availability_dict
 
     """ Get """
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
 
-    def get_full_av(self) -> set:
+    def get_av(self) -> list[Availability]:
         return self.availability
 
-    def get_av(self) -> list[int]:
+    def get_random_av(self) -> Availability:
         if len(self.availability) > 0:
             return random.choice(self.availability)
-
-    def get_name(self, name) -> str:
-        return name
 
     def get_wage(self) -> float:
         return float(self.wage)
@@ -100,12 +60,20 @@ class Employee:
     def get_tasks(self) -> int:
         return self.tasks
 
-    def get_week_max_dict(self) -> dict:
+    def get_week_max_dict(self) -> dict[int, int]:
         return self.weekly_max
 
     def get_week_max(self, week) -> int:
         return self.weekly_max.get(week)
 
-    def get_id(self) -> int:
+    def get_week_min_dict(self) -> dict[int, int]:
+        return self.weekly_min
+
+    def get_week_min(self, week) -> int:
+        return self.weekly_min.get(week)
+
+    def get_id(self) -> str:
         return self.id
 
+    def __str__(self) -> str:
+        return f"{self.name} (ID: {self.id})"
