@@ -4,13 +4,6 @@ from classes.representation.employee import Employee
 
 from data.assign import employee_list, shift_list
 
-
-for id_, employee in enumerate(employee_list):
-    employee.id_ = id_
-
-for id_, shift in enumerate(shift_list):
-    shift.id = id_
-
 id_employee = {employee.id: employee for employee in employee_list}
 id_shift = {shift.id: shift for shift in shift_list}
 

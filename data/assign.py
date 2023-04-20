@@ -121,3 +121,9 @@ for day in range(4,6):
     shift_list.append(Shift(start=datetime(2023, 2, day, 12, 30),
                          end=datetime(2023, 2, day, 18, 0),
                          task=1, location=1))
+
+for id_, employee in enumerate(employee_list):
+    employee.id = id_
+
+for id_, shift in enumerate(shift_list):
+    shift.id = id_

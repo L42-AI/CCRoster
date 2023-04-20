@@ -5,7 +5,7 @@ class Employee:
         self.fname = fname
         self.lname = lname
         self.name = f'{fname} {lname}'
-        self.id_ = None
+        self.id = None
         self.availability = self.sort_availability(av)
         self.wage = wage
         self.weekly_max = maximum
@@ -60,7 +60,6 @@ class Employee:
 
     def get_week_min(self, week) -> int:
         return self.weekly_min.get(week)
-
 
     def get_id(self) -> str:
         return self.id

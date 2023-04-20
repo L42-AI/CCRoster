@@ -18,13 +18,13 @@ class Schedule(dict):
     def random_fill(self) -> None:
 
         filled = 0
-        while filled < len(self.schedule):
-            shift_id = random.choice(self.schedule)
+        while filled < len(self):
+            shift_id = random.choice(self)
 
-            if self.schedule[shift_id] != None:
+            if self[shift_id] != None:
                 continue
 
-            selected_employee = random.choice(self.employees)
+            selected_employee = random.choice(self)
             self.schedule_in(shift_id, selected_employee.id)
 
             filled += 1
@@ -86,9 +86,9 @@ class Schedule(dict):
         self.schedule_out(shift_id)
         self.schedule_in(shift_id, employee_id)
 
-    def copy(self, schedule: Schedule) -> dict[int, int]:
+    # def copy(self, schedule: Schedule) -> dict[int, int]:
 
-        return {k: v for k, v in schedule.items()}
+    #     return {k: v for k, v in schedule.items()}
         
     def recursive_copy(self, obj: object) -> object:
         """

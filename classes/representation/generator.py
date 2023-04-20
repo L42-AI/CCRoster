@@ -1,11 +1,9 @@
 import random
-import copy
 
 from classes.representation.shift_constraints import ShiftConstrains
 from classes.representation.availabilities import Availabilities
 from classes.representation.malus_calc import MalusCalc
 from classes.representation.workload import Workload
-from test import Schedule
 
 
 from helpers import get_shift, get_employee, get_weeknumber
@@ -22,10 +20,9 @@ class Generator:
         self.Availabilities = Availabilities()
         self.Workload = Workload()
 
-        # self.schedule = {shift.id: None for shift in self.shifts}
-        self.schedule = Schedule()
+        self.schedule = {shift.id: None for shift in self.shifts}
 
-        self.schedule.greedy_fill(self.Availabilities, self.Workload, self.ShiftConstrains)
+        self.greedy_fill()
 
         self.improve()
 
@@ -33,6 +30,77 @@ class Generator:
         # [print(f"Shift ID: {k}, available employee ID's: {v[1]}") for k, v in self.actual_availabilities.items()]
 
     """ Schedule manipulation """
+
+    def random_fill(self) -> None:
+
+        filled = 0
+        while filled < len(self.schedule):
+            shift_id = random.choice(self.schedule)
+
+            if self.schedule[shift_id] != None:
+                continue
+
+            selected_employee = random.choice(self.schedule)
+            self.schedule_in(shift_id, selected_employee.id)
+
+            filled += 1
+
+    def greedy_fill(self) -> None:
+
+        filled = 0
+        while filled < len(self.schedule):
+
+            sorted_id_list = sorted(self.schedule.keys(), key = lambda shift_id: len(self.Availabilities.actual[shift_id][1]) if self.Availabilities.actual[shift_id][0] == 0 else 999)
+
+            for shift_id in sorted_id_list:
+                if self.schedule[shift_id] != None:
+                    continue
+                # if len(self.actual_availabilities[sorted_id_list[0]][1]) < 2:
+                #     shift_id = sorted_id_list[0]
+                elif len(self.Availabilities.actual[shift_id][1]) < 1:
+                    raise LookupError('No availabilities for shift!')
+
+                weeknum = get_weeknumber(shift_id)
+
+                self.Availabilities.compute_priority(self.Workload, weeknum)
+                self.Availabilities.update_highest_priority_list()
+
+                possible_employee_list = list(self.Availabilities.actual[shift_id][1])
+                selected_employee_id = random.choice(possible_employee_list)
+                
+                for employee_id in possible_employee_list:
+                    if get_employee(employee_id).priority < get_employee(selected_employee_id).priority:
+                        selected_employee_id = employee_id
+                
+                if self.ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.schedule):
+                    self.schedule_in(shift_id, selected_employee_id, fill=True)
+                    filled += 1
+
+    def schedule_in(self, shift_id: int, employee_id: int, fill: bool = False) -> None:
+        self.schedule[shift_id] = employee_id
+        self.Workload.update(shift_id, employee_id, add=True)
+
+        if fill:
+            week_num = get_weeknumber(shift_id)
+            employee_obj = get_employee(employee_id)
+            emlployee_week_max = employee_obj.get_week_max(week_num)
+
+            if len(self.Workload[employee_id][week_num]) == emlployee_week_max:
+                self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=True, max_hit=True)
+            else:
+                self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=True, max_hit=False)
+
+    def schedule_out(self, shift_id: int, fill: bool = False) -> None:
+        employee_id = self.schedule[shift_id]
+        self.schedule[shift_id] = None
+        self.Workload.update(shift_id, employee_id, add=False)
+        
+        if fill:
+            self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=False)
+
+    def schedule_swap(self, shift_id: int, employee_id: int) -> None:
+        self.schedule_out(shift_id)
+        self.schedule_in(shift_id, employee_id)
 
     """ MUTATE """
 
