@@ -5,7 +5,7 @@ class Employee:
         self.fname = fname
         self.lname = lname
         self.name = f'{fname} {lname}'
-        self.id = None
+        self.id_ = None
         self.availability = self.sort_availability(av)
         self.wage = wage
         self.weekly_max = maximum

@@ -6,7 +6,7 @@ from data.assign import employee_list, shift_list
 
 
 for id_, employee in enumerate(employee_list):
-    employee.id = id_
+    employee.id_ = id_
 
 for id_, shift in enumerate(shift_list):
     shift.id = id_
