@@ -118,8 +118,9 @@ class Generator:
 
                 if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
                     self.schedule_swap(replace_shift_id, replace_employee_id, bud_schedule)
-                    buds = self.accept_change(bud_schedule, old_cost, buds, T)
-            
+                    if MalusCalc.get_total_cost(bud_schedule) < 2898.1:
+                        print(MalusCalc.get_total_cost(bud_schedule))
+                    buds = self.accept_change(bud_schedule, old_cost, buds, T)            
             else:
 
                 # try to 'ease' workers workload by having someone else take over the shift, store the changes 
