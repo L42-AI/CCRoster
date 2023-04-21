@@ -9,7 +9,7 @@ from helpers import recursive_copy, get_temperature
 from data.assign import employee_list, shift_list, total_availabilities
 
 class PlantPropagation:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE=.99) -> None:
+    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE=.5) -> None:
         self.gen: Generator = Generator()
         self.gen.greedy_fill()
         self.Schedule = self.gen.Schedule # not necessary but better readability imo
@@ -45,6 +45,3 @@ class PlantPropagation:
                         break
                     
             winner = sorted(plants, key= lambda x: x.cost)
-            print([x.cost for x in winner])
-            print()
-            print()

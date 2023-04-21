@@ -114,8 +114,7 @@ class Generator:
         old_cost = MalusCalc.get_total_cost(Schedule)
         while len(buds) < 10:
             
-            bud_schedule = Schedule
-            bud_schedule.schedule = recursive_copy(Schedule.schedule)
+            bud_schedule = copy.deepcopy(Schedule)
             replace_shift_id = self.get_random_shift()
 
             current_employee_id = Schedule.schedule[replace_shift_id]
@@ -126,14 +125,14 @@ class Generator:
                 if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, Schedule):
                     # print('improvement')
                     self.schedule_swap(replace_shift_id, replace_employee_id, bud_schedule)
-                    buds = self.accept_change(bud_schedule, old_cost, buds, T)
-            
+                    if MalusCalc.get_total_cost(bud_schedule) < 2898.1:
+                        print(MalusCalc.get_total_cost(bud_schedule))
+                    buds = self.accept_change(bud_schedule, old_cost, buds, T)            
             else:
 
                 # try to 'ease' workers workload by having someone else take over the shift, store the changes 
                 bud_schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, bud_schedule) 
                 buds = self.accept_change(bud_schedule, old_cost, buds, T)
-        print('done')
         return buds
     
     def accept_change(self, bud_schedule, old_cost, buds, T) -> Schedule:
