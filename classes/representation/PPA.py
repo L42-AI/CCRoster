@@ -5,7 +5,7 @@ from classes.representation.generator import Generator
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 
-from helpers import recursive_copy
+from helpers import recursive_copy, get_temperature
 from data.assign import employee_list, shift_list, total_availabilities
 
 class PlantPropagation:
@@ -23,7 +23,7 @@ class PlantPropagation:
     def plants(self):
         plants = [Schedule(self.Schedule.Workload, self.Schedule.schedule, self.Schedule.cost) for i in range(100)]
         for _ in range(2000):
-            self.T = self.get_temperature(self.T)
+            self.T = get_temperature(self.T)
             plants_and_buds = [self.gen.mutate(self.Schedule, self.T) for plant in plants]
             plants_and_buds = list(itertools.chain(*plants_and_buds))
             plants_and_buds = sorted(plants_and_buds, key= lambda x: x.cost)
@@ -48,7 +48,3 @@ class PlantPropagation:
             print([x.cost for x in winner])
             print()
             print()
-    
-    @staticmethod
-    def get_temperature(T):
-        return T*0.90

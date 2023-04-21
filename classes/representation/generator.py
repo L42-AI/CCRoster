@@ -9,7 +9,7 @@ from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 
 
-from helpers import get_shift, get_employee, get_weeknumber
+from helpers import get_shift, get_employee, get_weeknumber, recursive_copy
 from data.assign import employee_list, shift_list, total_availabilities
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
@@ -113,7 +113,9 @@ class Generator:
         buds = []
         old_cost = MalusCalc.get_total_cost(Schedule)
         while len(buds) < 10:
-            bud_schedule = copy.deepcopy(Schedule)
+            
+            bud_schedule = Schedule
+            bud_schedule.schedule = recursive_copy(Schedule.schedule)
             replace_shift_id = self.get_random_shift()
 
             current_employee_id = Schedule.schedule[replace_shift_id]
@@ -131,13 +133,13 @@ class Generator:
                 # try to 'ease' workers workload by having someone else take over the shift, store the changes 
                 bud_schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, bud_schedule) 
                 buds = self.accept_change(bud_schedule, old_cost, buds, T)
+        print('done')
         return buds
     
     def accept_change(self, bud_schedule, old_cost, buds, T) -> Schedule:
         bud_schedule.cost = MalusCalc.get_total_cost(bud_schedule)
         new_cost = bud_schedule.cost
-        if new_cost < 2898.1:
-            print(True)
+
         if new_cost < old_cost:
             buds.append(bud_schedule)
             return buds

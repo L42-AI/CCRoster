@@ -8,4 +8,3 @@ class Schedule():
         self.fitness: float = None
         self.p: float = None
         self.BUDS = 10 # number of buds this plant can have
-    
