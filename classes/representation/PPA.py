@@ -21,7 +21,7 @@ class PlantPropagation:
 
 
     def plants(self):
-        plants = [Schedule(self.Schedule.Workload, self.Schedule.schedule, self.Schedule.cost) for i in range(100)]
+        plants = [Schedule(self.Schedule.Workload, self.Schedule.cost, recursive_copy(self.Schedule)) for i in range(100)]
         for _ in range(2000):
             self.T = get_temperature(self.T)
             plants_and_buds = [self.gen.mutate(self.Schedule, self.T) for plant in plants]

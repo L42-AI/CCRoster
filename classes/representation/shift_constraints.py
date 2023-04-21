@@ -23,7 +23,7 @@ class ShiftConstrains:
 
         colliding_shifts = time_conflict_dict[shift_id]
         for colliding_shift_id in colliding_shifts:
-            if Schedule.schedule[colliding_shift_id] == employee_id:
+            if Schedule[colliding_shift_id] == employee_id:
                 return True
 
         return False

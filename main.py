@@ -6,10 +6,6 @@ from io import StringIO
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-SINGLE = 1
-
-""" TEST """
-
 
 def run() -> None:
     plot_dict = {}
@@ -23,23 +19,17 @@ def run() -> None:
     print(plot_dict)
     plot_bar(plot_dict, title='costs over 10000 iters')
 
-""" PLOT """
-
 def plot_bar(plot_dict: dict[int, int], title: str) -> None:
     plt.bar(x=plot_dict.keys(), height=plot_dict.values())
     plt.title(title)
     plt.show()
 
-NUMBER_OF_PLANTS = 100
-NUMBER_OF_GENS = 10
-
-if __name__ == "__main__":
-    if SINGLE:
-        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
-
+def main(PROFILE):
+    if PROFILE:
         pr = cProfile.Profile()
         pr.enable()
 
+        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
         
         pr.disable()
 
@@ -51,4 +41,11 @@ if __name__ == "__main__":
         ps.print_stats()
         print(s.getvalue())
     else:
-        run()
+        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+
+
+if __name__ == "__main__":
+    NUMBER_OF_PLANTS = 100
+    NUMBER_OF_GENS = 10
+    PROFILE = False
+    main(PROFILE)

@@ -11,7 +11,7 @@ class MalusCalc:
     @staticmethod
     def compute_wage_cost(Schedule: Schedule) -> float:
         total_cost = 0
-        for shift_id, employee_id in Schedule.schedule.items():
+        for shift_id, employee_id in Schedule.items():
             total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id)
         return round(total_cost, 2)
     
