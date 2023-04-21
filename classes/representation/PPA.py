@@ -24,10 +24,9 @@ class PlantPropagation:
         plants = [Schedule(self.Schedule.Workload, self.Schedule.cost, recursive_copy(self.Schedule)) for i in range(100)]
         for _ in range(2000):
             self.T = get_temperature(self.T)
-            plants_and_buds = [self.gen.mutate(self.Schedule, self.T) for plant in plants]
+            plants_and_buds = [self.gen.mutate(plant, self.T) for plant in plants]
             plants_and_buds = list(itertools.chain(*plants_and_buds))
             plants_and_buds = sorted(plants_and_buds, key= lambda x: x.cost)
-            print(plants_and_buds[0].cost)
             total_fitness: float = 0.0
             for plant in plants_and_buds:
                 plant.fitness = 1.0 / plant.cost
@@ -44,4 +43,5 @@ class PlantPropagation:
                         plants.append(plants_and_buds[i])
                         break
                     
-            winner = sorted(plants, key= lambda x: x.cost)
+            winner = sorted(plants, key= lambda x: x.cost)[0]
+            print(winner.cost)
