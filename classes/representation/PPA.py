@@ -1,40 +1,52 @@
 import random
+import itertools
 
 from classes.representation.generator import Generator
 from classes.representation.workload import Workload
 from classes.representation.plant import Plant
+from classes.representation.schedule import Schedule
 
 from helpers import recursive_copy
 from data.assign import employee_list, shift_list, total_availabilities
 
 class PlantPropagation:
-    def __init__(self, num_plants: int, num_gens: int) -> None:
-        self.gen = Generator()
+    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE=.99) -> None:
+        self.gen: Generator = Generator()
         self.gen.greedy_fill()
+        self.schedule = self.gen.schedule # not necessary but better readability imo
+        self.NUMBER_OF_PLANTS: int = num_plants
+        self.NUMBER_OF_GENERATIONS: int = num_gens
+        self.T: int = TEMPERATURE
 
-        self.NUMBER_OF_PLANTS = num_plants
-        self.NUMBER_OF_GENERATIONS = num_gens
-
-        self.plants(self.gen, self.NUMBER_OF_PLANTS, self.NUMBER_OF_GENERATIONS)
+        self.plants()
 
 
-    def plants(self, gen: Generator, NUMBER_OF_PLANTS: int, NUMBER_OF_GENERATIONS: int):
-        forest = []
-        forest_costs = []
-        for plant in range(NUMBER_OF_PLANTS):
-            # start with a sim an probability of 0
-            new_plant = Plant(0, recursive_copy(gen.schedule), Workload(recursive_copy(gen.Workload)))
-            forest.append(new_plant)
-
-        for generation in range(NUMBER_OF_GENERATIONS):
-            forest = sorted(forest, key= lambda x: x.total_costs)
-            for plant in forest:
-                print(plant.total_costs)
-            print('--------------------------------')
-            forest_costs = []
-            for index, plant in enumerate(forest):
-                plant.sim_an = index / (NUMBER_OF_PLANTS * 1000 ) if index > 20 else 0
-                plant.improve(200)
-        
-        winner = min(forest, key= lambda x: x.total_costs)
-        return winner.schedule
+    def plants(self):
+        plants = [Schedule(self.schedule.workload, self.schedule.schedule, self.schedule.cost) for i in range(100)]
+        for _ in range(2000):
+            self.T = self.get_temperature(T)
+            plants_and_buds = [self.gen.mutate(plant, self.T) for plant in plants]
+            plants_and_buds = list(itertools.chain(*plants_and_buds))
+            plants_and_buds = sorted(plants_and_buds, key= lambda x: x.cost)
+            total_fitness: float = 0.0
+            for plant in plants_and_buds:
+                plant.fitness = 1.0 / plant.cost
+                total_fitness += plant.fitness
+            for plant in plants_and_buds:
+                plant.p = plant.fitness / total_fitness
+            random_numbers = [random.random() for _ in range(100)]
+            plants = []
+            for random_number in random_numbers:
+                accumulated_probability = 0
+                for i, plant in enumerate(plants_and_buds):
+                    accumulated_probability += plant.p
+                    if accumulated_probability >= random_number:
+                        plants.append(plants_and_buds[i])
+                        break
+                    
+            winner = sorted(plants, key= lambda x: x.cost)[0]
+            print(winner.cost)
+    
+    @staticmethod
+    def get_temperature(T):
+        return T*0.90

@@ -4,6 +4,7 @@ from classes.representation.shift_constraints import ShiftConstrains
 from classes.representation.availabilities import Availabilities
 from classes.representation.malus_calc import MalusCalc
 from classes.representation.workload import Workload
+from classes.representation.schedule import Schedule
 
 
 from helpers import get_shift, get_employee, get_weeknumber
@@ -20,7 +21,8 @@ class Generator:
         self.Availabilities = Availabilities()
         self.Workload = Workload()
 
-        self.schedule = {shift.id: None for shift in self.shifts}
+        self.init_schedule = {shift.id: None for shift in self.shifts}
+        self.schedule = Schedule(self.Workload, self.init_schedule, 999999)
 
         # self.improve(2000)
 
@@ -46,12 +48,11 @@ class Generator:
     def greedy_fill(self) -> None:
 
         filled = 0
-        while filled < len(self.schedule):
-            print(filled)
-            sorted_id_list = sorted(self.schedule.keys(), key = lambda shift_id: len(self.Availabilities[shift_id][1]) if self.Availabilities[shift_id][0] == 0 else 999)
+        while filled < len(self.schedule.schedule):
+            sorted_id_list = sorted(self.schedule.schedule.keys(), key = lambda shift_id: len(self.Availabilities[shift_id][1]) if self.Availabilities[shift_id][0] == 0 else 999)
 
             for shift_id in sorted_id_list:
-                if self.schedule[shift_id] != None:
+                if self.schedule.schedule[shift_id] != None:
                     continue
                 # if len(self.actual_availabilities[sorted_id_list[0]][1]) < 2:
                 #     shift_id = sorted_id_list[0]
@@ -71,7 +72,7 @@ class Generator:
                         selected_employee_id = employee_id
                 
                 if ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.schedule):
-                    self.schedule_in(shift_id, selected_employee_id, fill=True)
+                    self.schedule_in(shift_id, selected_employee_id, self.schedule, fill=True)
                     filled += 1
 
     def schedule_in(self, shift_id: int, employee_id: int, fill: bool = False) -> None:
