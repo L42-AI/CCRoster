@@ -62,14 +62,7 @@ class Plant(Generator):
                     self.schedule_swap(shift_id, employee_id)
 
         
-    def mutate_extra_employees(self) -> None:
-        sorted_shifts = sorted(self.schedule.keys(), key = lambda shift_id: self.actual_availabilities[shift_id][1], reverse=True)
 
-        for shift_id in sorted_shifts:
-            for employee_id in self.actual_availabilities[shift_id][1]:
-                if self.Workload.check_capacity(shift_id, employee_id):
-                    ...
-        return
 
     def mutate_max_workload(self, shift_to_replace_id: int, possible_employee_id: int) -> list[tuple[int, int]]:
         '''

@@ -1,5 +1,6 @@
 from classes.representation.employee import Employee
 from classes.representation.workload import Workload
+from classes.representation.schedule import Schedule
 
 from helpers import get_shift, get_employee, get_weeknumber
 from data.assign import employee_list
@@ -8,10 +9,10 @@ from data.assign import employee_list
 class MalusCalc:
 
     @staticmethod
-    def compute_wage_cost(schedule: dict[int, int], workload: Workload) -> float:
+    def compute_wage_cost(Schedule: Schedule) -> float:
         total_cost = 0
-        for shift_id, employee_id in schedule.items():
-            total_cost += MalusCalc._compute_cost(workload, shift_id, employee_id)
+        for shift_id, employee_id in Schedule.schedule.items():
+            total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id)
         return round(total_cost, 2)
     
     @staticmethod
@@ -39,8 +40,8 @@ class MalusCalc:
         return round(total, 2)
     
     @staticmethod
-    def get_total_cost(schedule: dict[int, int], workload: Workload) -> float:
-        wage_cost = MalusCalc.compute_wage_cost(schedule, workload)
+    def get_total_cost(Schedule: Schedule) -> float:
+        wage_cost = MalusCalc.compute_wage_cost(Schedule)
         standard_cost = MalusCalc.standard_cost(employee_list)
         return round(wage_cost + standard_cost, 2)
 
