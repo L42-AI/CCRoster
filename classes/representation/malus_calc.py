@@ -2,7 +2,7 @@ from classes.representation.employee import Employee
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 
-from helpers import get_shift, get_employee, get_weeknumber
+from helpers import get_shift, get_employee, get_weeknumber, id_shift
 from data.assign import employee_list
 
 
@@ -64,9 +64,13 @@ class MalusCalc:
             return 0
 
         # check if worker is under his/hers weely min
-        elif len(workload[employee_id][weeknumber]) < weekly_min:
-            return 0
+        total_duration = [get_shift(x).duration for x in workload[weeknumber]]
+        print(total_duration)
+        print()
+        quit()
+        # elif len(workload[employee_id][weeknumber]) < weekly_min:
+        #     return 0
 
-        else:
-            # if weekly_min is reached, calculate the wage it will cost normal way
-            return wage * hours  # Multiply duration with hourly wage to get total pay
+        # else:
+        #     # if weekly_min is reached, calculate the wage it will cost normal way
+        #     return wage * hours  # Multiply duration with hourly wage to get total pay
