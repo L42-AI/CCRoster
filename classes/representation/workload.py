@@ -52,7 +52,7 @@ class Workload(dict):
         if add:
             # add a shift to the workload of that employee that week
             self[employee_id][weeknumber].append(shift_id)
-        else:
+        elif employee_id != 10: # hardcoded for dummy employee!! remove after testing
             self[employee_id][weeknumber].remove(shift_id)
 
     def compute_priority(self, weeknum: int) -> None:

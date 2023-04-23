@@ -40,9 +40,8 @@ class MalusCalc:
         return round(total, 2)
     
     @staticmethod
-    def get_total_cost(Schedule: Schedule) -> float:
+    def get_total_cost(standard_cost, Schedule: Schedule) -> float:
         wage_cost = MalusCalc.compute_wage_cost(Schedule)
-        standard_cost = MalusCalc.standard_cost(employee_list)
         return round(wage_cost + standard_cost, 2)
 
     @staticmethod
