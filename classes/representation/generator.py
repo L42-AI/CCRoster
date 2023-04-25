@@ -1,13 +1,15 @@
 import random
 import copy
 import math
+import datetime
 
 from classes.representation.shift_constraints import ShiftConstrains
 from classes.representation.availabilities import Availabilities
 from classes.representation.malus_calc import MalusCalc
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
-
+from classes.representation.employee import Employee
+from classes.representation.availability import Availability
 
 from helpers import get_shift, get_employee, get_weeknumber, recursive_copy
 from data.assign import employee_list, shift_list, total_availabilities
@@ -22,26 +24,21 @@ class Generator:
         self.ShiftConstrains = ShiftConstrains()
         self.Availabilities = Availabilities()
         self.Workload = Workload()
+        self.standard_cost = MalusCalc.standard_cost(self.employees)
 
         self.Schedule = Schedule(self.Workload, 999999, None)
 
     """ Schedule manipulation """
 
-    def random_fill(self) -> None:
+    def random_fill(self, Schedule) -> None:
+        ''' yields terrible result, so it implies ppa still get stuck in local optima '''
 
-        filled = 0
-        while filled < len(self.Schedule):
-            shift_id = random.choice(self.Schedule)
-
-            if self.Schedule[shift_id] != None:
-                continue
-
-            selected_employee = random.choice(self.Schedule)
-            self.schedule_in(shift_id, selected_employee.id)
-
-            filled += 1
+        # fill with dummy employee
+        for shift in self.shifts:
+            self.schedule_in(shift.id, 10, Schedule) # HARDCODED FOR DUMMY_EMPLOYEE
 
     def greedy_fill(self) -> None:
+        ''' Fills in the initial schedule in a greedy way '''
 
         filled = 0
         while filled < len(self.Schedule):
@@ -72,6 +69,7 @@ class Generator:
                     filled += 1
 
     def schedule_in(self, shift_id: int, employee_id: int, Schedule: Schedule, fill: bool = False) -> None:
+        ''' Places a worker in a shift in the schedule, while also updating his workload '''
         Schedule[shift_id] = employee_id
         Schedule.Workload.update(shift_id, employee_id, add=True)
 
@@ -86,6 +84,8 @@ class Generator:
                 self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=True, max_hit=False)
 
     def schedule_out(self, shift_id: int, Schedule: Schedule, fill: bool = False) -> None:
+        ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
+
         employee_id = Schedule[shift_id]
         Schedule[shift_id] = None
         Schedule.Workload.update(shift_id, employee_id, add=False)
@@ -94,6 +94,7 @@ class Generator:
             self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=False)
 
     def schedule_swap(self, shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+        ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
         self.schedule_out(shift_id, Schedule)
         self.schedule_in(shift_id, employee_id, Schedule)
 
@@ -104,57 +105,59 @@ class Generator:
         makes mutations to the schedule but remembers original state and returns to it if
         change is not better. So no deepcopies needed :0
         '''
+
+        # buds will be the mutated schedules
         buds = []
-        old_cost = MalusCalc.get_total_cost(schedule)
+        old_cost = MalusCalc.compute_final_costs(self.standard_cost, schedule)
         while len(buds) < 10:
             
+            # copy the original schedule
             bud_schedule = Schedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
-            replace_shift_id = self.get_random_shift()
+            for i in range(schedule.MUTATIONS):
+                buds = self.modification(buds, bud_schedule, old_cost, T)
 
-            current_employee_id = schedule[replace_shift_id]
-            replace_employee_id = self.get_random_employee(replace_shift_id, current_employee_id, schedule)
-
-            if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
-
-                if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
-                    self.schedule_swap(replace_shift_id, replace_employee_id, bud_schedule)
-                    buds = self.accept_change(bud_schedule, old_cost, buds, T)            
-            else:
-
-                # try to 'ease' workers workload by having someone else take over the shift, store the changes 
-                bud_schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, bud_schedule) 
-                buds = self.accept_change(bud_schedule, old_cost, buds, T)
-        # print('done')
         return buds
     
-    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float) -> list[Schedule]:
-        bud_schedule.cost = MalusCalc.get_total_cost(bud_schedule)
+    def modification(self, buds, schedule, old_cost, T) -> Schedule:
+        # find a modification            
+        replace_shift_id = self.get_random_shift()
+        current_employee_id = schedule[replace_shift_id]
+        replace_employee_id = self.get_random_employee(replace_shift_id, current_employee_id, schedule)
+
+        # check if new worker wants to work additional shift, if not, use mutate_max
+        if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
+
+            if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
+                self.schedule_swap(replace_shift_id, replace_employee_id, schedule)
+                buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)            
+                
+            return buds
+        else: # if worker does not want an additional shift, have someone else work on of the worker's shift
+            schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
+            buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)
+            return buds
+        
+    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float, skip_shift_id=None) -> list:
+        ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
+            and a simulated annealing probability'''
+        
+        # store the costs in bud_schedule
+        bud_schedule.cost = MalusCalc.compute_final_costs(self.standard_cost, bud_schedule)
         new_cost = bud_schedule.cost
 
+        # if cost lower, do not make math calculation
         if new_cost < old_cost:
             buds.append(bud_schedule)
             return buds
         
+        # accept only if it satisfies sim an condition
         exponent = -(new_cost - old_cost) / T
         exponent = max(-700, min(exponent, 700))
         p_acceptance = math.exp(exponent)
         if p_acceptance > random.random(): 
             buds.append(bud_schedule)
-            return buds
+            
         return buds
-
-        
-    # def mutate_extra_employees(self) -> None:
-    #     '''
-    #     Method only works in generator, maybe should get schedule as argument so it always works?
-    #     '''
-    #     sorted_shifts = sorted(self.Schedule.keys(), key = lambda shift_id: self.actual_availabilities[shift_id][1], reverse=True)
-
-    #     for shift_id in sorted_shifts:
-    #         for employee_id in self.Availabilities.actual[shift_id][1]:
-    #             if self.Workload.check_capacity(shift_id, employee_id):
-    #                 ...
-    #     return
 
     def mutate_max_workload(self, shift_to_replace_id: int, possible_employee_id: int, schedule: Schedule) -> list[tuple[int, int]]:
         '''
@@ -165,17 +168,21 @@ class Generator:
         # get the shortest shift the busy person is working
         shortest_shift_id = sorted(self.shifts, key=lambda x: x.duration)[0].id
 
+        # make sure we do not get stuck in recursive loop
         if shift_to_replace_id == shortest_shift_id:
             return schedule
 
         # pick new employee to work the shortest shift
         shortest_shift_employee_id = self.get_random_employee(shortest_shift_id, possible_employee_id, schedule)
 
+        # check if worker that will take over the shift, still wants to work additional shift
         if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
             if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
 
                 self.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
-        else:
+
+        # find replacement for the replacement worker
+        else: 
             self.mutate_max_workload(shortest_shift_id, shortest_shift_employee_id, schedule)
         return schedule
 
@@ -195,6 +202,8 @@ class Generator:
         """
         returns an employee id
         """
+
+        # see who is working already to avoid duplicate
         current_employee_id = schedule[shift_id]
 
         choices = total_availabilities[shift_id] - {current_employee_id}

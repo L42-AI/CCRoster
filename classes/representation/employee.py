@@ -1,7 +1,7 @@
 from classes.representation.availability import Availability
 
 class Employee:
-    def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], minimum: dict[int, int], wage: float, level: int, tasks: list[int], location: str) -> None:
+    def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
         self.fname = fname
         self.lname = lname
         self.name = f'{fname} {lname}'
@@ -9,7 +9,7 @@ class Employee:
         self.availability = self.sort_availability(av)
         self.wage = wage
         self.weekly_max = maximum
-        self.weekly_min = minimum
+        self.min_hours = min_hours
         self.level = level
         self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
@@ -58,8 +58,8 @@ class Employee:
     def get_week_min_dict(self) -> dict[int, int]:
         return self.weekly_min
 
-    def get_week_min(self, week) -> int:
-        return self.weekly_min.get(week)
+    def get_minimal_hours(self) -> int:
+        return self.min_hours
 
     def get_id(self) -> str:
         return self.id
