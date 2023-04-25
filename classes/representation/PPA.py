@@ -6,7 +6,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 from classes.representation.malus_calc import MalusCalc
-from helpers import recursive_copy, get_temperature, id_shift, id_employee
+from helpers import recursive_copy, id_shift, id_employee
 
 from data.assign import employee_list, shift_list, total_availabilities
 
@@ -62,7 +62,7 @@ class PPA:
                 Schedule(
                     Workload = Workload(recursive_copy(schedule.Workload)),
                     cost = schedule.cost,
-                    schedule = recursive_copy(schedule)
+                    set_schedule = recursive_copy(schedule)
                 )
             )
         return plants
