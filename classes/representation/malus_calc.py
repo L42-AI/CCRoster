@@ -70,7 +70,7 @@ class MalusCalc:
     
     def compute_final_costs(standard_cost: int, schedule: Schedule) -> float:
         ''' Get total costs does not know '''
-        
+
         wage_costs = 0
 
         employee_duration = {}

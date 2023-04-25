@@ -44,7 +44,7 @@ class PlantPropagation:
             if all(x == winners[0] for x in winners):
                 self.T += 0.1 if self.T < 0.5 else + 0
 
-            print(MalusCalc.compute_final_costs(self.gen.standard_cost, winners[0]))
+            print(MalusCalc.compute_final_costs(self.gen.standard_cost, winners[-1]))
         winners = sorted(plants, key= lambda x: x.cost)
         for shift_id, employee_id in winners[0].items():
 
