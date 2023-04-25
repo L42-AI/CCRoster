@@ -35,7 +35,7 @@ class Generator:
 
         # fill with dummy employee
         for shift in self.shifts:
-            self.schedule_in(shift.id, 10, Schedule)
+            self.schedule_in(shift.id, 10, Schedule) # HARDCODED FOR DUMMY_EMPLOYEE
 
     def greedy_fill(self) -> None:
         ''' Fills in the initial schedule in a greedy way '''
@@ -108,7 +108,7 @@ class Generator:
 
         # buds will be the mutated schedules
         buds = []
-        old_cost = MalusCalc.get_total_cost(self.standard_cost, schedule)
+        old_cost = MalusCalc.compute_final_costs(self.standard_cost, schedule)
         while len(buds) < 10:
             
             # copy the original schedule
@@ -129,20 +129,20 @@ class Generator:
 
             if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
                 self.schedule_swap(replace_shift_id, replace_employee_id, schedule)
-                buds = self.accept_change(schedule, old_cost, buds, T)            
+                buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)            
                 
             return buds
         else: # if worker does not want an additional shift, have someone else work on of the worker's shift
             schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
-            buds = self.accept_change(schedule, old_cost, buds, T)
+            buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)
             return buds
         
-    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float) -> list:
+    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float, skip_shift_id=None) -> list:
         ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
             and a simulated annealing probability'''
         
         # store the costs in bud_schedule
-        bud_schedule.cost = MalusCalc.get_total_cost(self.standard_cost, bud_schedule)
+        bud_schedule.cost = MalusCalc.compute_final_costs(self.standard_cost, bud_schedule)
         new_cost = bud_schedule.cost
 
         # if cost lower, do not make math calculation

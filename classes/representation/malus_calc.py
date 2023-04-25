@@ -9,10 +9,10 @@ from data.assign import employee_list
 class MalusCalc:
 
     @staticmethod
-    def compute_wage_cost(Schedule: Schedule) -> float:
+    def compute_wage_cost(Schedule: Schedule, skip_shift_id=None) -> float:
         total_cost = 0
         for shift_id, employee_id in Schedule.items():
-            total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id)
+            total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id, skip_shift_id=skip_shift_id)
         return round(total_cost, 2)
     
     @staticmethod
@@ -40,24 +40,49 @@ class MalusCalc:
         return round(total, 2)
     
     @staticmethod
-    def get_total_cost(standard_cost, Schedule: Schedule) -> float:
-        wage_cost = MalusCalc.compute_wage_cost(Schedule)
+    def get_total_cost(standard_cost: int, Schedule: Schedule, skip_shift_id=None) -> float:
+        wage_cost = MalusCalc.compute_wage_cost(Schedule, skip_shift_id=skip_shift_id)
+        
         return round(wage_cost + standard_cost, 2)
 
     @staticmethod
-    def _compute_cost(workload: Workload, shift_id: int, employee_id: int) -> float:
+    def _compute_cost(workload: Workload, shift_id: int, employee_id: int, skip_shift_id=None) -> float:
         """
         returns the total pay using the wage and shift in hours. Also takes into account that if an employee has a
-        weekly min, the first shifts are 'free'
+        a guaranteed working hours, those hours are 'free'
         """
 
+        # collect info
         possible_employee_object = get_employee(employee_id)
         hours = get_shift(shift_id).duration
         weeknumber = get_weeknumber(shift_id)
         minimal_hours = possible_employee_object.get_minimal_hours()
         wage = possible_employee_object.get_wage()
-        total_scheduled_duration = sum(get_shift(x).duration for x in workload[weeknumber])
-        remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) < 0 else 0
 
+        # check if employee has obligated contract hours left
+        total_scheduled_duration = sum(get_shift(x).duration for x in workload[weeknumber] if x != skip_shift_id)
+        remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) > 0 else 0
 
-        return wage * (hours - remaining_min_hours) # Multiply duration with hourly wage to get total pay
+        # subtract those hours, which are part of generator.standard_cost, from working hours to avoid double counting
+        billable_hours = hours - remaining_min_hours if hours - remaining_min_hours > 0 else 0
+
+        return wage * billable_hours # Multiply duration with hourly wage to get total pay
+    
+    def compute_final_costs(standard_cost: int, schedule: Schedule) -> float:
+        ''' Get total costs does not know '''
+        
+        wage_costs = 0
+
+        employee_duration = {}
+        for shift_id in schedule:
+            if schedule[shift_id] in employee_duration:
+                employee_duration[schedule[shift_id]] += get_shift(shift_id).duration
+            else:
+                employee_duration[schedule[shift_id]] = get_shift(shift_id).duration
+        for employee in employee_duration:
+            employee_obj = get_employee(employee)
+            wage_costs += (employee_duration[employee] - employee_obj.min_hours) * employee_obj.get_wage() if (employee_duration[employee] - employee_obj.min_hours) > 0 else + 0
+                   
+        return wage_costs + standard_cost
+
+        

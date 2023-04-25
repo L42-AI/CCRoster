@@ -28,26 +28,27 @@ class PlantPropagation:
             plants_and_buds = [self.gen.mutate(plant, self.T) for plant in plants]
             plants_and_buds = list(itertools.chain(*plants_and_buds))
 
-            def tournament_selection(plants, k=3):  # k is the tournament size
+            def tournament_selection(plants, k=5):  # k is the tournament size
                 selected_plants = random.sample(plants, k)
-                winner = min(selected_plants, key=lambda x: x.cost)
+                if random.random() < self.T:  # Occasionally select a plant with worse cost
+                    winner = max(selected_plants, key=lambda x: x.cost)
+                else:
+                    winner = min(selected_plants, key=lambda x: x.cost)
                 return winner
 
             plants = [tournament_selection(plants_and_buds) for _ in range(self.NUMBER_OF_PLANTS)]
-            winners.append(sorted(plants, key= lambda x: x.cost)[0])
+            winners.append(sorted(plants, key=lambda x: MalusCalc.compute_final_costs(self.gen.standard_cost, x))[0])
             if len(winners) > 5:
                 del winners[0]
+            # print([x.cost for x in winners])
             if all(x == winners[0] for x in winners):
-                self.T += 0.1 if self.T < 0.5 else + 0.1
-                for plant in plants: 
-                    plant.MUTATIONS += 1
-            else:
-                for plant in plants:
-                    plant.MUTATIONS = random.randint(1, 5)
-            print(winners[0].cost, self.T)
+                self.T += 0.1 if self.T < 0.5 else + 0
+
+            print(MalusCalc.compute_final_costs(self.gen.standard_cost, winners[0]))
         winners = sorted(plants, key= lambda x: x.cost)
         for shift_id, employee_id in winners[0].items():
 
             print(get_shift(shift_id), get_employee(employee_id))
             print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")
+        
