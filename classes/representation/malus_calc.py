@@ -72,12 +72,9 @@ class MalusCalc:
 
         wage_costs = 0
 
-        employee_duration = {}
+        employee_duration = {employee.id: 0 for employee in employee_list}
         for shift_id in schedule:
-            if schedule[shift_id] in employee_duration:
-                employee_duration[schedule[shift_id]] += id_shift[shift_id].duration
-            else:
-                employee_duration[schedule[shift_id]] = id_shift[shift_id].duration
+            employee_duration[schedule[shift_id]] = id_shift[shift_id].duration
         for employee in employee_duration:
             employee_obj = id_employee[employee]
             wage_costs += (employee_duration[employee] - employee_obj.min_hours) * employee_obj.get_wage() if (employee_duration[employee] - employee_obj.min_hours) > 0 else + 0
