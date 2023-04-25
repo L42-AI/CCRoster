@@ -35,7 +35,7 @@ class MalusCalc:
         calculates the total costs of a schedule
         """
         # calculate the starting costs
-        total = sum([sum(employee.weekly_min.values()) * employee.get_wage()  for employee in employee_list])
+        total = sum([employee.get_minimal_hours() * employee.get_wage()  for employee in employee_list])
 
         return round(total, 2)
     
@@ -52,25 +52,12 @@ class MalusCalc:
         """
 
         possible_employee_object = get_employee(employee_id)
-        weeknumber = get_weeknumber(shift_id)
-        weekly_min = possible_employee_object.get_week_min(weeknumber)
         hours = get_shift(shift_id).duration
+        weeknumber = get_weeknumber(shift_id)
+        minimal_hours = possible_employee_object.get_minimal_hours()
         wage = possible_employee_object.get_wage()
+        total_scheduled_duration = sum(get_shift(x).duration for x in workload[weeknumber])
+        remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) < 0 else 0
 
-        # if week not in workload, number of shifts that week == 0
-        if weeknumber not in workload[employee_id] and weekly_min > 0:
 
-            # this shift the worker works for 'free'
-            return 0
-
-        # check if worker is under his/hers weely min
-        total_duration = [get_shift(x).duration for x in workload[weeknumber]]
-        print(total_duration)
-        print()
-        quit()
-        # elif len(workload[employee_id][weeknumber]) < weekly_min:
-        #     return 0
-
-        # else:
-        #     # if weekly_min is reached, calculate the wage it will cost normal way
-        #     return wage * hours  # Multiply duration with hourly wage to get total pay
+        return wage * (hours - remaining_min_hours) # Multiply duration with hourly wage to get total pay
