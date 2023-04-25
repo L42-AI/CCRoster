@@ -55,9 +55,6 @@ class Employee:
     def get_week_max(self, week) -> int:
         return self.weekly_max.get(week)
 
-    def get_week_min_dict(self) -> dict[int, int]:
-        return self.weekly_min
-
     def get_minimal_hours(self) -> int:
         return self.min_hours
 

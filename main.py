@@ -1,5 +1,5 @@
 from classes.representation.generator import Generator
-from classes.representation.PPA import PlantPropagation
+from classes.representation.PPA import PPA
 import cProfile
 import pstats
 from io import StringIO
@@ -29,7 +29,7 @@ def main(PROFILE):
         pr = cProfile.Profile()
         pr.enable()
 
-        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
         
         pr.disable()
 
@@ -41,7 +41,7 @@ def main(PROFILE):
         ps.print_stats()
         print(s.getvalue())
     else:
-        PlantPropagation(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
 
 
 if __name__ == "__main__":
