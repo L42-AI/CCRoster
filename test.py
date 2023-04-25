@@ -5,7 +5,7 @@ from classes.representation.availabilities import Availabilities
 from classes.representation.workload import Workload
 
 
-from helpers import get_employee, get_weeknumber
+from helpers import get_weeknumber, id_employee
 from data.assign import shift_list
 
 class Schedule(dict):
@@ -53,7 +53,7 @@ class Schedule(dict):
                 selected_employee_id = random.choice(possible_employee_list)
                 
                 for employee_id in possible_employee_list:
-                    if get_employee(employee_id).priority < get_employee(selected_employee_id).priority:
+                    if id_employee[employee_id].priority < get_employee(selected_employee_id).priority:
                         selected_employee_id = employee_id
                 
                 if ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self):

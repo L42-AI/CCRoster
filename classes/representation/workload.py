@@ -1,7 +1,7 @@
 
 from data.assign import employee_list
 
-from helpers import get_weeknumber, get_employee
+from helpers import get_weeknumber, id_employee
 
 class Workload(dict):
 
@@ -27,7 +27,7 @@ class Workload(dict):
         returns True if the employee is allowed to work that shift given his/hers weekly max
         """
 
-        employee_obj = get_employee(employee_id)
+        employee_obj = id_employee[employee_id]
 
         # get the week and check how many shifts the person is working that week
         weeknumber = get_weeknumber(shift_id)
