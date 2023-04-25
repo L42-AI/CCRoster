@@ -99,7 +99,7 @@ class Generator:
 
     """ MUTATE """
 
-    def mutate(self, schedule: Schedule, T):
+    def mutate(self, schedule: Schedule, T: float) -> list[Schedule]:
         '''
         makes mutations to the schedule but remembers original state and returns to it if
         change is not better. So no deepcopies needed :0
@@ -127,7 +127,7 @@ class Generator:
         # print('done')
         return buds
     
-    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float) -> list:
+    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float) -> list[Schedule]:
         bud_schedule.cost = MalusCalc.get_total_cost(bud_schedule)
         new_cost = bud_schedule.cost
 

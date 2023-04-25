@@ -1,6 +1,5 @@
-from classes.representation.shift import Shift
 from classes.representation.employee import Employee
-
+from classes.representation.shift import Shift
 
 from data.assign import employee_list, shift_list
 
@@ -31,6 +30,3 @@ def recursive_copy(obj: object) -> object:
     else:
         # final return
         return obj
-
-def get_temperature(T):
-    return T*0.80

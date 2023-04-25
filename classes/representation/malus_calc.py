@@ -52,11 +52,11 @@ class MalusCalc:
         weekly min, the first shifts are 'free'
         """
 
-        possible_employee_object = get_employee(employee_id)
+        employee_obj = get_employee(employee_id)
         weeknumber = get_weeknumber(shift_id)
-        weekly_min = possible_employee_object.get_week_min(weeknumber)
+        weekly_min = employee_obj.get_week_min(weeknumber)
         hours = get_shift(shift_id).duration
-        wage = possible_employee_object.get_wage()
+        wage = employee_obj.get_wage()
 
         # if week not in workload, number of shifts that week == 0
         if weeknumber not in workload[employee_id] and weekly_min > 0:
