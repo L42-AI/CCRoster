@@ -2,7 +2,7 @@ from classes.representation.employee import Employee
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 
-from helpers import get_shift, get_employee, get_weeknumber, id_shift
+from helpers import get_weeknumber, id_shift, id_employee
 from data.assign import employee_list
 
 
@@ -52,14 +52,14 @@ class MalusCalc:
         a guaranteed working hours, those hours are 'free'
         """
 
-        employee_obj = get_employee(employee_id)
+        employee_obj = id_employee[employee_id]
         weeknumber = get_weeknumber(shift_id)
         minimal_hours = employee_obj.get_minimal_hours()
-        hours = get_shift(shift_id).duration
+        hours = id_shift[shift_id].duration
         wage = employee_obj.get_wage()
 
         # check if employee has obligated contract hours left
-        total_scheduled_duration = sum(get_shift(x).duration for x in workload[weeknumber] if x != skip_shift_id)
+        total_scheduled_duration = sum(id_shift[x].duration for x in workload[weeknumber] if x != skip_shift_id)
         remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) > 0 else 0
 
         # subtract those hours, which are part of generator.standard_cost, from working hours to avoid double counting
@@ -75,11 +75,11 @@ class MalusCalc:
         employee_duration = {}
         for shift_id in schedule:
             if schedule[shift_id] in employee_duration:
-                employee_duration[schedule[shift_id]] += get_shift(shift_id).duration
+                employee_duration[schedule[shift_id]] += id_shift[shift_id].duration
             else:
-                employee_duration[schedule[shift_id]] = get_shift(shift_id).duration
+                employee_duration[schedule[shift_id]] = id_shift[shift_id].duration
         for employee in employee_duration:
-            employee_obj = get_employee(employee)
+            employee_obj = id_employee[employee]
             wage_costs += (employee_duration[employee] - employee_obj.min_hours) * employee_obj.get_wage() if (employee_duration[employee] - employee_obj.min_hours) > 0 else + 0
                    
         return wage_costs + standard_cost

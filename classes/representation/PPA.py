@@ -6,7 +6,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 from classes.representation.malus_calc import MalusCalc
-from helpers import get_shift, get_employee, recursive_copy, get_temperature
+from helpers import recursive_copy, get_temperature, id_shift, id_employee
 
 from data.assign import employee_list, shift_list, total_availabilities
 
@@ -48,6 +48,6 @@ class PlantPropagation:
         winners = sorted(plants, key= lambda x: x.cost)
         for shift_id, employee_id in winners[0].items():
 
-            print(get_shift(shift_id), get_employee(employee_id))
+            print(id_shift[shift_id], id_employee[employee_id])
             print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")

@@ -11,7 +11,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.employee import Employee
 from classes.representation.availability import Availability
 
-from helpers import get_shift, get_employee, get_weeknumber, recursive_copy
+from helpers import get_weeknumber, recursive_copy, id_shift, id_employee
 from data.assign import employee_list, shift_list, total_availabilities
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
@@ -61,7 +61,7 @@ class Generator:
                 selected_employee_id = random.choice(possible_employee_list)
                 
                 for employee_id in possible_employee_list:
-                    if get_employee(employee_id).priority < get_employee(selected_employee_id).priority:
+                    if id_employee[employee_id].priority < id_employee[selected_employee_id].priority:
                         selected_employee_id = employee_id
                 
                 if ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.Schedule):
@@ -75,7 +75,7 @@ class Generator:
 
         if fill:
             week_num = get_weeknumber(shift_id)
-            employee_obj = get_employee(employee_id)
+            employee_obj = id_employee[employee_id]
             employee_week_max = employee_obj.get_week_max(week_num)
 
             if len(Schedule.Workload[employee_id][week_num]) == employee_week_max:
@@ -214,4 +214,4 @@ class Generator:
     def print_schedule(self, schedule: Schedule) -> None:
         # Format and print the schedule
         for shift_id, employee_id in schedule.items():
-            print(get_shift(shift_id), get_employee(employee_id))
+            print(id_shift[shift_id], id_employee[employee_id])
