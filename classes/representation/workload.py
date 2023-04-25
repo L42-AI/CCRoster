@@ -1,5 +1,6 @@
 
 from data.assign import employee_list
+from classes.representation.employee import Employee
 
 from helpers import get_weeknumber, id_employee
 
@@ -9,16 +10,21 @@ class Workload(dict):
         super().__init__(self)
 
         if set_workload is not None:
-            for employee_id in set_workload:
-                self[employee_id] = set_workload[employee_id]
+            self.copy_workload(set_workload)
         else:
-            for employee in employee_list:
-                self[employee.id] = {weeknum: [] for weeknum in employee.availability}
+            self.init_workload(employee_list)
 
         self.update_highest_priority_list()
 
     """ INIT """
 
+    def copy_workload(self, set_workload: dict[int, dict[int, list]]) -> None:
+        for employee_id in set_workload:
+            self[employee_id] = set_workload[employee_id]
+
+    def init_workload(self, employee_list: list[Employee]) -> None:
+        for employee in employee_list:
+            self[employee.id] = {weeknum: [] for weeknum in employee.availability}
 
     """ METHODS """
 
