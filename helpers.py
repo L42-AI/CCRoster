@@ -30,6 +30,3 @@ def recursive_copy(obj: object) -> object:
     else:
         # final return
         return obj
-
-def get_temperature(T):
-    return T*0.95

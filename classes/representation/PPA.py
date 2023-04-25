@@ -10,44 +10,63 @@ from helpers import get_shift, get_employee, recursive_copy, get_temperature
 
 from data.assign import employee_list, shift_list, total_availabilities
 
-class PlantPropagation:
+class PPA:
     def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
-        self.G: Generator = Generator()
+        self.G = Generator()
         self.Schedule = self.G.Schedule # not necessary but better readability imo
-        self.NUMBER_OF_PLANTS: int = num_plants
-        self.NUMBER_OF_GENERATIONS: int = num_gens
-        self.T = TEMPERATURE
-        self.grow()
+        self.NUMBER_OF_PLANTS = num_plants
+        self.NUMBER_OF_GENERATIONS = num_gens
+        self.grow(TEMPERATURE)
 
-
-    def grow(self):
+    def grow(self, temperature: float) -> None:
         winners = []
-        plants = [Schedule(Workload(recursive_copy(self.Schedule.Workload)), self.Schedule.cost, recursive_copy(self.Schedule)) for i in range(self.NUMBER_OF_PLANTS)]
+        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
+        
         for _ in range(self.NUMBER_OF_GENERATIONS):
-            self.T = get_temperature(self.T)
-            plants_and_buds = [self.G.mutate(plant, self.T) for plant in plants]
-            plants_and_buds = list(chain(*plants_and_buds))
+            temperature = PPA.adjust_temperature(temperature)
 
-            def tournament_selection(plants, k=5):  # k is the tournament size
-                selected_plants = random.sample(plants, k)
-                if random.random() < self.T:  # Occasionally select a plant with worse cost
-                    winner = max(selected_plants, key=lambda x: x.cost)
-                else:
-                    winner = min(selected_plants, key=lambda x: x.cost)
-                return winner
+            plants_and_buds = list(chain*[self.G.mutate(plant, temperature) for plant in plants])
+            plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
 
-            plants = [tournament_selection(plants_and_buds) for _ in range(self.NUMBER_OF_PLANTS)]
             winners.append(sorted(plants, key=lambda x: MalusCalc.compute_final_costs(self.G.standard_cost, x))[0])
+            
             if len(winners) > 5:
                 del winners[0]
-            # print([x.cost for x in winners])
+
             if all(x == winners[0] for x in winners):
-                self.T += 0.1 if self.T < 0.5 else + 0
+                temperature += 0.1 if temperature < 0.5 else + 0
 
             print(MalusCalc.compute_final_costs(self.G.standard_cost, winners[-1]))
+
         winners = sorted(plants, key= lambda x: x.cost)
         for shift_id, employee_id in winners[0].items():
 
             print(get_shift(shift_id), get_employee(employee_id))
             print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")
+
+    @staticmethod
+    def tournament_selection(plants: list[Schedule], T: float, k: int = 5) -> Schedule:  # k is the tournament size
+        selected_plants = random.sample(plants, k)
+        if random.random() < T:  # Occasionally select a plant with worse cost
+            winner = max(selected_plants, key=lambda x: x.cost)
+        else:
+            winner = min(selected_plants, key=lambda x: x.cost)
+        return winner
+
+    @staticmethod
+    def gen_plants(schedule: Schedule, number_plants: int) -> list[Schedule]:
+        plants = []
+        for _ in range(number_plants):
+            plants.append(
+                Schedule(
+                    Workload = Workload(recursive_copy(schedule.Workload)),
+                    cost = schedule.cost,
+                    schedule = recursive_copy(schedule)
+                )
+            )
+        return plants
+
+    @staticmethod
+    def adjust_temperature(T: float) -> float:
+        return T*0.95
