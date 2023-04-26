@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from classes.representation.employee import Employee
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
@@ -68,20 +70,17 @@ class MalusCalc:
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
     
     def compute_final_costs(standard_cost: int, schedule: Schedule) -> float:
-        ''' Get total costs does not know '''
-
         wage_costs = 0
 
-        employee_duration = {}
+        employee_duration = defaultdict(float)
         for shift_id in schedule:
-            if schedule[shift_id] in employee_duration:
-                employee_duration[schedule[shift_id]] += id_shift[shift_id].duration
-            else:
-                employee_duration[schedule[shift_id]] = id_shift[shift_id].duration
-        for employee in employee_duration:
+            employee_duration[schedule[shift_id]] += id_shift[shift_id].duration
+
+        for employee, duration in employee_duration.items():
             employee_obj = id_employee[employee]
-            wage_costs += (employee_duration[employee] - employee_obj.min_hours) * employee_obj.get_wage() if (employee_duration[employee] - employee_obj.min_hours) > 0 else + 0
-                   
+            wage_costs += max(duration - employee_obj.min_hours, 0) * employee_obj.get_wage()
+
         return wage_costs + standard_cost
+
 
         
