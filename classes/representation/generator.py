@@ -63,15 +63,15 @@ class Generator:
             # copy the original schedule
             bud_schedule = Schedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
             for i in range(schedule.MUTATIONS):
-                buds = self.modification(buds, bud_schedule, old_cost, T)
-
+                buds = self.modification(buds, bud_schedule, T)
         return buds
     
-    def modification(self, buds, schedule, old_cost, T) -> Schedule:
+    def modification(self, buds, schedule: Schedule, T) -> Schedule:
         # find a modification            
         replace_shift_id = self.get_random_shift()
         current_employee_id = schedule[replace_shift_id]
         replace_employee_id = self.get_random_employee(replace_shift_id, current_employee_id, schedule)
+        old_cost = schedule.cost
 
         # check if new worker wants to work additional shift, if not, use mutate_max
         if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
@@ -90,18 +90,15 @@ class Generator:
         ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
             and a simulated annealing probability'''
         if shift_id != None: # does not take into account 'free' hours
-            # print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5])
+        #     # print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5])
         
-            duration = self.id_shift[shift_id].duration
+            duration_old_emp, duration_new_emp = self.billable_hours(shift_id, old_emp, new_emp, bud_schedule)
             old_wage = self.id_employee[old_emp].wage
             new_wage = self.id_employee[new_emp].wage
-            duration_old_emp = max(0, duration - max(0, self.id_employee[old_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
-            duration_new_emp = max(0, duration - max(0, self.id_employee[new_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
             cost_old_emp = old_wage * duration_old_emp
             cost_new_emp = new_wage * duration_new_emp
 
-            # print(bud_schedule.cost == MalusCalc.compute_final_costs(self.standard_cost, bud_schedule))
-            print(old_cost - MalusCalc.compute_final_costs(self.standard_cost, bud_schedule) == cost_old_emp - cost_new_emp)
+            # print(old_cost - MalusCalc.compute_final_costs(self.standard_cost, bud_schedule), cost_old_emp - cost_new_emp)
             bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
         else:
@@ -153,6 +150,11 @@ class Generator:
         return schedule
 
     """ Helper methods """
+    def billable_hours(self, shift_id, old_emp, new_emp, bud_schedule):
+            duration = self.id_shift[shift_id].duration
+            duration_old_emp = max(0, duration - max(0, self.id_employee[old_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
+            duration_new_emp = max(0, duration - max(0, self.id_employee[new_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
+            return duration_old_emp, duration_new_emp
 
     def get_random_shift(self) -> int:
         """
