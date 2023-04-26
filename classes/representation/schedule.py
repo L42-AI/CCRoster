@@ -15,7 +15,6 @@ class Schedule(dict):
         if set_schedule is not None:
             for shift_id in set_schedule:
                 self[shift_id] = set_schedule[shift_id]
-
         else:
             for shift in shift_list:
                 self[shift.id] = 10 #HARDCODED DUMMY EMPL

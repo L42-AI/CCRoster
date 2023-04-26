@@ -14,8 +14,6 @@ class Workload(dict):
         else:
             self.init_workload(employee_list)
 
-        self.update_highest_priority_list()
-
     """ INIT """
 
     def copy_workload(self, set_workload: dict[int, dict[int, list]]) -> None:
@@ -59,30 +57,3 @@ class Workload(dict):
             self[employee_id][weeknumber].append(shift_id)
         elif employee_id != 10: # hardcoded for dummy employee!! remove after testing
             self[employee_id][weeknumber].remove(shift_id)
-
-    def compute_priority(self, weeknum: int) -> None:
-        for employee in employee_list:
-            week_max = employee.get_week_max(weeknum)
-            week_min = employee.get_week_min(weeknum)
-
-            if weeknum in employee.availability:
-                availability_priority = (
-                    len(employee.availability[weeknum]) - week_max)
-                week_min_priority = (len(self[employee.id][weeknum]) - week_min)
-                week_max_priority = (week_max - len(self[employee.id][weeknum]))
-
-                if availability_priority < 1:
-                    availability_priority = -99
-                if week_min_priority < 0:
-                    week_min_priority = -150
-                if week_max_priority < 1:
-                    week_max_priority = -99
-
-                employee.priority = availability_priority + \
-                    week_min_priority - week_max_priority
-            else:
-                employee.priority = 999
-    
-    def update_highest_priority_list(self) -> None:
-        self.priority_list = sorted(
-            employee_list, key=lambda employee: employee.priority)

@@ -24,7 +24,6 @@ class Generator:
         self.id_shift = id_shift
 
         self.ShiftConstrains = ShiftConstrains()
-        self.Availabilities = Availabilities()
         self.Workload = Workload()
         self.standard_cost = MalusCalc.standard_cost(self.employees)
 
@@ -32,68 +31,16 @@ class Generator:
 
     """ Schedule manipulation """
 
-    def random_fill(self, Schedule) -> None:
-        ''' yields terrible result, so it implies ppa still get stuck in local optima '''
-
-        # fill with dummy employee
-        for shift in self.shifts:
-            self.schedule_in(shift.id, 10, Schedule) # HARDCODED FOR DUMMY_EMPLOYEE
-
-    def greedy_fill(self) -> None:
-        ''' Fills in the initial schedule in a greedy way '''
-
-        filled = 0
-        while filled < len(self.Schedule):
-            sorted_id_list = sorted(self.Schedule.keys(), key = lambda shift_id: len(self.Availabilities[shift_id][1]) if self.Availabilities[shift_id][0] == 0 else 999)
-
-            for shift_id in sorted_id_list:
-                if self.Schedule[shift_id] != None:
-                    continue
-                # if len(self.actual_availabilities[sorted_id_list[0]][1]) < 2:
-                #     shift_id = sorted_id_list[0]
-                elif len(self.Availabilities[shift_id][1]) < 1:
-                    raise LookupError('No availabilities for shift!')
-
-                weeknum = get_weeknumber(shift_id)
-
-                self.Workload.compute_priority(weeknum)
-                self.Workload.update_highest_priority_list()
-
-                possible_employee_list = list(self.Availabilities[shift_id][1])
-                selected_employee_id = random.choice(possible_employee_list)
-                
-                for employee_id in possible_employee_list:
-                    if id_employee[employee_id].priority < id_employee[selected_employee_id].priority:
-                        selected_employee_id = employee_id
-                
-                if ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, self.Schedule):
-                    self.schedule_in(shift_id, selected_employee_id, self.Schedule, fill=True)
-                    filled += 1
-
-    def schedule_in(self, shift_id: int, employee_id: int, Schedule: Schedule, fill: bool = False) -> None:
+    def schedule_in(self, shift_id: int, employee_id: int, Schedule: Schedule) -> None:
         ''' Places a worker in a shift in the schedule, while also updating his workload '''
         Schedule[shift_id] = employee_id
         Schedule.Workload.update(shift_id, employee_id, add=True)
 
-        if fill:
-            week_num = get_weeknumber(shift_id)
-            employee_obj = id_employee[employee_id]
-            employee_week_max = employee_obj.get_week_max(week_num)
-
-            if len(Schedule.Workload[employee_id][week_num]) == employee_week_max:
-                self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=True, max_hit=True)
-            else:
-                self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=True, max_hit=False)
-
-    def schedule_out(self, shift_id: int, Schedule: Schedule, fill: bool = False) -> None:
+    def schedule_out(self, shift_id: int, Schedule: Schedule) -> None:
         ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
-
         employee_id = Schedule[shift_id]
         Schedule[shift_id] = None
         Schedule.Workload.update(shift_id, employee_id, add=False)
-        
-        if fill:
-            self.Availabilities.update_availabilty(self.ShiftConstrains, shift_id, employee_id, add=False)
 
     def schedule_swap(self, shift_id: int, employee_id: int, Schedule: Schedule) -> None:
         ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
