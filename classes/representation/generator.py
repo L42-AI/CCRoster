@@ -90,17 +90,18 @@ class Generator:
         ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
             and a simulated annealing probability'''
         if shift_id != None: # does not take into account 'free' hours
-            print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5], shift_id)
+            # print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5])
         
             duration = self.id_shift[shift_id].duration
             old_wage = self.id_employee[old_emp].wage
             new_wage = self.id_employee[new_emp].wage
-            duration_old_emp = duration - max(0, self.id_employee[old_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]]))
-            duration_new_emp = duration - max(0, self.id_employee[new_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]))
+            duration_old_emp = max(0, duration - max(0, self.id_employee[old_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
+            duration_new_emp = max(0, duration - max(0, self.id_employee[new_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
             cost_old_emp = old_wage * duration_old_emp
             cost_new_emp = new_wage * duration_new_emp
 
             # print(bud_schedule.cost == MalusCalc.compute_final_costs(self.standard_cost, bud_schedule))
+            print(old_cost - MalusCalc.compute_final_costs(self.standard_cost, bud_schedule) == cost_old_emp - cost_new_emp)
             bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
         else:
