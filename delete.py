@@ -114,5 +114,5 @@ employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(datetime(20
 for day in range(3,31):
     shift_list.append(Shift(start=datetime(2023, 4, day, 7, 0),
                          end=datetime(2023, 4, day, 9, 0),
-                         task=1, location=1))
+                         task=1, location=1))             
 """

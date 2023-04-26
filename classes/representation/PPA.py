@@ -7,7 +7,6 @@ from classes.representation.schedule import Schedule
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 from classes.representation.malus_calc import MalusCalc
-from helpers import recursive_copy, id_shift, id_employee
 
 from helpers import recursive_copy, id_shift, id_employee
 
