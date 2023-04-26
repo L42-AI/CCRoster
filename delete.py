@@ -116,3 +116,13 @@ for day in range(3,31):
                          end=datetime(2023, 4, day, 9, 0),
                          task=1, location=1))
 """
+
+# PPA old tournament selection
+@staticmethod
+def tournament_selection(plants: list[Schedule], T: float, k: int = 5) -> Schedule:  # k is the tournament size
+    selected_plants = random.sample(plants, k)
+    if random.random() < T:  # Occasionally select a plant with worse cost
+        winner = max(selected_plants, key=lambda x: x.cost)
+    else:
+        winner = min(selected_plants, key=lambda x: x.cost)
+    return winner

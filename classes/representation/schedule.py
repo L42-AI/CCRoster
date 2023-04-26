@@ -18,5 +18,5 @@ class Schedule(dict):
 
         else:
             for shift in shift_list:
-                self[shift.id] = 10
+                self[shift.id] = 10 #HARDCODED DUMMY EMPL
                 

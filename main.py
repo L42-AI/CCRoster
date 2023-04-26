@@ -6,6 +6,7 @@ from io import StringIO
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+from helpers import id_employee, id_shift
 
 def run() -> None:
     plot_dict = {}
@@ -45,7 +46,7 @@ def main(PROFILE):
 
 
 if __name__ == "__main__":
-    NUMBER_OF_PLANTS = 100
-    NUMBER_OF_GENS = 100
-    PROFILE = False
+    NUMBER_OF_PLANTS = 200
+    NUMBER_OF_GENS = 60
+    PROFILE = True
     main(PROFILE)

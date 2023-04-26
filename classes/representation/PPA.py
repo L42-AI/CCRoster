@@ -7,9 +7,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 from classes.representation.malus_calc import MalusCalc
-from helpers import recursive_copy, id_shift, id_employee
-
-from helpers import recursive_copy, id_shift, id_employee
+from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
@@ -17,6 +15,8 @@ class PPA:
         self.Schedule = self.G.Schedule # not necessary but better readability imo
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
+        self.id_employee = id_employee
+        self.id_shift = id_shift
         self.grow(TEMPERATURE)
 
     def grow(self, temperature: float) -> None:
@@ -36,23 +36,20 @@ class PPA:
 
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
-
             print(MalusCalc.compute_final_costs(self.G.standard_cost, winners[-1]))
 
         winners = sorted(plants, key= lambda x: x.cost)
+        
         for shift_id, employee_id in winners[0].items():
 
-            print(id_shift[shift_id], id_employee[employee_id])
+            print(self.id_shift[shift_id], self.id_employee[employee_id])
             print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")
 
     @staticmethod
     def tournament_selection(plants: list[Schedule], T: float, k: int = 5) -> Schedule:  # k is the tournament size
         selected_plants = random.sample(plants, k)
-        if random.random() < T:  # Occasionally select a plant with worse cost
-            winner = max(selected_plants, key=lambda x: x.cost)
-        else:
-            winner = min(selected_plants, key=lambda x: x.cost)
+        winner = min(selected_plants, key=lambda x: x.cost)
         return winner
 
     @staticmethod
@@ -70,4 +67,4 @@ class PPA:
 
     @staticmethod
     def adjust_temperature(T: float) -> float:
-        return T*0.95
+        return T*0.90

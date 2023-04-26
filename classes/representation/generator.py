@@ -11,7 +11,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.employee import Employee
 from classes.representation.availability import Availability
 
-from helpers import get_weeknumber, recursive_copy, id_shift, id_employee
+from helpers import get_weeknumber, recursive_copy, id_employee, id_shift
 from data.assign import employee_list, shift_list, total_availabilities
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
@@ -20,6 +20,8 @@ class Generator:
     def __init__(self) -> None:
         self.shifts = shift_list  # shift list from assign with shift instances
         self.employees = employee_list
+        self.id_employee = id_employee
+        self.id_shift = id_shift
 
         self.ShiftConstrains = ShiftConstrains()
         self.Availabilities = Availabilities()
@@ -129,20 +131,36 @@ class Generator:
 
             if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
                 self.schedule_swap(replace_shift_id, replace_employee_id, schedule)
-                buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)            
+                buds = self.accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id, skip_shift_id=replace_shift_id)            
                 
             return buds
         else: # if worker does not want an additional shift, have someone else work on of the worker's shift
             schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
-            buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id)
+            buds = self.accept_change(schedule, old_cost, buds, T, skip_shift_id=replace_shift_id, )
             return buds
         
-    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float, skip_shift_id=None) -> list:
+    def accept_change(self, bud_schedule: Schedule, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None, skip_shift_id=None) -> list:
         ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
             and a simulated annealing probability'''
+        if shift_id != None: # does not take into account 'free' hours
+            print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5], shift_id)
+        
+            duration = self.id_shift[shift_id].duration
+            old_wage = self.id_employee[old_emp].wage
+            new_wage = self.id_employee[new_emp].wage
+            duration_old_emp = duration - max(0, self.id_employee[old_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]]))
+            duration_new_emp = duration - max(0, self.id_employee[new_emp].min_hours - sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]))
+            cost_old_emp = old_wage * duration_old_emp
+            cost_new_emp = new_wage * duration_new_emp
+
+            # print(bud_schedule.cost == MalusCalc.compute_final_costs(self.standard_cost, bud_schedule))
+            bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
+
+        else:
+            bud_schedule.cost = MalusCalc.compute_final_costs(self.standard_cost, bud_schedule)
         
         # store the costs in bud_schedule
-        bud_schedule.cost = MalusCalc.compute_final_costs(self.standard_cost, bud_schedule)
+
         new_cost = bud_schedule.cost
 
         # if cost lower, do not make math calculation
