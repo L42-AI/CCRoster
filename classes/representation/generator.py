@@ -62,7 +62,7 @@ class Generator:
             
             # copy the original schedule
             bud_schedule = Schedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
-            for i in range(schedule.MUTATIONS):
+            for _ in range(schedule.MUTATIONS):
                 buds = self.modification(buds, bud_schedule, T)
         return buds
     
