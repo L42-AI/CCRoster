@@ -1,17 +1,12 @@
 import random
 import copy
 import math
-import datetime
-
 from representation.shift_constraints import ShiftConstrains
-from representation.availabilities import Availabilities
 from representation.malus_calc import MalusCalc
 from representation.workload import Workload
 from representation.schedule import Schedule
-from representation.employee import Employee
-from representation.availability import Availability
 
-from helpers import get_weeknumber, recursive_copy, id_employee, id_shift
+from helpers import recursive_copy, id_employee, id_shift
 from data.assign import employee_list, shift_list
 from data.schedule_constants import total_availabilities
 

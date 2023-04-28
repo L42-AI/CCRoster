@@ -1,31 +1,14 @@
 import random
-import copy
 import math
-import datetime
 
 from representation.shift_constraints import ShiftConstrains
-from representation.availabilities import Availabilities
 from representation.malus_calc import MalusCalc
 from representation.workload import Workload
 from representation.schedule import Schedule
-from representation.employee import Employee
-from representation.availability import Availability
 
-from helpers import get_weeknumber, recursive_copy, id_employee, id_shift
-from data.assign import employee_list, shift_list
-from data.schedule_constants import total_availabilities
-
-OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
-
-shifts = shift_list
-employees = employee_list
-
-id_employee = id_employee
-id_shift = id_shift
-
-shiftconstrains = ShiftConstrains()
-workload = Workload()
-standard_cost = MalusCalc.standard_cost(employees)
+from helpers import recursive_copy, id_employee, id_shift
+from data.schedule_constants import total_availabilities, standard_cost
+from data.assign import shift_list
 
 """ Schedule manipulation """
 
@@ -127,7 +110,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
     '''
 
     # get the shortest shift the busy person is working
-    shortest_shift_id = sorted(shifts, key=lambda x: x.duration)[0].id
+    shortest_shift_id = sorted(shift_list, key=lambda x: x.duration)[0].id
 
     # make sure we do not get stuck in recursive loop
     if shift_to_replace_id == shortest_shift_id:
@@ -160,9 +143,9 @@ def _get_random_shift() -> int:
     returns a tuple with inside (1) a tuple containing shift info and (2) an index
     """
 
-    shift_id = random.choice(shifts).id
+    shift_id = random.choice(shift_list).id
     while len(total_availabilities[shift_id]) < 2:
-        shift_id = random.choice(shifts).id
+        shift_id = random.choice(shift_list).id
     return shift_id
 
 def _get_random_employee(shift_id: int, current_employee_id: int, schedule: Schedule) -> int:
