@@ -53,7 +53,7 @@ class Generator:
 
         # buds will be the mutated schedules
         buds = []
-        old_cost = MalusCalc.compute_final_costs(self.standard_cost, schedule)
+        old_cost = MalusCalc.compute_cost(self.standard_cost, schedule)
         while len(buds) < 10:
             
             # copy the original schedule
@@ -98,7 +98,7 @@ class Generator:
             bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
         else:
-            bud_schedule.cost = MalusCalc.compute_final_costs(self.standard_cost, bud_schedule)
+            bud_schedule.cost = MalusCalc.compute_cost(self.standard_cost, bud_schedule)
         
         # store the costs in bud_schedule
 

@@ -1,11 +1,9 @@
-import random
 from itertools import chain
+import random
 
 from representation.malus_calc import MalusCalc
 from representation.schedule import Schedule
 from representation.workload import Workload
-from representation.schedule import Schedule
-from representation.malus_calc import MalusCalc
 
 from data.schedule_constants import standard_cost
 from improve.mutate import mutate
@@ -31,7 +29,7 @@ class PPA:
 
             plants_and_buds = list(chain(*[mutate(plant, temperature) for plant in plants]))
             plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
-            best_plant = sorted(plants, key=lambda x: MalusCalc.compute_final_costs(self.standard_cost, x))[0]
+            best_plant = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))[0]
             winners.append(best_plant)
             
             if best_plant.cost < lowest.cost:
@@ -42,7 +40,7 @@ class PPA:
 
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
-            print(MalusCalc.compute_final_costs(self.standard_cost, winners[-1]))
+            print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
 
         print(f'COST: {lowest.cost}')
         for shift_id, employee_id in lowest.items():

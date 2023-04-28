@@ -2,13 +2,6 @@ from data.schedule_constants import time_conflict_dict
 from representation.schedule import Schedule
 
 class ShiftConstrains:
-    def __init__(self) -> None:
-        self.time_conflict_dict = time_conflict_dict
-
-    def __getitem__(self, index: int) -> list[int]:
-        if index not in self.time_conflict_dict:
-            raise ValueError('Shift id not in conflicting shifts dict')
-        return self.time_conflict_dict[index]
 
     @staticmethod
     def passed_hard_constraints(shift_id: int, employee_id: int, schedule: dict[int, int]) -> bool:

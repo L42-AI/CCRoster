@@ -5,17 +5,16 @@ from representation.workload import Workload
 from representation.schedule import Schedule
 
 from helpers import get_weeknumber, id_shift, id_employee
-from data.assign import employee_list
 
 
 class MalusCalc:
 
-    @staticmethod
-    def compute_wage_cost(Schedule: Schedule, skip_shift_id=None) -> float:
-        total_cost = 0
-        for shift_id, employee_id in Schedule.items():
-            total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id, skip_shift_id=skip_shift_id)
-        return round(total_cost, 2)
+    # @staticmethod
+    # def compute_wage_cost(Schedule: Schedule, skip_shift_id=None) -> float:
+    #     total_cost = 0
+    #     for shift_id, employee_id in Schedule.items():
+    #         total_cost += MalusCalc._compute_cost(Schedule.Workload, shift_id, employee_id, skip_shift_id=skip_shift_id)
+    #     return round(total_cost, 2)
     
     @staticmethod
     def compute_replacement_factor(availabilities_dict: dict[int, set[int]]) -> float:
@@ -31,21 +30,11 @@ class MalusCalc:
     def compute_team_strength(self) -> float:
         ...
 
-    @staticmethod
-    def standard_cost(employee_list: list[Employee]):
-        """
-        calculates the total costs of a schedule
-        """
-        # calculate the starting costs
-        total = sum([employee.get_minimal_hours() * employee.get_wage()  for employee in employee_list])
-
-        return round(total, 2)
-    
-    @staticmethod
-    def get_total_cost(standard_cost: int, Schedule: Schedule, skip_shift_id=None) -> float:
-        wage_cost = MalusCalc.compute_wage_cost(Schedule, skip_shift_id=skip_shift_id)
+    # @staticmethod
+    # def get_total_cost(standard_cost: int, Schedule: Schedule, skip_shift_id=None) -> float:
+    #     wage_cost = MalusCalc.compute_wage_cost(Schedule, skip_shift_id=skip_shift_id)
         
-        return round(wage_cost + standard_cost, 2)
+    #     return round(wage_cost + standard_cost, 2)
 
     @staticmethod
     def _compute_cost(workload: Workload, shift_id: int, employee_id: int, skip_shift_id=None) -> float:
@@ -69,7 +58,7 @@ class MalusCalc:
 
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
     
-    def compute_final_costs(standard_cost: int, schedule: Schedule) -> float:
+    def compute_cost(standard_cost: int, schedule: Schedule) -> float:
         wage_costs = 0
 
         employee_duration = defaultdict(float)
@@ -80,7 +69,7 @@ class MalusCalc:
             employee_obj = id_employee[employee]
             wage_costs += max(duration - employee_obj.min_hours, 0) * employee_obj.get_wage()
 
-        return wage_costs + standard_cost
+        return round(wage_costs + standard_cost, 2)
 
 
         

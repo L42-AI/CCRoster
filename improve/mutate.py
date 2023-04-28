@@ -38,7 +38,7 @@ def mutate(schedule: Schedule, T: float) -> list[Schedule]:
 
     # buds will be the mutated schedules
     buds = []
-    old_cost = MalusCalc.compute_final_costs(standard_cost, schedule)
+    old_cost = MalusCalc.compute_cost(standard_cost, schedule)
     while len(buds) < 10:
         
         # copy the original schedule
@@ -83,7 +83,7 @@ def accept_change(bud_schedule: Schedule, old_cost: int, buds: list, T: float, s
         bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
     else:
-        bud_schedule.cost = MalusCalc.compute_final_costs(standard_cost, bud_schedule)
+        bud_schedule.cost = MalusCalc.compute_cost(standard_cost, bud_schedule)
     
     # store the costs in bud_schedule
 

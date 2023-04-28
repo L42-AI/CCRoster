@@ -13,9 +13,9 @@ def get_standard_cost(employee_list: list[Employee]) -> float:
 
     return round(total, 2)
 
-def init_coliding_dict(shifts: list[Shift]) -> dict[int, list[int]]:
+def init_coliding_dict(shifts: list[Shift]) -> dict[int, set[int]]:
 
-    time_conflict_dict = {shift.id: [] for shift in shifts}
+    time_conflict_dict = {shift.id: set() for shift in shifts}
 
     for i, shift_1 in enumerate(shifts):
 
@@ -23,8 +23,8 @@ def init_coliding_dict(shifts: list[Shift]) -> dict[int, list[int]]:
             if shift_1.end < shift_2.start:
                 continue
             if shift_1.start < shift_2.end:
-                time_conflict_dict[shift_1.id].append(shift_2.id)
-                time_conflict_dict[shift_2.id].append(shift_1.id)
+                time_conflict_dict[shift_1.id].add(shift_2.id)
+                time_conflict_dict[shift_2.id].add(shift_1.id)
 
     return time_conflict_dict
 
