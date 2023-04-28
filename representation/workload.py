@@ -1,6 +1,6 @@
 
 from data.assign import employee_list
-from classes.representation.employee import Employee
+from representation.employee import Employee
 
 from helpers import get_weeknumber, id_employee
 

@@ -1,8 +1,8 @@
 from collections import defaultdict
 
-from classes.representation.employee import Employee
-from classes.representation.workload import Workload
-from classes.representation.schedule import Schedule
+from representation.employee import Employee
+from representation.workload import Workload
+from representation.schedule import Schedule
 
 from helpers import get_weeknumber, id_shift, id_employee
 from data.assign import employee_list

@@ -1,12 +1,12 @@
 
 
-from classes.representation.employee import Employee
-from classes.representation.shift import Shift
-from classes.representation.availability import Availability
-from classes.representation.shift_constraints import ShiftConstrains
-from classes.representation.workload import Workload
+from representation.employee import Employee
+from representation.shift import Shift
+from representation.availability import Availability
+from representation.shift_constraints import ShiftConstrains
+from representation.workload import Workload
 
-from data.assign import total_availabilities
+from data.schedule_constants import total_availabilities
 
 class Availabilities(dict):
 

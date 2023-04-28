@@ -1,5 +1,6 @@
-from classes.representation.generator import Generator
-from classes.representation.PPA import PPA
+from improve.generator import Generator
+from improve.PPA_copy import PPA
+
 import cProfile
 import pstats
 from io import StringIO
@@ -48,5 +49,5 @@ def main(PROFILE):
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 500
     NUMBER_OF_GENS = 20
-    PROFILE = True
+    PROFILE = False
     main(PROFILE)

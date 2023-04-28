@@ -3,16 +3,17 @@ import copy
 import math
 import datetime
 
-from classes.representation.shift_constraints import ShiftConstrains
-from classes.representation.availabilities import Availabilities
-from classes.representation.malus_calc import MalusCalc
-from classes.representation.workload import Workload
-from classes.representation.schedule import Schedule
-from classes.representation.employee import Employee
-from classes.representation.availability import Availability
+from representation.shift_constraints import ShiftConstrains
+from representation.availabilities import Availabilities
+from representation.malus_calc import MalusCalc
+from representation.workload import Workload
+from representation.schedule import Schedule
+from representation.employee import Employee
+from representation.availability import Availability
 
 from helpers import get_weeknumber, recursive_copy, id_employee, id_shift
-from data.assign import employee_list, shift_list, total_availabilities
+from data.assign import employee_list, shift_list
+from data.schedule_constants import total_availabilities
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
 

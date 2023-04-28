@@ -1,12 +1,12 @@
 import random
 from itertools import chain
 
-from classes.representation.malus_calc import MalusCalc
-from classes.representation.generator import Generator
-from classes.representation.schedule import Schedule
-from classes.representation.workload import Workload
-from classes.representation.schedule import Schedule
-from classes.representation.malus_calc import MalusCalc
+from representation.malus_calc import MalusCalc
+from improve.generator import Generator
+from representation.schedule import Schedule
+from representation.workload import Workload
+from representation.schedule import Schedule
+from representation.malus_calc import MalusCalc
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:

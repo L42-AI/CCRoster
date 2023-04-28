@@ -1,5 +1,5 @@
-from data.assign import time_conflict_dict
-from classes.representation.schedule import Schedule
+from data.schedule_constants import time_conflict_dict
+from representation.schedule import Schedule
 
 class ShiftConstrains:
     def __init__(self) -> None:
