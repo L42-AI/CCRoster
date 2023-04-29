@@ -1,18 +1,18 @@
-import random
 from itertools import chain
+import random
 
-from classes.representation.malus_calc import MalusCalc
-from classes.representation.generator import Generator
-from classes.representation.schedule import Schedule
-from classes.representation.workload import Workload
-from classes.representation.schedule import Schedule
-from classes.representation.malus_calc import MalusCalc
+from representation.malus_calc import MalusCalc
+from representation.schedule import Schedule
+from representation.workload import Workload
+
+from data.schedule_constants import standard_cost
+from improve.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
-        self.G = Generator()
-        self.Schedule = self.G.Schedule # not necessary but better readability imo
+        self.Schedule = Schedule(Workload(), 999999)
+        self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
         self.id_employee = id_employee
@@ -27,10 +27,11 @@ class PPA:
         for _ in range(self.NUMBER_OF_GENERATIONS):
             temperature = PPA.adjust_temperature(temperature)
 
-            plants_and_buds = list(chain(*[self.G.mutate(plant, temperature) for plant in plants]))
+            plants_and_buds = list(chain(*[mutate(plant, temperature) for plant in plants]))
             plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
-            best_plant = sorted(plants, key=lambda x: MalusCalc.compute_final_costs(self.G.standard_cost, x))[0]
+            best_plant = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))[0]
             winners.append(best_plant)
+            
             if best_plant.cost < lowest.cost:
                 lowest = best_plant
                         
@@ -39,7 +40,7 @@ class PPA:
 
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
-            print(MalusCalc.compute_final_costs(self.G.standard_cost, winners[-1]))
+            print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
 
         print(f'COST: {lowest.cost}')
         for shift_id, employee_id in lowest.items():

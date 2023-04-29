@@ -1,6 +1,3 @@
-from classes.representation.employee import Employee
-from classes.representation.shift import Shift
-
 from data.assign import employee_list, shift_list
 
 id_employee = {employee.id: employee for employee in employee_list}

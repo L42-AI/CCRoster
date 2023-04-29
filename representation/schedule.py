@@ -1,9 +1,10 @@
-from classes.representation.workload import Workload
 import random
+
+from representation.workload import Workload
 from data.assign import shift_list
 
 class Schedule(dict):
-    def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int]):
+    def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
         self.Workload = Workload
         self.cost = cost
 

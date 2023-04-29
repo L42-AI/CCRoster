@@ -1,29 +1,8 @@
-from classes.representation.generator import Generator
-from classes.representation.PPA import PPA
+from improve.PPA import PPA
+
 import cProfile
 import pstats
 from io import StringIO
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-
-from helpers import id_employee, id_shift
-
-def run() -> None:
-    plot_dict = {}
-    for i in tqdm(range(1000)):
-        G = Generator()
-        cost = G.total_costs
-        if cost not in plot_dict:
-            plot_dict[cost] = 1
-        else:
-            plot_dict[cost] += 1
-    print(plot_dict)
-    plot_bar(plot_dict, title='costs over 10000 iters')
-
-def plot_bar(plot_dict: dict[int, int], title: str) -> None:
-    plt.bar(x=plot_dict.keys(), height=plot_dict.values())
-    plt.title(title)
-    plt.show()
 
 def main(PROFILE):
     if PROFILE:
@@ -48,5 +27,5 @@ def main(PROFILE):
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 500
     NUMBER_OF_GENS = 20
-    PROFILE = True
+    PROFILE = False
     main(PROFILE)

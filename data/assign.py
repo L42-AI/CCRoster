@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from classes.representation.shift import Shift
-from classes.representation.employee import Employee
-from classes.representation.availability import Availability
+from representation.shift import Shift
+from representation.employee import Employee
+from representation.availability import Availability
 
 employee_list: list[Employee] = []
 shift_list: list[Shift] = []
@@ -134,52 +134,4 @@ for id_, employee in enumerate(employee_list):
 
 for id_, shift in enumerate(shift_list):
     shift.id = id_
-
-def possible_shift(workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
-
-    # Check time
-    if workable_shift.start > shift.start or workable_shift.end < shift.end:
-        return False
-
-    # Check task
-    tasks_list = employee.get_tasks()
-    for task in tasks_list:
-        if task == shift.task:
-            return True
-    return False
-
-def get_employee_set(shift: Shift) -> set[int]:
-    """
-    this method is only used to develop the generator, later, the info will actually be downloaded
-    for now it just returns a hardcoded list with availability
-    """
-
-    availabilities = set()
-    for employee in employee_list:
-
-        for weeknum in employee.availability:
-            for workable_shift in employee.availability[weeknum]:
-
-                if possible_shift(workable_shift, employee, shift):
-                    availabilities.add(employee.id)
-
-    return availabilities
-
-def init_coliding_dict(shifts: list[Shift]) -> dict[int, list[int]]:
-
-    time_conflict_dict = {shift.id: [] for shift in shifts}
-
-    for i, shift_1 in enumerate(shifts):
-
-        for shift_2 in shifts[i+1:]:
-            if shift_1.end < shift_2.start:
-                continue
-            if shift_1.start < shift_2.end:
-                time_conflict_dict[shift_1.id].append(shift_2.id)
-                time_conflict_dict[shift_2.id].append(shift_1.id)
-
-    return time_conflict_dict
-
-time_conflict_dict = init_coliding_dict(shift_list)
-total_availabilities = {shift.id: get_employee_set(shift) for shift in shift_list}
 
