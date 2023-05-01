@@ -1,6 +1,26 @@
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
 from representation.availability import Availability
+Base = declarative_base()
 
-class Employee:
+class Employee(Base):
+    __tablename__ = 'employee'
+
+    id = Column(Integer, primary_key=True)
+    fname = Column(String)
+    lname = Column(String)
+    name = Column(String)
+    wage = Column(Float)
+    weekly_max = Column(Integer)
+    min_hours = Column(Integer)
+    level = Column(Integer)
+    tasks = Column(String)
+    location = Column(String)
+    priority = Column(Integer)
+
+    availabilities = relationship("Availability", back_populates="employee")
+
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
         self.fname = fname
         self.lname = lname
@@ -13,17 +33,11 @@ class Employee:
         self.level = level
         self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
-        self.priority = 0
-        self.add_remove_timeslot = []
+        self.availability = self.sort_availability(av)
 
-        # self.upload_employee()
-        # self.upload_availability()
-
-    """ Compute availability """
-
-    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+    def sort_availability(self, av):
         availability_dict = {}
-        
+
         for availability in av:
             weeknum = availability.start.isocalendar()[1]
 
@@ -32,7 +46,6 @@ class Employee:
 
             availability_dict[weeknum].append(availability)
         return availability_dict
-
     """ Get """
     def get_name(self) -> str:
         return self.name
