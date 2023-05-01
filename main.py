@@ -25,7 +25,7 @@ def main(PROFILE):
 
 
 if __name__ == "__main__":
-    NUMBER_OF_PLANTS = 500
+    NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20
     PROFILE = False
     main(PROFILE)
