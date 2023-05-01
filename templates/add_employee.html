@@ -15,7 +15,7 @@
             <input type="number" id="maximum" name="maximum" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="minimum">Maximum Hours:</label>
+            <label for="minimum">Minimum Hours:</label>
             <input type="number" id="minimum" name="minimum" class="form-control" required>
         </div>
         <div class="form-group">
@@ -36,6 +36,7 @@
         </div>
 
         <h1>Manage Availabilities</h1>
+        <button id="closeBtn" type="button" class="btn btn-secondary" style="display:none;">Close</button>
         <div class="calendar-container">
             <div id="calendar"></div>
             <div class="grid-overlay"></div>
@@ -48,37 +49,71 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var singleClickTimer;
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            selectable: true,
-            selectMirror: true,
-            events: [],
-            dateClick: function(info) {
-                calendar.changeView('timeGridDay', info.date);
+    const doubleClickDelay = 300;
 
-                if (calendar.view.type === 'timeGridDay') {
-                    calendar.setOption('select', function(info) {
-                        var eventData = {
-                            start: info.startStr,
-                            end: info.endStr,
-                        };
-                        calendar.addEvent(eventData);
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
+        selectMirror: true,
+        events: [],
+        dateClick: function(info) {
+            if (singleClickTimer) {
+                clearTimeout(singleClickTimer);
+                singleClickTimer = null;
 
-                        // Save the availability data to the hidden input field
-                        var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
-                        availabilityData.push(eventData);
-                        document.getElementById('availability').value = JSON.stringify(availabilityData);
+                // Handle double-click event
+                const defaultStartTime = 'T00:00:00+02:00';
+                const defaultEndTime = 'T23:59:59+02:00';
 
-                        calendar.unselect();
-                    });
-                }
-            },
-        });
+                var eventData = {
+                    start: info.dateStr + defaultStartTime,
+                    end: info.dateStr + defaultEndTime,
+                };
+                calendar.addEvent(eventData);
+                var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
+                availabilityData.push(eventData);
+                document.getElementById('availability').value = JSON.stringify(availabilityData);
+            } else {
+                singleClickTimer = setTimeout(function() {
+                    singleClickTimer = null;
 
-        calendar.render();
+                    // Handle single-click event
+                    calendar.changeView('timeGridDay', info.date);
+                    document.getElementById('closeBtn').style.display = 'inline-block';
+
+                    if (calendar.view.type === 'timeGridDay') {
+                        calendar.setOption('select', function(info) {
+                            var eventData = {
+                                start: info.startStr,
+                                end: info.endStr,
+                            };
+                            calendar.addEvent(eventData);
+
+                            // Save the availability data to the hidden input field
+                            var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
+                            availabilityData.push(eventData);
+                            document.getElementById('availability').value = JSON.stringify(availabilityData);
+
+                            calendar.unselect();
+                        });
+                    }
+                }, doubleClickDelay);
+            }
+        },
     });
+
+    calendar.render();
+
+    var closeBtn = document.getElementById('closeBtn');
+    closeBtn.addEventListener('click', function() {
+        calendar.changeView('dayGridMonth');
+        closeBtn.style.display = 'none';
+    });
+});
+
 </script>
 {% endblock %}
