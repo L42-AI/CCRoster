@@ -1,0 +1,188 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<style>
+    .calendar-container {
+        position: relative;
+    }
+
+    .header {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .grid-cells {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .grid-cells div {
+        background-color: rgba(0, 123, 255, 0.3);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .grid-cells div.selected {
+        background-color: rgba(0, 123, 255, 0.6);
+    }
+
+</style>
+
+<div class="container">
+    <h1>Manage Shifts</h1>
+    <button id="closeBtn" class="btn btn-secondary" style="display:none;">Close</button>
+    <div class="calendar-container">
+        <div id="calendar"></div>
+        <div class="grid-overlay"></div>
+        <div class="grid-cells"></div>
+    </div>
+</div>
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1" role="dialog" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editShiftModalLabel">Edit Shift</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editShiftType">Shift Type:</label>
+                    <input type="text" class="form-control" id="editShiftType" placeholder="Enter shift type">
+                </div>
+                <div class="form-group">
+                    <label for="editShiftStart">Start Time:</label>
+                    <input type="text" class="form-control" id="editShiftStart" placeholder="Enter start time">
+                </div>
+                <div class="form-group">
+                    <label for="editShiftEnd">End Time:</label>
+                    <input type="text" class="form-control" id="editShiftEnd" placeholder="Enter end time">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="deleteShiftBtn">Delete Shift</button>
+                <button type="button" class="btn btn-primary" id="saveChangesBtn">Save Changes</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        let clickedEventId;
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            height: 'auto',
+            initialView: 'dayGridMonth',
+            slotEventOverlap: false,
+            selectable: true,
+            events: [
+                {% for shift in shifts %}
+                {
+                    id: '{{ shift.id }}',
+                    title: '{{ shift }}',
+                    start: '{{ shift.start.isoformat() }}',
+                    end: '{{ shift.end.isoformat() }}',
+                    className: 'shift-class',
+                },
+                {% endfor %}
+            ],
+            dateClick: function(info) {
+                calendar.changeView('timeGridDay', info.date);
+                document.getElementById('closeBtn').style.display = 'inline-block';
+
+                if (calendar.view.type === 'timeGridDay') {
+                    calendar.setOption('select', function(info) {
+                        var shiftType = prompt("Enter the shift type:");
+
+                        if (shiftType) {
+                            // Send an AJAX request to your backend with the startStr, endStr, and shiftType
+                            $.ajax({
+                                url: '/save_shift/',  // Replace this with your actual endpoint URL
+                                method: 'POST',
+                                data: {
+                                    start: info.startStr,
+                                    end: info.endStr,
+                                    shift_type: shiftType,
+                                },
+                                success: function(response) {
+                                    console.log('Shift saved:', response);
+                                },
+                                error: function(error) {
+                                    console.error('Error saving shift:', error);
+                                },
+                            });
+
+                            var event = {
+                                title: shiftType,
+                                start: info.startStr,
+                                end: info.endStr,
+                                allDay: info.allDay,
+                                className: shiftType.toLowerCase() + '-shift'
+                            };
+                            calendar.addEvent(event);
+                        }
+
+                        calendar.unselect(); // Clear the selection
+                    });
+                }
+            },
+
+        eventClick: function(info) {
+            // Update modal with event details
+            clickedEventId = info.event.id;
+
+            $('#eventTitle').text(info.event.title);
+            $('#eventStart').text(info.event.start.toLocaleString());
+            $('#eventEnd').text(info.event.end.toLocaleString());
+
+            console.log('About to show the modal');
+            // Show the modal
+            $('#eventDetailsModal').modal('show');
+
+        }
+        });
+
+        calendar.render();
+
+        // Close button event listener
+        var closeBtn = document.getElementById('closeBtn');
+        closeBtn.addEventListener('click', function() {
+            calendar.changeView('dayGridMonth');
+            closeBtn.style.display = 'none';
+        });
+
+        var deleteShiftBtn = document.getElementById('deleteShiftBtn');
+        deleteShiftBtn.addEventListener('click', function(info) {
+            $.ajax({
+                url: '/delete_shift',
+                method: 'POST',
+                data: {
+                    id: clickedEventId,
+                },
+                success: function(response) {
+                    console.log('Availability added:', response);
+                },
+                error: function(error) {
+                    console.log('Failed to add availability:', error)
+                },
+            }
+            )
+        })
+    });
+</script>
+
+{% endblock %}
+{% endblock %}

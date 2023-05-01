@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<header>
+
+</header>
+
+    <h1>Employee Scheduler</h1>
+    <div class="flex-container">
+        <div style="width: 30%; padding: 1rem; border-radius: 5px;">
+            <h2>Shifts</h2>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Task</th>
+                </tr>
+                {% for shift in shifts %}
+                {% set date = shift.start.strftime('%B %d') %}
+                {% set start = '{:02d}:{:02d}'.format(shift.start.hour, shift.start.minute)  %}
+                {% set end = '{:02d}:{:02d}'.format(shift.end.hour, shift.end.minute) %}
+                <tr>
+                    <td>{{ date }}</td>
+                    <td>{{ start }}-{{ end }}</td>
+                    <td>{{ shift.task }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div style="width: 30%; padding: 1rem; border-radius: 5px;">
+            <h2>Schedule Info</h2>
+            <p>Here you can add some information about the schedule.</p>
+
+        </div>
+        <div class="employee-section" style="width: 30%; padding: 1rem; border-radius: 5px;">
+            <h2>Employees</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Location</th>
+                </tr>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.name }}</td>
+                    <td>{{ employee.level }}</td>
+                    <td>{{ employee.location }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <a href="{{ url_for('add_employee_form') }}" class="btn btn-primary" style="margin-top: 1rem;">Add Employee</a>
+        </div>
+    </div>
+
+{% endblock %}
