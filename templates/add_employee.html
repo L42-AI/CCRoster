@@ -66,12 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 singleClickTimer = null;
 
                 // Handle double-click event
-                const defaultStartTime = 'T00:00:00+02:00';
-                const defaultEndTime = 'T23:59:59+02:00';
+                const defaultStartTimeMonthGrid = 'T00:00:00+02:00';
+                const defaultEndTimeMonthGrid = 'T23:59:59+02:00';
 
                 var eventData = {
-                    start: info.dateStr + defaultStartTime,
-                    end: info.dateStr + defaultEndTime,
+                    start: info.dateStr + defaultStartTimeMonthGrid,
+                    end: info.dateStr + defaultEndTimeMonthGrid,
                 };
                 calendar.addEvent(eventData);
                 var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
@@ -87,9 +87,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (calendar.view.type === 'timeGridDay') {
                         calendar.setOption('select', function(info) {
+                            const defaultStartTimeDayGrid = 'T00:00:00+02:00';
+                            const defaultEndTimeDayGrid = 'T00:00:00+02:00';
                             var eventData = {
-                                start: info.startStr,
-                                end: info.endStr,
+                                start: info.startStr.includes('T') ? info.startStr : info.startStr + defaultStartTimeDayGrid,
+                                end: info.endStr.includes('T') ? info.endStr : info.endStr + defaultEndTimeDayGrid,
                             };
                             calendar.addEvent(eventData);
 
