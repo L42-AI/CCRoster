@@ -50,7 +50,7 @@ def save_shift():
     id = len(imported_shift_list)
 
     # Save the shift to your database here
-    imported_shift_list.append(Shift(start, end, 1, 1, id))
+    imported_shift_list.append(Shift(start, end, 1, 1))
 
     # Return a success response
     return jsonify({'result': 'success'})
@@ -78,7 +78,7 @@ def proces_availability():
     availability = []
     availability_json = request.form['availability']
     availability_data = json.loads(availability_json)
-    for av in availability_data:
+    for _, av in enumerate(availability_data):
         start_str = av['start'] 
         end_str = av['end']
         av_start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
