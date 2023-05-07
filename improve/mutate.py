@@ -8,7 +8,7 @@ from representation.schedule import Schedule
 
 from helpers import recursive_copy, id_employee, id_shift
 from data.schedule_constants import total_availabilities, standard_cost
-from data.assign import shift_list
+from data.assign_haarlemmer import shift_list
 
 """ Schedule manipulation """
 

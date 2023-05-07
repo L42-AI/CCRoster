@@ -10,7 +10,7 @@ from improve.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.1) -> None:
         self.Schedule = Schedule(Workload(), 999999)
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
@@ -31,7 +31,7 @@ class PPA:
             plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
             best_plant = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))[0]
             winners.append(best_plant)
-            
+
             if best_plant.cost < lowest.cost:
                 lowest = best_plant
                         

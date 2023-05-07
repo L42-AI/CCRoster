@@ -1,20 +1,20 @@
 from representation.availability import Availability
 
 class Employee:
-    def __init__(self, fname: str, lname: str, av: list[Availability], maximum:dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
+    def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
         self.fname = fname
         self.lname = lname
-        self.name = f'{fname} {lname}'
-        self.id: int = None
         self.availability = self.sort_availability(av)
-        self.wage = wage
         self.weekly_max = maximum
         self.min_hours = min_hours
+        self.wage = wage
         self.level = level
         self.tasks = tasks
         self.location = location # where does this employee work? coffecompany, bagels and beans or google?
+
+        self.name = f'{fname} {lname}'
+        self.id: int = None
         self.priority = 0
-        self.add_remove_timeslot = []
 
         # self.upload_employee()
         # self.upload_availability()

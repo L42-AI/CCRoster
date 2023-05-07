@@ -50,7 +50,7 @@ class MalusCalc:
         wage = employee_obj.get_wage()
 
         # check if employee has obligated contract hours left
-        total_scheduled_duration = sum(id_shift[x].duration for x in workload[weeknumber] if x != skip_shift_id)
+        total_scheduled_duration = sum(id_shift[x].duration for x in workload[weeknumber] if x != skip_shift_id and len(workload[weeknumber]) != 0 )
         remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) > 0 else 0
 
         # subtract those hours, which are part of generator.standard_cost, from working hours to avoid double counting

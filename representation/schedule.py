@@ -1,7 +1,7 @@
 import random
 
 from representation.workload import Workload
-from data.assign import shift_list
+from data.assign_haarlemmer import shift_list
 
 class Schedule(dict):
     def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
@@ -18,5 +18,5 @@ class Schedule(dict):
                 self[shift_id] = set_schedule[shift_id]
         else:
             for shift in shift_list:
-                self[shift.id] = 10 #HARDCODED DUMMY EMPL
+                self[shift.id] = 14
                 

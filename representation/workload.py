@@ -1,6 +1,6 @@
 from representation.employee import Employee
 
-from data.assign import employee_list
+from data.assign_haarlemmer import employee_list
 from helpers import get_weeknumber, id_employee
 
 class Workload(dict):
@@ -21,7 +21,7 @@ class Workload(dict):
 
     def init_workload(self, employee_list: list[Employee]) -> None:
         for employee in employee_list:
-            self[employee.id] = {weeknum: [] for weeknum in employee.availability}
+            self[employee.id] = {weeknum: [] for weeknum in employee.weekly_max}
 
     """ METHODS """
 
@@ -54,5 +54,5 @@ class Workload(dict):
         if add:
             # add a shift to the workload of that employee that week
             self[employee_id][weeknumber].append(shift_id)
-        elif employee_id != 10: # hardcoded for dummy employee!! remove after testing
+        elif employee_id != 14: # hardcoded for dummy employee!! remove after testing
             self[employee_id][weeknumber].remove(shift_id)

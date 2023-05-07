@@ -5,6 +5,9 @@ import pstats
 from io import StringIO
 
 def main(PROFILE):
+
+    
+
     if PROFILE:
         pr = cProfile.Profile()
         pr.enable()
