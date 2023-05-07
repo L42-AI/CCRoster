@@ -432,32 +432,32 @@ shift_list.append(Shift(
 #                          end=datetime(2023, 2, day, 18, 0),
 #                          task=1, location=1))
 
-# short shifts
-for day in range(30,32):
-    shift_list.append(Shift(start=datetime(2023, 1, day, 10, 30),
-                         end=datetime(2023, 1, day, 13, 0),
-                         task=1, location=1))
-    shift_list.append(Shift(start=datetime(2023, 1, day, 13, 30),
-                         end=datetime(2023, 1, day, 18, 0),
-                         task=1, location=1))
+# # short shifts
+# for day in range(30,32):
+#     shift_list.append(Shift(start=datetime(2023, 1, day, 10, 30),
+#                          end=datetime(2023, 1, day, 13, 0),
+#                          task=1, location=1))
+#     shift_list.append(Shift(start=datetime(2023, 1, day, 13, 30),
+#                          end=datetime(2023, 1, day, 18, 0),
+#                          task=1, location=1))
     
-# medium shifts
-for day in range(1,3):
-    shift_list.append(Shift(start=datetime(2023, 2, day, 9, 0),
-                         end=datetime(2023, 2, day, 13, 0),
-                         task=1, location=1))
-    shift_list.append(Shift(start=datetime(2023, 2, day, 14, 0),
-                         end=datetime(2023, 2, day, 18, 0),
-                         task=1, location=1))
+# # medium shifts
+# for day in range(1,3):
+#     shift_list.append(Shift(start=datetime(2023, 2, day, 9, 0),
+#                          end=datetime(2023, 2, day, 13, 0),
+#                          task=1, location=1))
+#     shift_list.append(Shift(start=datetime(2023, 2, day, 14, 0),
+#                          end=datetime(2023, 2, day, 18, 0),
+#                          task=1, location=1))
     
-# long shifts
-for day in range(4,6):
-    shift_list.append(Shift(start=datetime(2023, 2, day, 7, 30),
-                         end=datetime(2023, 2, day, 13, 0),
-                         task=1, location=1))
-    shift_list.append(Shift(start=datetime(2023, 2, day, 12, 30),
-                         end=datetime(2023, 2, day, 18, 0),
-                         task=1, location=1))
+# # long shifts
+# for day in range(4,6):
+#     shift_list.append(Shift(start=datetime(2023, 2, day, 7, 30),
+#                          end=datetime(2023, 2, day, 13, 0),
+#                          task=1, location=1))
+#     shift_list.append(Shift(start=datetime(2023, 2, day, 12, 30),
+#                          end=datetime(2023, 2, day, 18, 0),
+#                          task=1, location=1))
 
 for id_, employee in enumerate(employee_list):
     employee.id = id_

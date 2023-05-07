@@ -10,8 +10,8 @@ from improve.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.1) -> None:
-        self.Schedule = Schedule(Workload(), 999999)
+    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.2) -> None:
+        self.Schedule = Schedule(Workload(), 999999999999999)
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
@@ -46,7 +46,9 @@ class PPA:
         for shift_id, employee_id in lowest.items():
 
             print(self.id_shift[shift_id], self.id_employee[employee_id])
-            print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
+            print(self.id_employee[employee_id].weekly_max)
+            print(lowest.Workload[employee_id])
+            # print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")
 
     @staticmethod

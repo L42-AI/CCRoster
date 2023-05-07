@@ -10,8 +10,8 @@ class Schedule(dict):
 
         self.fitness: float = None
         self.p: float = None
-        self.BUDS = 10 # number of buds this plant can have
-        self.MUTATIONS = random.randint(1, 5)
+        self.BUDS = 20 # number of buds this plant can have
+        self.MUTATIONS = random.randint(1, 50)
 
         if set_schedule is not None:
             for shift_id in set_schedule:
@@ -19,4 +19,5 @@ class Schedule(dict):
         else:
             for shift in shift_list:
                 self[shift.id] = 14
+                self.Workload.update(shift.id, 14, add=True)
                 
