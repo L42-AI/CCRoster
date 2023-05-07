@@ -1,7 +1,7 @@
 from representation.employee import Employee
 from representation.shift import Shift
 from representation.availability import Availability
-from data.assign_haarlemmer import shift_list, employee_list
+from data.assign import shift_list, employee_list
 
 
 def get_standard_cost(employee_list: list[Employee]) -> float:

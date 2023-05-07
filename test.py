@@ -6,7 +6,7 @@ from classes.representation.workload import Workload
 
 
 from helpers import get_weeknumber, id_employee
-from data.assign_haarlemmer import shift_list
+from data.assign import shift_list
 
 class Schedule(dict):
     def __init__(self):

@@ -5,7 +5,7 @@ from representation.schedule import Schedule
 
 from helpers import get_weeknumber, id_employee
 from data.schedule_constants import time_conflict_dict
-from data.assign_haarlemmer import shift_list, employee_list
+from data.assign import shift_list, employee_list
 
 """ Schedule manipulation """
 

@@ -13,12 +13,9 @@ from data.schedule_constants import standard_cost
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.2) -> None:
-        self.Schedule = Schedule(Workload(), 99, CurrentAvailabilities())
-        print(self.Schedule)
-        self.Schedule = Greedy.greedy_fill(self.Schedule)
-        print(self.Schedule)
-        quit()
+    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.8) -> None:
+        self.Schedule = Schedule(Workload(), 99999, CurrentAvailabilities())
+        # self.Schedule = Greedy.greedy_fill(self.Schedule)
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
@@ -72,7 +69,8 @@ class PPA:
                 Schedule(
                     Workload = Workload(recursive_copy(schedule.Workload)),
                     cost = schedule.cost,
-                    set_schedule = recursive_copy(schedule)
+                    set_schedule = recursive_copy(schedule),
+                    CurrentAvailabilities = CurrentAvailabilities()
                 )
             )
         return plants

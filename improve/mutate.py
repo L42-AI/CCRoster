@@ -9,7 +9,7 @@ from improve.fill import Fill
 
 from helpers import recursive_copy, get_weeknumber, id_employee, id_shift
 from data.schedule_constants import total_availabilities, standard_cost, time_conflict_dict
-from data.assign_haarlemmer import shift_list, employee_list
+from data.assign import shift_list, employee_list
 
 """ MUTATE """
 
