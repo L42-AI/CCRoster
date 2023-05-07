@@ -1,4 +1,5 @@
-from improve.PPA import PPA
+from model.improve.PPA import PPA
+from model.data.assign import shift_list
 
 import cProfile
 import pstats
@@ -9,7 +10,7 @@ def main(PROFILE):
         pr = cProfile.Profile()
         pr.enable()
 
-        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS, shift_list)
         
         pr.disable()
 
@@ -21,7 +22,7 @@ def main(PROFILE):
         ps.print_stats()
         print(s.getvalue())
     else:
-        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS)
+        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS, shift_list)
 
 
 if __name__ == "__main__":

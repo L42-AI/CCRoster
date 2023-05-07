@@ -1,4 +1,4 @@
-from data.assign import employee_list, shift_list
+from model.data.assign import employee_list, shift_list
 
 id_employee = {employee.id: employee for employee in employee_list}
 id_shift = {shift.id: shift for shift in shift_list}

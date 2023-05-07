@@ -10,8 +10,8 @@ from improve.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
-        self.Schedule = Schedule(Workload(), 999999)
+    def __init__(self, num_plants: int, num_gens: int, shift_list, TEMPERATURE: float=.5) -> None:
+        self.Schedule = Schedule(Workload(), 999999, shift_list)
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens

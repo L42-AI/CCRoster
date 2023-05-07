@@ -1,4 +1,4 @@
-from representation.employee import Employee
+from model.representation.data_objects import Employee
 
 from data.assign import employee_list
 from helpers import get_weeknumber, id_employee

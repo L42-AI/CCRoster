@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from representation.employee import Employee
+from model.representation.data_objects import Employee
 from representation.workload import Workload
 from representation.schedule import Schedule
 

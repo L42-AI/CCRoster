@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, redirect, jsonify
-from representation.shift import Shift
-from representation.availability import Availability
-from representation.employee import Employee
-from data.assign import employee_list as imported_employee_list  # Rename the imported list to avoid conflicts
-from data.assign import shift_list as imported_shift_list
+from model.representation.data_objects import Employee, Availability, Shift
+from model.data.assign import employee_list as imported_employee_list  # Rename the imported list to avoid conflicts
+from model.data.assign import shift_list as imported_shift_list
 from datetime import datetime
 import json
+import database
 
 #http://127.0.0.1:5000
 

@@ -1,8 +1,34 @@
 from datetime import datetime
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from model.representation.data_objects import Employee, Availability, Shift, Weekly_max, Task
+from sqlalchemy.ext.declarative import declarative_base
 
-from representation.shift import Shift
-from representation.employee import Employee
-from representation.availability import Availability
+Base = declarative_base()
+database_url = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'
+
+engine = create_engine(database_url)
+Base.metadata.create_all(engine)
+
+session = Session(engine)
+
+
+def create_employee_availability(employee: Employee):
+    for av in employee.availability:
+        session.add(av)
+
+
+def create_employee_weekly_max(employee):
+    for week, max_shifts in employee.weekly_max.items():
+        wm = Weekly_max(week=week, max=max_shifts)
+        wm.employee = employee
+        session.add(wm)
+
+def create_employee_tasks(employee):
+    for task in employee.tasks:
+        tsk = Task(employee_id=employee.id, task=task)
+        session.add(tsk)
+
 
 employee_list: list[Employee] = []
 shift_list: list[Shift] = []
@@ -14,7 +40,6 @@ employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(20
                                                   Availability(start=datetime(2023,2,1,13), end=datetime(2023,2,1,23,59)),
                                                   Availability(start=datetime(2023,2,3,0), end=datetime(2023,2,3,23,59))],
                                                   {5:2, 1:2, 2:2, 3:2}, 4, 240, 1, [1], 'coffee_company'))
-
 employee_list.append(Employee('Soraya', 'van Geldere', [Availability(start=datetime(2023,1,30,0), end=datetime(2023,1,30,23,59)),
                                                         Availability(start=datetime(2023,1,31,0), end=datetime(2023,1,31,23,59)),
                                                         Availability(start=datetime(2023,2,1,0), end=datetime(2023,2,1,23,59)),
@@ -86,21 +111,6 @@ employee_list.append(Employee('Dumdum', 'Dummy', [Availability(start=datetime(20
                                                         Availability(start=datetime(2023,2,2,7), end=datetime(2023,2,2,18,00))],
                                                         {5:2, 1:2, 2:2, 3:2}, 0, 100000, 1, [1], 'coffee_company'))
 
-# for day in range(30,32):
-#     shift_list.append(Shift(start=datetime(2023, 1, day, 7, day),
-#                          end=datetime(2023, 1, day, 13, 0),
-#                          task=1, location=1))
-#     shift_list.append(Shift(start=datetime(2023, 1, day, 12, 30),
-#                          end=datetime(2023, 1, day, 18, 0),
-#                          task=1, location=1))
-
-# for day in range(1,6):
-#     shift_list.append(Shift(start=datetime(2023, 2, day, 7, day),
-#                          end=datetime(2023, 2, day, 13, 0),
-#                          task=1, location=1))
-#     shift_list.append(Shift(start=datetime(2023, 2, day, 12, 30),
-#                          end=datetime(2023, 2, day, 18, 0),
-#                          task=1, location=1))
 
 # short shifts
 for day in range(30,32):
@@ -129,9 +139,15 @@ for day in range(4,6):
                          end=datetime(2023, 2, day, 18, 0),
                          task=1, location=1))
 
-for id_, employee in enumerate(employee_list):
-    employee.id = id_
 
-for id_, shift in enumerate(shift_list):
-    shift.id = id_
+# for emp in employee_list:
+#     session.add(emp)
+#     create_employee_tasks(emp)
+#     create_employee_availability(emp)
+#     create_employee_weekly_max(emp)
 
+# if __name__ == 'main':
+#     for shift in shift_list:
+#         session.add(shift)
+#     session.commit()
+#     session.close()

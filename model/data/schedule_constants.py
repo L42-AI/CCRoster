@@ -1,6 +1,4 @@
-from representation.employee import Employee
-from representation.shift import Shift
-from representation.availability import Availability
+from model.representation.data_objects import Employee, Shift, Availability
 from data.assign import shift_list, employee_list
 
 
