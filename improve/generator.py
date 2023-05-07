@@ -8,7 +8,7 @@ from representation.schedule import Schedule
 
 from helpers import recursive_copy, id_employee, id_shift
 from data.assign_haarlemmer import employee_list, shift_list
-from data.schedule_constants import total_availabilities
+from data.schedule_constants import total_availabilities, standard_cost
 
 OFFLINE = True  # employee.id is downloaded from the server, so when offline, use index of employee object in employeelist as id
 
@@ -21,7 +21,7 @@ class Generator:
 
         self.ShiftConstrains = ShiftConstrains()
         self.Workload = Workload()
-        self.standard_cost = MalusCalc.standard_cost(self.employees)
+        self.standard_cost = standard_cost
 
         self.Schedule = Schedule(self.Workload, 999999, None)
 

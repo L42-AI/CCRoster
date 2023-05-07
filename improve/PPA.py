@@ -4,14 +4,21 @@ import random
 from representation.malus_calc import MalusCalc
 from representation.schedule import Schedule
 from representation.workload import Workload
+from representation.current_availabilities import CurrentAvailabilities
+
+from improve.mutate import mutate
+from improve.fill import Greedy
 
 from data.schedule_constants import standard_cost
-from improve.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.2) -> None:
-        self.Schedule = Schedule(Workload(), 999999999999999)
+        self.Schedule = Schedule(Workload(), 99, CurrentAvailabilities())
+        print(self.Schedule)
+        self.Schedule = Greedy.greedy_fill(self.Schedule)
+        print(self.Schedule)
+        quit()
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens

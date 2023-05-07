@@ -1,11 +1,14 @@
 import random
 
+from representation.current_availabilities import CurrentAvailabilities
 from representation.workload import Workload
+
 from data.assign_haarlemmer import shift_list
 
 class Schedule(dict):
-    def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
+    def __init__(self, Workload: Workload, cost: float, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
         self.Workload = Workload
+        self.CurrentAvailabilities = CurrentAvailabilities
         self.cost = cost
 
         self.fitness: float = None
@@ -18,6 +21,5 @@ class Schedule(dict):
                 self[shift_id] = set_schedule[shift_id]
         else:
             for shift in shift_list:
-                self[shift.id] = 14
-                self.Workload.update(shift.id, 14, add=True)
+                self[shift.id] = None
                 
