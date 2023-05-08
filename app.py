@@ -8,7 +8,7 @@ import database
 
 #http://127.0.0.1:5000
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='view/templates', static_folder='view/static')
 
 def create_employee_list():
     return imported_employee_list
