@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, VAR
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from controller.helpers import get_weeknumber, id_employee
+# from controller.helpers import get_weeknumber, id_employee
 import random
 
 Base = declarative_base()

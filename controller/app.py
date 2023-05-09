@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from model.representation.data_objects import Employee, Availability, Shift
 from model.data.assign import employee_list as imported_employee_list  # Rename the imported list to avoid conflicts
 from model.data.assign import shift_list as imported_shift_list
-from datetime import datetime
+from controller.database import download_employees
+from datetime import datetime, timedelta
 import json
 import controller.database as database
 
@@ -13,18 +17,56 @@ parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
 template_directory = os.path.join(parent_directory, 'view', 'templates')
 static_directory = os.path.join(parent_directory, 'view', 'static' )
 
-#http://127.0.0.1:5000
-
 app = Flask(__name__, template_folder=template_directory, static_folder=static_directory)
+app.config['SECRET_KEY'] = 'wouterisdebestehuisgenoot'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=2)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
+USER_ID = None
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+with app.app_context():
+    db.create_all()
+
+@login_required
 def create_employee_list():
+    id = USER_ID
+    download_employees(id)
+
     return imported_employee_list
 
-employee_list = create_employee_list()
 
 @app.route('/')
+@login_required
 def index():
-    return render_template('index.html', employees=employee_list, shifts=imported_shift_list)
+    employee_list = create_employee_list()
+    return render_template('index.html', employees=employee_list)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created successfully!')
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
 @app.route('/add_employee')
 def add_employee_form():
@@ -92,5 +134,29 @@ def proces_availability():
         availability.append(Availability(start=av_start, end=av_end))
     return availability
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
 
-app.run(debug=True)
+        if user and check_password_hash(user.password_hash, password):
+            USER_ID = user.id
+            login_user(user, remember=True)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
+        else:
+            flash('Login unsuccessful. Please check your username and password.')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    USER_ID = None
+    logout_user()
+    return redirect(url_for('login'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
