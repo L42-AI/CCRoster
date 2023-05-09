@@ -5,7 +5,7 @@ from classes.representation.availabilities import Availabilities
 from classes.representation.workload import Workload
 
 
-from helpers import get_weeknumber, id_employee
+from controller.helpers import get_weeknumber, id_employee
 from data.assign import shift_list
 
 class Schedule(dict):

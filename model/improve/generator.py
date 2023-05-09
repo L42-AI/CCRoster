@@ -6,7 +6,7 @@ from representation.malus_calc import MalusCalc
 from representation.workload import Workload
 from representation.schedule import Schedule
 
-from helpers import recursive_copy, id_employee, id_shift
+from controller.helpers import recursive_copy, id_employee, id_shift
 from data.assign import employee_list, shift_list
 from data.schedule_constants import total_availabilities
 

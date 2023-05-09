@@ -7,7 +7,7 @@ from classes.representation.schedule import Schedule
 from classes.representation.workload import Workload
 from classes.representation.schedule import Schedule
 from classes.representation.malus_calc import MalusCalc
-from helpers import recursive_copy, id_employee, id_shift
+from controller.helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:

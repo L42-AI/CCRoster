@@ -7,7 +7,7 @@ from representation.workload import Workload
 
 from data.schedule_constants import standard_cost
 from improve.mutate import mutate
-from helpers import recursive_copy, id_employee, id_shift
+from controller.helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, shift_list, TEMPERATURE: float=.5) -> None:

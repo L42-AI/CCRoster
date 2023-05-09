@@ -4,11 +4,18 @@ from model.data.assign import employee_list as imported_employee_list  # Rename 
 from model.data.assign import shift_list as imported_shift_list
 from datetime import datetime
 import json
-import database
+import controller.database as database
+
+import os
+
+current_directory = os.path.dirname(os.path.abspath(__file__))
+parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
+template_directory = os.path.join(parent_directory, 'view', 'templates')
+static_directory = os.path.join(parent_directory, 'view', 'static' )
 
 #http://127.0.0.1:5000
 
-app = Flask(__name__, template_folder='view/templates', static_folder='view/static')
+app = Flask(__name__, template_folder=template_directory, static_folder=static_directory)
 
 def create_employee_list():
     return imported_employee_list
@@ -85,5 +92,5 @@ def proces_availability():
         availability.append(Availability(start=av_start, end=av_end))
     return availability
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+app.run(debug=True)

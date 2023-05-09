@@ -4,7 +4,7 @@ from model.representation.data_objects import Employee
 from representation.workload import Workload
 from representation.schedule import Schedule
 
-from helpers import get_weeknumber, id_shift, id_employee
+from controller.helpers import get_weeknumber, id_shift, id_employee
 
 
 class MalusCalc:
