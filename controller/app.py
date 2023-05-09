@@ -3,8 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from model.representation.data_objects import Employee, Availability, Shift
-from model.data.assign import employee_list as imported_employee_list  # Rename the imported list to avoid conflicts
-from model.data.assign import shift_list as imported_shift_list
 from controller.database import download_employees
 from datetime import datetime, timedelta
 import json
@@ -25,8 +23,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-USER_ID = None
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -43,10 +39,14 @@ with app.app_context():
 
 @login_required
 def create_employee_list():
-    id = USER_ID
-    download_employees(id)
+    id = current_user.id
+    employee_list = download_employees(id)
 
-    return imported_employee_list
+    return employee_list
+
+def create_shift_list():
+    '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?@!'''
+    pass
 
 
 @app.route('/')
@@ -142,7 +142,6 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password_hash, password):
-            USER_ID = user.id
             login_user(user, remember=True)
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('index'))
@@ -153,7 +152,6 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    USER_ID = None
     logout_user()
     return redirect(url_for('login'))
 
