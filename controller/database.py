@@ -10,7 +10,5 @@ session = Session(engine)
 
 
 def download_employees(id):
-    print(id)
     employees = session.query(Employee).filter(Employee.location == id).all()
-    print(employees)
-
+    return employees

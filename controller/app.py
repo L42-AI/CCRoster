@@ -45,7 +45,7 @@ def create_employee_list():
     return employee_list
 
 def create_shift_list():
-    '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?@!'''
+    '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
     pass
 
 
