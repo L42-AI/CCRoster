@@ -1,4 +1,4 @@
-from representation.availability import Availability
+from model.representation.availability import Availability
 
 class Employee:
     def __init__(self, fname: str, lname: str, av: list[Availability], maximum: dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
