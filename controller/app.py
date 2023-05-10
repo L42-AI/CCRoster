@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from model.representation.data_objects import Employee, Availability, Shift
-from controller.database import download_employees
+from controller.database import download_employees, download_shifts
 from datetime import datetime, timedelta
 import json
 import controller.database as database
@@ -74,7 +74,8 @@ def add_employee_form():
 
 @app.route('/manage_shifts')
 def manage_shifts_page():
-    return render_template('manage_shifts.html', shifts=imported_shift_list)
+    shift_list = download_shifts(current_user.id)
+    return render_template('manage_shifts.html', shifts=shift_list)
 
 @app.route('/delete_shift', methods=['POST'])
 def delete_shift():
@@ -82,7 +83,7 @@ def delete_shift():
     print(shift_id)
     
     # update shift list
-    imported_shift_list = [shift for shift in imported_shift_list if shift.id != shift_id]
+    shift_list = [shift for shift in shift_list if shift.id != shift_id]
     return jsonify({'result': 'success'}) 
 
 
@@ -95,7 +96,7 @@ def save_shift():
     # Convert the startStr and endStr into datetime.datetime objects
     start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
     end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
-    id = len(imported_shift_list)
+    id = len(shift_list)
 
     # Save the shift to your database here
     imported_shift_list.append(Shift(start, end, 1, 1))
