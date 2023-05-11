@@ -3,14 +3,14 @@ import random
 
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import BaseSchedule, Plant
+from model.representation.data_classes.schedule import AbsSchedule, Plant
 
 from model.representation.behaviour_classes.schedule_constants import standard_cost
 from model.manipulate.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, start_schedule: BaseSchedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+    def __init__(self, start_schedule: AbsSchedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
         self.Schedule = start_schedule
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
@@ -58,7 +58,7 @@ class PPA:
         return winner
 
     @staticmethod
-    def gen_plants(schedule: BaseSchedule, number_plants: int) -> list[Plant]:
+    def gen_plants(schedule: AbsSchedule, number_plants: int) -> list[Plant]:
         plants = []
         for _ in range(number_plants):
             plants.append(

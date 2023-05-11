@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import BaseSchedule
+from model.representation.data_classes.schedule import AbsSchedule
 
 from helpers import get_weeknumber, id_shift, id_employee
 
@@ -57,7 +57,7 @@ class MalusCalc:
 
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
     
-    def compute_cost(standard_cost: int, schedule: BaseSchedule) -> float:
+    def compute_cost(standard_cost: int, schedule: AbsSchedule) -> float:
         wage_costs = 0
 
         employee_duration = defaultdict(float)

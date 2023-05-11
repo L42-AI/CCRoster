@@ -8,7 +8,7 @@ from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.setup import Base
 from data.assign import shift_list
 
-class BaseSchedule(dict):
+class AbsSchedule(dict):
     def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
         self.Workload = Workload
         self.cost = cost
@@ -21,12 +21,12 @@ class BaseSchedule(dict):
                 self[shift.id] = 10
                 self.Workload.update(shift.id, 10, add=True)
 
-class Schedule(BaseSchedule):
+class Schedule(AbsSchedule):
     def __init__(self, Workload: Workload, cost: float, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
         super().__init__(Workload, cost, set_schedule)
         self.CurrentAvailabilities = CurrentAvailabilities
 
-class Plant(BaseSchedule):
+class Plant(AbsSchedule):
     def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
         super().__init__(Workload, cost, set_schedule)
 

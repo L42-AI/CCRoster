@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, VARCHAR
 from sqlalchemy.orm import relationship
 
 from model.representation.data_classes.setup import Base
+from model.representation.data_classes.availability import Availability
 
 
 class Task(Base):
@@ -50,6 +51,7 @@ class Employee(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.availability = availability
+        self.availability = self.sort_availability(availability)
         self.wage = wage
         self.weekly_max = maximum
         self.min_hours = min_hours
@@ -57,6 +59,20 @@ class Employee(Base):
         self.tasks = tasks
         self.location = location
 
+        self.name = f'{first_name} {last_name}'
+        self.priority = 0
+
+    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+        availability_dict = {}
+        
+        for availability in av:
+            weeknum = availability.start.isocalendar()[1]
+
+            if weeknum not in availability_dict:
+                availability_dict[weeknum] = []
+
+            availability_dict[weeknum].append(availability)
+        return availability_dict
     
     """ Get """
     def get_name(self) -> str:
@@ -88,4 +104,3 @@ class Employee(Base):
 
     def __str__(self) -> str:
         return f"{self.name} (ID: {self.id})"
-    

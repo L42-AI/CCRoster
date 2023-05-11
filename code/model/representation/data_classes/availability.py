@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship
 
 from model.representation.data_classes.setup import Base
 
-
 class Availability(Base):
     __tablename__ = 'availability'
 
