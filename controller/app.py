@@ -69,10 +69,12 @@ def register():
     return render_template('register.html')
 
 @app.route('/add_employee')
+@login_required
 def add_employee_form():
     return render_template('add_employee.html')
 
 @app.route('/manage_shifts')
+@login_required
 def manage_shifts_page():
     shift_list = download_shifts(current_user.id)
     return render_template('manage_shifts.html', shifts=shift_list)
