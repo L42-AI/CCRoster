@@ -44,6 +44,7 @@ class Fill:
                 if ShiftConstrains.passed_hard_constraints(shift_id, employee_id, Schedule):
                     Fill.schedule_in(shift_id, employee_id, Schedule)
                     filled += 1
+                    continue
 
         return Schedule
 

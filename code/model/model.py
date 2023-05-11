@@ -42,7 +42,8 @@ class Generator(Model):
     def create_greedy_schedule(employee_list: list[Employee], shift_list: list[Shift]):
         return Greedy.fill(employee_list, shift_list, Schedule(Workload(), CurrentAvailabilities()))
 
-    def propagate(shift_list, **kwargs):
+    def propagate(employee_list: list[Employee], shift_list: list[Shift], **kwargs):
         schedule = Fill.fill(AbsSchedule(Workload()))
+        # schedule = Greedy.fill(employee_list, shift_list, Schedule(Workload(), CurrentAvailabilities()))
         P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']))
         P.grow(float(kwargs['temperature']))

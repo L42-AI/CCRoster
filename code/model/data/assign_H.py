@@ -18,6 +18,9 @@ employee_list.append(Employee('Allumuah', ' ', [
     ], {20:2, 21:3}, 1, 10, 1, [1], 'coffee_company'))
 
 employee_list.append(Employee('Lena', ' ', [
+
+    Availability(start=datetime(2023,5,27,0), end=datetime(2023,5,27,23,59)),
+    Availability(start=datetime(2023,5,28,0), end=datetime(2023,5,28,23,59)),
     ], {20:2, 21:2}, 1, 10, 1, [1], 'coffee_company'))
 
 employee_list.append(Employee("Beau", " ", [
