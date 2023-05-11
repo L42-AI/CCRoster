@@ -1,14 +1,15 @@
 import random
 import math
 
-from representation.shift_constraints import ShiftConstrains
-from representation.malus_calc import MalusCalc
-from representation.workload import Workload
-from representation.schedule import Schedule
+from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
+from model.representation.behaviour_classes.malus_calc import MalusCalc
+from model.representation.data_classes.workload import Workload
+from model.representation.data_classes.schedule import Schedule
 
-from controller.helpers import recursive_copy, id_employee, id_shift
-from data.schedule_constants import total_availabilities, standard_cost
-from data.assign import shift_list
+from model.representation.behaviour_classes.schedule_constants import total_availabilities, standard_cost
+from model.data.assign import shift_list
+
+from helpers import recursive_copy, id_employee, id_shift
 
 """ Schedule manipulation """
 

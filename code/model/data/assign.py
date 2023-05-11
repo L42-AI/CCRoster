@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from model.representation.data_objects import Employee, Availability, Shift
+from model.representation.data_classes.availability import Availability
+from model.representation.data_classes.employee import Employee
+from model.representation.data_classes.shift import Shift
 
 employee_list: list[Employee] = []
 shift_list: list[Shift] = []

@@ -1,5 +1,5 @@
-from data.schedule_constants import time_conflict_dict
-from representation.schedule import Schedule
+from model.representation.behaviour_classes.schedule_constants import time_conflict_dict
+from model.representation.data_classes.schedule import Schedule
 
 class ShiftConstrains:
 

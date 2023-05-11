@@ -1,6 +1,6 @@
 import random
 
-from representation.workload import Workload
+from model.representation.data_classes.workload import Workload
 from data.assign import shift_list
 
 class Schedule(dict):

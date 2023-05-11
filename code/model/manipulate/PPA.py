@@ -1,13 +1,13 @@
 from itertools import chain
 import random
 
-from representation.malus_calc import MalusCalc
-from representation.schedule import Schedule
-from representation.workload import Workload
+from model.representation.behaviour_classes.malus_calc import MalusCalc
+from model.representation.data_classes.workload import Workload
+from model.representation.data_classes.schedule import Schedule
 
-from data.schedule_constants import standard_cost
-from improve.mutate import mutate
-from controller.helpers import recursive_copy, id_employee, id_shift
+from model.representation.behaviour_classes.schedule_constants import standard_cost
+from model.manipulate.mutate import mutate
+from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
     def __init__(self, num_plants: int, num_gens: int, shift_list, TEMPERATURE: float=.5) -> None:
@@ -48,7 +48,7 @@ class PPA:
             print(self.id_shift[shift_id], self.id_employee[employee_id])
             print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
             print("---------------")
-            
+
         return lowest
 
     @staticmethod

@@ -1,10 +1,9 @@
 from collections import defaultdict
 
-from model.representation.data_objects import Employee
-from representation.workload import Workload
-from representation.schedule import Schedule
+from model.representation.data_classes.workload import Workload
+from model.representation.data_classes.schedule import Schedule
 
-from controller.helpers import get_weeknumber, id_shift, id_employee
+from helpers import get_weeknumber, id_shift, id_employee
 
 
 class MalusCalc:

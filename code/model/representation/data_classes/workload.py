@@ -1,7 +1,7 @@
-from model.representation.data_objects import Employee
+from model.representation.data_classes.employee import Employee
 
 from data.assign import employee_list
-from controller.helpers import get_weeknumber, id_employee
+from helpers import get_weeknumber, id_employee
 
 class Workload(dict):
 
@@ -21,7 +21,7 @@ class Workload(dict):
 
     def init_workload(self, employee_list: list[Employee]) -> None:
         for employee in employee_list:
-            self[employee.id] = {weeknum: [] for weeknum in employee.availability}
+            self[employee.id] = {weeknum: [] for weeknum in employee.weekly_max}
 
     """ METHODS """
 

@@ -1,6 +1,8 @@
-from model.representation.data_objects import Employee, Shift, Availability
-from data.assign import shift_list, employee_list
+from model.representation.data_classes.availability import Availability
+from model.representation.data_classes.employee import Employee
+from model.representation.data_classes.shift import Shift
 
+from data.assign import shift_list, employee_list
 
 def get_standard_cost(employee_list: list[Employee]) -> float:
     """
