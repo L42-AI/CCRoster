@@ -28,12 +28,12 @@ class Scheduler(Presentor):
         self.View = View
 
     def get_schedule(self, shift_list, employee_list, config):
-        if config['runtype'] == 'propegate':
-            schedule = self.Model.propagate()
-        elif config['runtype'] == 'random':
+        if config['runtype'] == 'random':
             schedule = self.Model.create_random_schedule()
         elif config['runtype'] == 'greedy':
             schedule = self.Model.create_greedy_schedule(shift_list, employee_list)
+        elif config['runtype'] == 'propagate':
+            schedule = self.Model.propagate(shift_list, **config)
         else:
             raise ValueError(f"{config['runtype']} not valid! Choose from: 'greedy', 'random' or 'propagate'")
         

@@ -9,9 +9,8 @@ from model.representation.data_classes.setup import Base
 from model.data.assign import shift_list
 
 class AbsSchedule(dict):
-    def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
+    def __init__(self, Workload: Workload, set_schedule: dict[int, int] = None):
         self.Workload = Workload
-        self.cost = cost
 
         if set_schedule is not None:
             for shift_id in set_schedule:
@@ -21,14 +20,15 @@ class AbsSchedule(dict):
                 self[shift.id] = None
 
 class Schedule(AbsSchedule):
-    def __init__(self, Workload: Workload, cost: float, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
-        super().__init__(Workload, cost, set_schedule)
+    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
+        super().__init__(Workload, set_schedule)
         self.CurrentAvailabilities = CurrentAvailabilities
 
 class Plant(AbsSchedule):
     def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
-        super().__init__(Workload, cost, set_schedule)
+        super().__init__(Workload, set_schedule)
 
+        self.cost = cost
         self.fitness: float = None
         self.p: float = None
         self.BUDS = 10 # number of buds this plant can have

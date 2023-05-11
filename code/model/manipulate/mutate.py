@@ -4,34 +4,16 @@ import math
 from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import AbsSchedule
+from model.representation.data_classes.schedule import AbsSchedule, Plant
 from model.manipulate.fill import Fill
 from model.representation.behaviour_classes.schedule_constants import total_availabilities, standard_cost
 from model.data.assign import shift_list
 
-from helpers import recursive_copy, id_employee, id_shift
-
-""" Schedule manipulation """
-
-def _schedule_in(shift_id: int, employee_id: int, Schedule: AbsSchedule) -> None:
-    ''' Places a worker in a shift in the schedule, while also updating his workload '''
-    Schedule[shift_id] = employee_id
-    Schedule.Workload.update(shift_id, employee_id, add=True)
-
-def _schedule_out(shift_id: int, Schedule: AbsSchedule) -> None:
-    ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
-    employee_id = Schedule[shift_id]
-    Schedule[shift_id] = None
-    Schedule.Workload.update(shift_id, employee_id, add=False)
-
-def schedule_swap(shift_id: int, employee_id: int, Schedule: AbsSchedule) -> None:
-    ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
-    _schedule_out(shift_id, Schedule)
-    _schedule_in(shift_id, employee_id, Schedule)
+from helpers import recursive_copy, id_employee, id_shift, get_random_employee, get_random_shift
 
 """ MUTATE """
 
-def mutate(schedule: AbsSchedule, T: float) -> list[AbsSchedule]:
+def mutate(schedule: Plant, T: float) -> list[Plant]:
     '''
     makes mutations to the schedule but remembers original state and returns to it if
     change is not better. So no deepcopies needed :0
@@ -43,16 +25,16 @@ def mutate(schedule: AbsSchedule, T: float) -> list[AbsSchedule]:
     while len(buds) < 10:
         
         # copy the original schedule
-        bud_schedule = AbsSchedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
+        bud_schedule = Plant(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
         for _ in range(schedule.MUTATIONS):
             buds = modification(buds, bud_schedule, T)
     return buds
 
-def modification(buds: list[AbsSchedule], schedule: AbsSchedule, T: float) -> list[AbsSchedule]:
+def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # find a modification            
-    replace_shift_id = _get_random_shift()
+    replace_shift_id = get_random_shift()
     current_employee_id = schedule[replace_shift_id]
-    replace_employee_id = _get_random_employee(replace_shift_id, current_employee_id, schedule)
+    replace_employee_id = get_random_employee(replace_shift_id, current_employee_id)
     old_cost = schedule.cost
 
     # check if new worker wants to work additional shift, if not, use mutate_max
@@ -68,7 +50,7 @@ def modification(buds: list[AbsSchedule], schedule: AbsSchedule, T: float) -> li
         buds = accept_change(schedule, old_cost, buds, T)
         return buds
     
-def accept_change(bud_schedule: AbsSchedule, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
+def accept_change(bud_schedule: Plant, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
     ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
         and a simulated annealing probability'''
     if shift_id != None: # does not take into account 'free' hours
@@ -104,7 +86,7 @@ def accept_change(bud_schedule: AbsSchedule, old_cost: int, buds: list, T: float
         
     return buds
 
-def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, schedule: AbsSchedule) -> list[tuple[int, int]]:
+def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, schedule: Plant) -> list[tuple[int, int]]:
     '''
     Method gets called when mutate wants to schedule a worker for a shift but the worker is already
     working his/hers max. This method will replace one of his/her shifts to check if that will be cheaper
@@ -118,7 +100,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
         return schedule
 
     # pick new employee to work the shortest shift
-    shortest_shift_employee_id = _get_random_employee(shortest_shift_id, possible_employee_id, schedule)
+    shortest_shift_employee_id = get_random_employee(shortest_shift_id, possible_employee_id)
 
     # check if worker that will take over the shift, still wants to work additional shift
     if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
@@ -133,31 +115,8 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
 
 """ Helper methods """
 
-def _billable_hours(shift_id: int, old_emp: int, new_emp: int, bud_schedule: AbsSchedule):
+def _billable_hours(shift_id: int, old_emp: int, new_emp: int, bud_schedule: Plant):
         duration = id_shift[shift_id].duration
         duration_old_emp = max(0, duration - max(0, id_employee[old_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
         duration_new_emp = max(0, duration - max(0, id_employee[new_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
         return duration_old_emp, duration_new_emp
-
-def _get_random_shift() -> int:
-    """
-    returns a tuple with inside (1) a tuple containing shift info and (2) an index
-    """
-
-    shift_id = random.choice(shift_list).id
-    while len(total_availabilities[shift_id]) < 2:
-        shift_id = random.choice(shift_list).id
-    return shift_id
-
-def _get_random_employee(shift_id: int, current_employee_id: int, schedule: AbsSchedule) -> int:
-    """
-    returns an employee id
-    """
-
-    # see who is working already to avoid duplicate
-    current_employee_id = schedule[shift_id]
-
-    choices = total_availabilities[shift_id] - {current_employee_id}
-    if not choices:
-        raise ValueError("No available employees for shift")
-    return random.choice(list(choices))

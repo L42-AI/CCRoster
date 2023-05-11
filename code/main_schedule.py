@@ -5,7 +5,10 @@ from view.view import View, Viewer
 from model.data.assign import shift_list, employee_list
 
 config = {
-    'runtype' : 'greedy',
+    'runtype' : 'propagate',
+    'num_plants' : '300',
+    'num_gens' : '20',
+    'temperature' : '0.5',
 }
 
 import cProfile
