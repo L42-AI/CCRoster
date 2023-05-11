@@ -1,3 +1,2 @@
 from controller.app import app
-
 app.run(debug=True)
