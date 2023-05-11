@@ -1,37 +1,9 @@
 from datetime import datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from model.representation.data_objects import Employee, Availability, Shift, Weekly_max, Task
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
-database_url = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'
+from model.representation.data_objects import Employee, Availability, Shift
 
-engine = create_engine(database_url)
-Base.metadata.create_all(engine)
-
-session = Session(engine)
-
-
-def create_employee_availability(employee):
-    for av in employee.availability:
-        session.add(av)
-
-
-def create_employee_weekly_max(employee):
-    for week, max_shifts in employee.weekly_max.items():
-        wm = Weekly_max(week=week, max=max_shifts)
-        wm.employee = employee
-        session.add(wm)
-
-def create_employee_tasks(employee):
-    for task in employee.tasks:
-        tsk = Task(employee_id=employee.id, task=task)
-        session.add(tsk)
-
-
-employee_list = []
-shift_list = []
+employee_list: list[Employee] = []
+shift_list: list[Shift] = []
 
 employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                   Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
@@ -40,6 +12,7 @@ employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(20
                                                   Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
                                                   Availability(start=datetime(2023, 5,3,0), end=datetime(2023, 5,3,23,59))],
                                                   {5:2, 1:2, 2:2, 3:2}, 4, 240, 1, [1], 1)) # location 1 is coffee comp for development
+
 employee_list.append(Employee('Soraya', 'van Geldere', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                         Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                         Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
@@ -138,16 +111,3 @@ for day in range(4,6):
     shift_list.append(Shift(start=datetime(2023, 5, day, 12, 30),
                          end=datetime(2023, 5, day, 18, 0),
                          task=1, location=1))
-
-
-for emp in employee_list:
-    session.add(emp)
-    create_employee_tasks(emp)
-    create_employee_availability(emp)
-    create_employee_weekly_max(emp)
-
-
-for shift in shift_list:
-    session.add(shift)
-session.commit()
-session.close()
