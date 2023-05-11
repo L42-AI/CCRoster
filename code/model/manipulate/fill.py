@@ -32,6 +32,10 @@ class Fill:
         Fill._schedule_out(shift_id, Schedule)
         Fill._schedule_in(shift_id, employee_id, Schedule)
 
+    @staticmethod
+    def fill():
+        pass
+
 class Greedy(Fill):
 
     @staticmethod

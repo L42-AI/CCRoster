@@ -17,8 +17,8 @@ def run(PROFILE):
         pr = cProfile.Profile()
         pr.enable()
 
-        S = Scheduler(Model, View)
-        S.get_schedule(shift_list, employee_list, config)
+        S = Scheduler(Generator, View)
+        S.get_schedule(employee_list, shift_list, config)
         
         pr.disable()
 
@@ -30,8 +30,8 @@ def run(PROFILE):
         ps.print_stats()
         print(s.getvalue())
     else:
-        S = Scheduler(Model, View)
-        S.get_schedule(shift_list, employee_list, config)
+        S = Scheduler(Generator, View)
+        print(S.get_schedule(employee_list, shift_list, config))
 
 
 if __name__ == "__main__":

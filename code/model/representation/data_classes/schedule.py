@@ -6,7 +6,7 @@ from sqlalchemy import Column, Integer, DateTime
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.setup import Base
-from data.assign import shift_list
+from model.data.assign import shift_list
 
 class AbsSchedule(dict):
     def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
@@ -18,8 +18,7 @@ class AbsSchedule(dict):
                 self[shift_id] = set_schedule[shift_id]
         else:
             for shift in shift_list:
-                self[shift.id] = 10
-                self.Workload.update(shift.id, 10, add=True)
+                self[shift.id] = None
 
 class Schedule(AbsSchedule):
     def __init__(self, Workload: Workload, cost: float, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):

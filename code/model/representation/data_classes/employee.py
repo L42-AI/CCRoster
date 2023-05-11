@@ -51,7 +51,7 @@ class Employee(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.availability = availability
-        self.availability = self.sort_availability(availability)
+        self.availability_dict = self.sort_availability(availability)
         self.wage = wage
         self.weekly_max = maximum
         self.min_hours = min_hours

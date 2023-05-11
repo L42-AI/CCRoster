@@ -50,8 +50,8 @@ def get_employee_set(shift: Shift, employee_list: list[Employee]) -> set[int]:
     availabilities = set()
     for employee in employee_list:
 
-        for weeknum in employee.availability:
-            for workable_shift in employee.availability[weeknum]:
+        for weeknum in employee.availability_dict:
+            for workable_shift in employee.availability_dict[weeknum]:
 
                 if _possible_shift(workable_shift, employee, shift):
                     availabilities.add(employee.id)
