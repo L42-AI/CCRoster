@@ -3,21 +3,21 @@ import random
 
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.schedule import BaseSchedule, Plant
 
 from model.representation.behaviour_classes.schedule_constants import standard_cost
 from model.manipulate.mutate import mutate
 from helpers import recursive_copy, id_employee, id_shift
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, shift_list, TEMPERATURE: float=.5) -> None:
-        self.Schedule = Schedule(Workload(), 999999, shift_list)
+    def __init__(self, start_schedule: BaseSchedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+        self.Schedule = start_schedule
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
         self.id_employee = id_employee
         self.id_shift = id_shift
-        self.grow(TEMPERATURE)
+        self.lowest = self.grow(TEMPERATURE)
 
     def grow(self, temperature: float) -> None:
         winners = []
@@ -52,17 +52,17 @@ class PPA:
         return lowest
 
     @staticmethod
-    def tournament_selection(plants: list[Schedule], T: float, k: int = 5) -> Schedule:  # k is the tournament size
+    def tournament_selection(plants: list[Plant], T: float, k: int = 5) -> Plant:  # k is the tournament size
         selected_plants = random.sample(plants, k)
         winner = min(selected_plants, key=lambda x: x.cost)
         return winner
 
     @staticmethod
-    def gen_plants(schedule: Schedule, number_plants: int) -> list[Schedule]:
+    def gen_plants(schedule: BaseSchedule, number_plants: int) -> list[Plant]:
         plants = []
         for _ in range(number_plants):
             plants.append(
-                Schedule(
+                Plant(
                     Workload = Workload(recursive_copy(schedule.Workload)),
                     cost = schedule.cost,
                     set_schedule = recursive_copy(schedule)

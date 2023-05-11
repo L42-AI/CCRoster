@@ -1,7 +1,7 @@
 import random
 
 from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
-from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.schedule import BaseSchedule
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.shift import Shift
 
@@ -14,20 +14,20 @@ from helpers import get_weeknumber, id_employee
 class Fill:
 
     @staticmethod
-    def _schedule_in(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+    def _schedule_in(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
         ''' Places a worker in a shift in the schedule, while also updating his workload '''
         Schedule[shift_id] = employee_id
         Schedule.Workload.update(shift_id, employee_id, add=True)
 
     @staticmethod
-    def _schedule_out(shift_id: int, Schedule: Schedule) -> None:
+    def _schedule_out(shift_id: int, Schedule: BaseSchedule) -> None:
         ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
         employee_id = Schedule[shift_id]
         Schedule[shift_id] = None
         Schedule.Workload.update(shift_id, employee_id, add=False)
 
     @staticmethod
-    def schedule_swap(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+    def schedule_swap(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
         ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
         Fill._schedule_out(shift_id, Schedule)
         Fill._schedule_in(shift_id, employee_id, Schedule)
@@ -35,7 +35,7 @@ class Fill:
 class Greedy(Fill):
 
     @staticmethod
-    def _schedule_in(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+    def _schedule_in(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
         Schedule[shift_id] = employee_id
         Schedule.Workload.update(shift_id, employee_id, add=True)
 
@@ -48,7 +48,7 @@ class Greedy(Fill):
             Greedy.update_availabilty(Schedule, employee_id, shift_id, added=True, max_hit=False)
 
     @staticmethod
-    def _schedule_out(shift_id: int, Schedule: Schedule) -> None:
+    def _schedule_out(shift_id: int, Schedule: BaseSchedule) -> None:
         employee_id = Schedule[shift_id]
         Schedule[shift_id] = None
         Schedule.Workload.update(shift_id, employee_id, add=False)
@@ -56,13 +56,13 @@ class Greedy(Fill):
         Greedy.update_availabilty(Schedule, employee_id, shift_id, added=False)
 
     @staticmethod
-    def schedule_swap(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+    def schedule_swap(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
         ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
         Greedy._schedule_out(shift_id, Schedule)
         Greedy._schedule_in(shift_id, employee_id, Schedule)
 
     @staticmethod
-    def update_availabilty(Schedule: Schedule, employee_id: int, shift_id: int, added: bool, max_hit: bool = False) -> None:
+    def update_availabilty(Schedule: BaseSchedule, employee_id: int, shift_id: int, added: bool, max_hit: bool = False) -> None:
 
         Greedy.set_shift_occupation(Schedule, shift_id, added)
         
@@ -83,14 +83,14 @@ class Greedy(Fill):
                     Schedule.CurrentAvailabilities[availability][1].add(employee_id)
 
     @staticmethod
-    def set_shift_occupation(Schedule: Schedule, shift_id: int, occupied: bool) -> None:
+    def set_shift_occupation(Schedule: BaseSchedule, shift_id: int, occupied: bool) -> None:
         if occupied:
             Schedule.CurrentAvailabilities[shift_id][0] = 1
         else: 
             Schedule.CurrentAvailabilities[shift_id][0] = 0
 
     @staticmethod
-    def greedy_fill(employee_list: list[Employee], shift_list: list[Shift], Schedule: Schedule) -> Schedule:
+    def greedy_fill(employee_list: list[Employee], shift_list: list[Shift], Schedule: BaseSchedule) -> BaseSchedule:
 
         filled = 0
         shift_id_list = [shift.id for shift in shift_list]
@@ -130,7 +130,7 @@ class Greedy(Fill):
         return Schedule
 
     @staticmethod
-    def compute_priority(employee_list: list[Employee], Schedule: Schedule, weeknum: int) -> None:
+    def compute_priority(employee_list: list[Employee], Schedule: BaseSchedule, weeknum: int) -> None:
         for employee in employee_list:
             workload = Schedule.Workload[employee.id]
             week_max = employee.get_week_max(weeknum)

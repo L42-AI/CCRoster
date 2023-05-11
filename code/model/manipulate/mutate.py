@@ -4,7 +4,7 @@ import math
 from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.schedule import BaseSchedule
 from model.manipulate.fill import Fill
 from model.representation.behaviour_classes.schedule_constants import total_availabilities, standard_cost
 from model.data.assign import shift_list
@@ -13,25 +13,25 @@ from helpers import recursive_copy, id_employee, id_shift
 
 """ Schedule manipulation """
 
-def _schedule_in(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+def _schedule_in(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
     ''' Places a worker in a shift in the schedule, while also updating his workload '''
     Schedule[shift_id] = employee_id
     Schedule.Workload.update(shift_id, employee_id, add=True)
 
-def _schedule_out(shift_id: int, Schedule: Schedule) -> None:
+def _schedule_out(shift_id: int, Schedule: BaseSchedule) -> None:
     ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
     employee_id = Schedule[shift_id]
     Schedule[shift_id] = None
     Schedule.Workload.update(shift_id, employee_id, add=False)
 
-def schedule_swap(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
+def schedule_swap(shift_id: int, employee_id: int, Schedule: BaseSchedule) -> None:
     ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
     _schedule_out(shift_id, Schedule)
     _schedule_in(shift_id, employee_id, Schedule)
 
 """ MUTATE """
 
-def mutate(schedule: Schedule, T: float) -> list[Schedule]:
+def mutate(schedule: BaseSchedule, T: float) -> list[BaseSchedule]:
     '''
     makes mutations to the schedule but remembers original state and returns to it if
     change is not better. So no deepcopies needed :0
@@ -43,12 +43,12 @@ def mutate(schedule: Schedule, T: float) -> list[Schedule]:
     while len(buds) < 10:
         
         # copy the original schedule
-        bud_schedule = Schedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
+        bud_schedule = BaseSchedule(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
         for _ in range(schedule.MUTATIONS):
             buds = modification(buds, bud_schedule, T)
     return buds
 
-def modification(buds: list[Schedule], schedule: Schedule, T: float) -> list[Schedule]:
+def modification(buds: list[BaseSchedule], schedule: BaseSchedule, T: float) -> list[BaseSchedule]:
     # find a modification            
     replace_shift_id = _get_random_shift()
     current_employee_id = schedule[replace_shift_id]
@@ -68,7 +68,7 @@ def modification(buds: list[Schedule], schedule: Schedule, T: float) -> list[Sch
         buds = accept_change(schedule, old_cost, buds, T)
         return buds
     
-def accept_change(bud_schedule: Schedule, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
+def accept_change(bud_schedule: BaseSchedule, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
     ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
         and a simulated annealing probability'''
     if shift_id != None: # does not take into account 'free' hours
@@ -104,7 +104,7 @@ def accept_change(bud_schedule: Schedule, old_cost: int, buds: list, T: float, s
         
     return buds
 
-def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, schedule: Schedule) -> list[tuple[int, int]]:
+def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, schedule: BaseSchedule) -> list[tuple[int, int]]:
     '''
     Method gets called when mutate wants to schedule a worker for a shift but the worker is already
     working his/hers max. This method will replace one of his/her shifts to check if that will be cheaper
@@ -133,7 +133,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
 
 """ Helper methods """
 
-def _billable_hours(shift_id: int, old_emp: int, new_emp: int, bud_schedule: Schedule):
+def _billable_hours(shift_id: int, old_emp: int, new_emp: int, bud_schedule: BaseSchedule):
         duration = id_shift[shift_id].duration
         duration_old_emp = max(0, duration - max(0, id_employee[old_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
         duration_new_emp = max(0, duration - max(0, id_employee[new_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
@@ -149,7 +149,7 @@ def _get_random_shift() -> int:
         shift_id = random.choice(shift_list).id
     return shift_id
 
-def _get_random_employee(shift_id: int, current_employee_id: int, schedule: Schedule) -> int:
+def _get_random_employee(shift_id: int, current_employee_id: int, schedule: BaseSchedule) -> int:
     """
     returns an employee id
     """

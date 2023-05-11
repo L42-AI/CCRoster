@@ -1,5 +1,12 @@
-from model.manipulate.PPA import PPA
-from model.data.assign import shift_list
+from presentor.presentor import Presentor, Scheduler
+from model.model import Model, Generator
+from view.view import View, Viewer
+
+from model.data.assign import shift_list, employee_list
+
+config = {
+    'runtype' : 'greedy',
+}
 
 import cProfile
 import pstats
@@ -10,7 +17,8 @@ def run(PROFILE):
         pr = cProfile.Profile()
         pr.enable()
 
-        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS, shift_list)
+        S = Scheduler(Model, View)
+        S.get_schedule(shift_list, employee_list, config)
         
         pr.disable()
 
@@ -22,7 +30,8 @@ def run(PROFILE):
         ps.print_stats()
         print(s.getvalue())
     else:
-        PPA(NUMBER_OF_PLANTS, NUMBER_OF_GENS, shift_list)
+        S = Scheduler(Model, View)
+        S.get_schedule(shift_list, employee_list, config)
 
 
 if __name__ == "__main__":
