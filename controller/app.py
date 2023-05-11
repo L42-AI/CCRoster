@@ -37,127 +37,133 @@ class User(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
-@login_required
-def create_employee_list():
-    id = current_user.id
-    employee_list = download_employees(id)
+class App():
 
-    return employee_list
+    def __init__(self):
+        self.employee_list: list[Employee] = None
+        self.shift_list: list[Shift] = None
 
-def create_shift_list():
-    '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
-    pass
+    @login_required
+    def create_employee_list():
+        id = current_user.id
+        employee_list = download_employees(id)
+
+        return employee_list
+
+    def create_shift_list():
+        '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
+        pass
 
 
-@app.route('/')
-@login_required
-def index():
-    employee_list = create_employee_list()
-    return render_template('index.html', employees=employee_list)
+    @app.route('/')
+    @login_required
+    def index():
+        employee_list = create_employee_list()
+        return render_template('index.html', employees=employee_list)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created successfully!')
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            hashed_password = generate_password_hash(password)
+            new_user = User(username=username, password_hash=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Account created successfully!')
+            return redirect(url_for('login'))
+        return render_template('register.html')
+
+    @app.route('/add_employee')
+    @login_required
+    def add_employee_form():
+        return render_template('add_employee.html')
+
+    @app.route('/manage_shifts')
+    @login_required
+    def manage_shifts_page():
+        shift_list = download_shifts(current_user.id)
+        return render_template('manage_shifts.html', shifts=shift_list)
+
+    @app.route('/delete_shift', methods=['POST'])
+    def delete_shift():
+        shift_id = id
+        print(shift_id)
+        
+        # update shift list
+        shift_list = [shift for shift in shift_list if shift.id != shift_id]
+        return jsonify({'result': 'success'}) 
+
+
+    @app.route('/save_shift/', methods=['POST'])
+    def save_shift():
+        start_str = request.form.get('start')
+        end_str = request.form.get('end')
+        shift_type = request.form.get('shift_type')
+
+        # Convert the startStr and endStr into datetime.datetime objects
+        start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
+        end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
+        id = len(shift_list)
+
+        # Save the shift to your database here
+        imported_shift_list.append(Shift(start, end, 1, 1))
+
+        # Return a success response
+        return jsonify({'result': 'success'})
+
+    @app.route('/add_employee', methods=['POST'])
+    def process_employee():
+        fname = request.form['fname']
+        lname = request.form['lname']
+        maximum = int(request.form['maximum'])
+        minimum = int(request.form['minimum'])
+        wage = float(request.form['wage'])
+        level = int(request.form['level'])
+        task = request.form['task']
+        location = int(request.form['location'])
+
+        availability = proces_availability()
+        
+        new_employee = Employee(fname, lname, availability, maximum, minimum, wage, level, task, location)
+        employee_list.append(new_employee)
+
+        return redirect('/')
+
+    @app.route('/add_availability/')
+    def proces_availability():
+        availability = []
+        availability_json = request.form['availability']
+        availability_data = json.loads(availability_json)
+        for _, av in enumerate(availability_data):
+            start_str = av['start'] 
+            end_str = av['end']
+            av_start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
+            av_end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
+            availability.append(Availability(start=av_start, end=av_end))
+        return availability
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            user = User.query.filter_by(username=username).first()
+
+            if user and check_password_hash(user.password_hash, password):
+                login_user(user, remember=True)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('index'))
+            else:
+                flash('Login unsuccessful. Please check your username and password.')
+        return render_template('login.html')
+
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
         return redirect(url_for('login'))
-    return render_template('register.html')
 
-@app.route('/add_employee')
-@login_required
-def add_employee_form():
-    return render_template('add_employee.html')
-
-@app.route('/manage_shifts')
-@login_required
-def manage_shifts_page():
-    shift_list = download_shifts(current_user.id)
-    return render_template('manage_shifts.html', shifts=shift_list)
-
-@app.route('/delete_shift', methods=['POST'])
-def delete_shift():
-    shift_id = id
-    print(shift_id)
-    
-    # update shift list
-    shift_list = [shift for shift in shift_list if shift.id != shift_id]
-    return jsonify({'result': 'success'}) 
-
-
-@app.route('/save_shift/', methods=['POST'])
-def save_shift():
-    start_str = request.form.get('start')
-    end_str = request.form.get('end')
-    shift_type = request.form.get('shift_type')
-
-    # Convert the startStr and endStr into datetime.datetime objects
-    start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
-    end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
-    id = len(shift_list)
-
-    # Save the shift to your database here
-    imported_shift_list.append(Shift(start, end, 1, 1))
-
-    # Return a success response
-    return jsonify({'result': 'success'})
-
-@app.route('/add_employee', methods=['POST'])
-def process_employee():
-    fname = request.form['fname']
-    lname = request.form['lname']
-    maximum = int(request.form['maximum'])
-    minimum = int(request.form['minimum'])
-    wage = float(request.form['wage'])
-    level = int(request.form['level'])
-    task = request.form['task']
-    location = int(request.form['location'])
-
-    availability = proces_availability()
-    
-    new_employee = Employee(fname, lname, availability, maximum, minimum, wage, level, task, location)
-    employee_list.append(new_employee)
-
-    return redirect('/')
-
-@app.route('/add_availability/')
-def proces_availability():
-    availability = []
-    availability_json = request.form['availability']
-    availability_data = json.loads(availability_json)
-    for _, av in enumerate(availability_data):
-        start_str = av['start'] 
-        end_str = av['end']
-        av_start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
-        av_end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
-        availability.append(Availability(start=av_start, end=av_end))
-    return availability
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user, remember=True)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
-        else:
-            flash('Login unsuccessful. Please check your username and password.')
-    return render_template('login.html')
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
