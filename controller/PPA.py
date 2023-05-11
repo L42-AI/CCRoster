@@ -4,17 +4,26 @@ from itertools import chain
 from model.representation.data_objects import Weekly_max, Schedule, Workload
 from model.representation.malus_calc import MalusCalc
 from model.improve.generator import Generator
-from controller.helpers import recursive_copy, id_employee, id_shift
+from controller.helpers import recursive_copy
+from controller.database import download_employees, download_shifts
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+    def __init__(self, num_plants: int, num_gens: int, session_id=1, TEMPERATURE: float=.5) -> None:
         self.G = Generator()
         self.Schedule = self.G.Schedule # not necessary but better readability imo
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
-        self.id_employee = id_employee
-        self.id_shift = id_shift
+        self.id_employee, self.id_shift = id_objects(session_id)
         self.grow(TEMPERATURE)
+
+    @staticmethod
+    def id_objects(session_id):
+        employee_list = download_employees(session_id)
+        shift_list = download_shifts(session_id)
+        id_employee = {x.id: x for x in employee_list}
+        id_shift = {x.id: x for x in shift_list}
+
+        return id_employee, id_shift
 
     def grow(self, temperature: float) -> None:
         winners = []

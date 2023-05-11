@@ -7,18 +7,27 @@ from representation.workload import Workload
 
 from data.schedule_constants import standard_cost
 from improve.mutate import mutate
-from controller.helpers import recursive_copy, id_employee, id_shift
+from controller.helpers import recursive_copy
+from controller.database import download_employees, download_shifts
 
 class PPA:
-    def __init__(self, num_plants: int, num_gens: int, shift_list, TEMPERATURE: float=.5) -> None:
+    def __init__(self, num_plants: int, num_gens: int, shift_list, session_id=1, TEMPERATURE: float=.5) -> None:
         self.Schedule = Schedule(Workload(), 999999, shift_list)
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
-        self.id_employee = id_employee
-        self.id_shift = id_shift
+        self.session_id = session_id
+        self.id_employee, self.id_shift = self.id_objects()
         self.grow(TEMPERATURE)
 
+    def id_objects(self):
+        employee_list = download_employees(self.session_id)
+        shift_list = download_shifts(self.session_id)
+        id_employee = {x.id: x for x in employee_list}
+        id_shift = {x.id: x for x in shift_list}
+
+        return id_employee, id_shift
+ 
     def grow(self, temperature: float) -> None:
         winners = []
         plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
