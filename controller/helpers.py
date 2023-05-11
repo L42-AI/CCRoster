@@ -1,5 +1,12 @@
-# from model.data.assign import employee_list, shift_list
+from controller.database import download_employees, download_shifts
+# or
+from controller.app import employee_list, shift_list 
 
+''' When should helpers be created? maybe only after the login? than we can
+    get id from current_user in app. it is only used in generator so when
+    browsing we do not need to create this file. But should app hold those lists globally?
+    currently only made inside functions. Maybe make class from app so the lists
+    can be made attributes''' 
 # id_employee = {employee.id: employee for employee in employee_list}
 # id_shift = {shift.id: shift for shift in shift_list}
 
