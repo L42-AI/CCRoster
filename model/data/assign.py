@@ -33,24 +33,24 @@ def create_employee_tasks(employee):
 employee_list = []
 shift_list = []
 
-employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
+employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                   Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                   Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
                                                   Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
                                                   Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
                                                   Availability(start=datetime(2023, 5,3,0), end=datetime(2023, 5,3,23,59))],
                                                   {5:2, 1:2, 2:2, 3:2}, 4, 240, 1, [1], 1)) # location 1 is coffee comp for development
-employee_list.append(Employee('Soraya', 'van Geldere', [Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
-                                                        Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59)),
+employee_list.append(Employee('Soraya', 'van Geldere', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
+                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                         Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                         Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)), ],
                                                         {5:2, 1:2, 2:2, 3:2}, 4, 3, 1, [1], 1)) # location 1 is coffee comp for development
 
-employee_list.append(Employee("Sophie", "van 't Hullenaar", [Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
-                                                        Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59)),
+employee_list.append(Employee("Sophie", "van 't Hullenaar", [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
+                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                         Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                         Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
+                                                        Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                         Availability(start=datetime(2023, 5,3,13,3), end=datetime(2023, 5,3,23,59)),
                                                         Availability(start=datetime(2023, 5,4,0), end=datetime(2023, 5,4,23,59)),
                                                         Availability(start=datetime(2023, 5,5,0), end=datetime(2023, 5,5,23,59))],
@@ -59,8 +59,8 @@ employee_list.append(Employee("Sophie", "van 't Hullenaar", [Availability(start=
 employee_list.append(Employee('Isabella', 'Koster', [Availability(start=datetime(2023, 5,3,13,3), end=datetime(2023, 5,3,23,59)),
                                                              Availability(start=datetime(2023, 5,4,0), end=datetime(2023, 5,4,23,59)),
                                                              Availability(start=datetime(2023, 5,5,0), end=datetime(2023, 5,5,23,59)),
-                                                    Availability(start=datetime(2023, 4,30,7,3), end=datetime(2023, 4,30,18,00)),
-                                                     Availability(start=datetime(2023, 4,31,7,3), end=datetime(2023, 4,31,18,00)),
+                                                    Availability(start=datetime(2023, 4,29,7,3), end=datetime(2023, 4,29,18,00)),
+                                                     Availability(start=datetime(2023, 4,30,7,3), end=datetime(2023, 4,30,18,00)),
                                                      Availability(start=datetime(2023, 5,4,8,3), end=datetime(2023, 5,4,13,30))],
                                                      {5:2, 1:2, 2:2, 3:2}, 4, 11, 1, [1], 1)) # location 1 is coffee comp for development
 
@@ -70,24 +70,24 @@ employee_list.append(Employee('Alexandra', 'Offringa', [Availability(start=datet
 employee_list.append(Employee('Pim', 'Putman', [Availability(start=datetime(2023, 5,3,0), end=datetime(2023, 5,3,23,59)),
                                                 Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                 Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
+                                                Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                 Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
-                                                Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,14)),
-                                                Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59))],
+                                                Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,14)),
+                                                Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59))],
                                                 {5:2, 1:0, 2:0, 3:0}, 4, 16.60, 1, [1], 1)) # location 1 is coffee comp for development
 
-employee_list.append(Employee('Danaë', 'Verstegen', [Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
-                                                    Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
+employee_list.append(Employee('Danaë', 'Verstegen', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
+                                                    Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                     Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
-                                                    Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,14)),
-                                                     Availability(start=datetime(2023, 4,31,7,3), end=datetime(2023, 4,31,13,00)),
+                                                    Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,14)),
+                                                     Availability(start=datetime(2023, 4,30,7,3), end=datetime(2023, 4,30,13,00)),
                                                      Availability(start=datetime(2023, 5,5,8,3), end=datetime(2023, 5,5,13,30))],
                                                      {5:2, 1:2, 2:2, 3:2}, 4, 14, 1, [1], 1)) # location 1 is coffee comp for development
 
-employee_list.append(Employee('Miranda', 'van Vuren', [Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
-                                                    Availability(start=datetime(2023, 4,31,7,3), end=datetime(2023, 4,31,13,00)),
+employee_list.append(Employee('Miranda', 'van Vuren', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
+                                                    Availability(start=datetime(2023, 4,30,7,3), end=datetime(2023, 4,30,13,00)),
                                                      Availability(start=datetime(2023, 5,5,8,3), end=datetime(2023, 5,5,13,30)),
-                                                       Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59)),
+                                                       Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                        Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                        Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
                                                        Availability(start=datetime(2023, 5,5,0), end=datetime(2023, 5,5,23,59))],
@@ -97,14 +97,14 @@ employee_list.append(Employee('Lulu', 'Wolff', [Availability(start=datetime(2023
                                                 {5:1, 1:0, 2:0, 3:0}, 4, 1, 1, [1], 1)) # location 1 is coffee comp for development
 
 employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                        Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59)),
+                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                        Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                        Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
                                                        Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
                                                         Availability(start=datetime(2023, 5,2,7), end=datetime(2023, 5,2,18,00))],
                                                         {5:2, 1:2, 2:2, 3:2}, 4, 50, 1, [1], 1)) # location 1 is coffee comp for development
 employee_list.append(Employee('Dumdum', 'Dummy', [Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                        Availability(start=datetime(2023, 4,31,0), end=datetime(2023, 4,31,23,59)),
+                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
                                                        Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
                                                        Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
                                                        Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
@@ -113,7 +113,7 @@ employee_list.append(Employee('Dumdum', 'Dummy', [Availability(start=datetime(20
 
 
 # short shifts
-for day in range(30,32):
+for day in range(29,31):
     shift_list.append(Shift(start=datetime(2023, 4, day, 10, 30),
                          end=datetime(2023, 4, day, 13, 0),
                          task=1, location=1))

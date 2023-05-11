@@ -4,7 +4,7 @@ from model.representation.data_objects import Base, Employee, Shift
 import datetime 
 
 connection_string = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'    
-    
+
 engine = create_engine(connection_string)
 Base.metadata.create_all(engine)
 session = Session(engine)
