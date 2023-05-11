@@ -17,11 +17,10 @@ class PPA:
         self.NUMBER_OF_GENERATIONS = num_gens
         self.id_employee = id_employee
         self.id_shift = id_shift
-        self.lowest = self.grow(TEMPERATURE)
 
     def grow(self, temperature: float) -> None:
         winners = []
-        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
+        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS, self.standard_cost)
         lowest = plants[0]
         
         for _ in range(self.NUMBER_OF_GENERATIONS):
@@ -58,13 +57,13 @@ class PPA:
         return winner
 
     @staticmethod
-    def gen_plants(schedule: AbsSchedule, number_plants: int) -> list[Plant]:
+    def gen_plants(schedule: AbsSchedule, number_plants: int, standard_cost: float) -> list[Plant]:
         plants = []
         for _ in range(number_plants):
             plants.append(
                 Plant(
                     Workload = Workload(recursive_copy(schedule.Workload)),
-                    cost = schedule.cost,
+                    cost = MalusCalc.compute_cost(standard_cost, schedule),
                     set_schedule = recursive_copy(schedule)
                 )
             )
