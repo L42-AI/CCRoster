@@ -5,7 +5,7 @@ from model.representation.behaviour_classes.shift_constraints import ShiftConstr
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.schedule import Schedule
-
+from model.manipulate.fill import Fill
 from model.representation.behaviour_classes.schedule_constants import total_availabilities, standard_cost
 from model.data.assign import shift_list
 
