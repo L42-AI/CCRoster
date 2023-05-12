@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from model.representation.data_objects import Employee, Availability, Shift
+from model.data.representation.data_classes import Employee, Availability, Shift
 from controller.database import download_employees, download_shifts
 from datetime import datetime, timedelta
 import json
