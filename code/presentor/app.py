@@ -46,8 +46,6 @@ def create_employee_list()-> None:
     json_formatted_employees = [x.to_dict() for x in employee_objects]
     session['employees'] = json_formatted_employees
    
-    
-
 def create_shift_list()-> None:
     '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
     _id = session['id']
