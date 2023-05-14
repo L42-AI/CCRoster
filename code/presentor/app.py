@@ -10,7 +10,10 @@ from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.availability import Availability
 from model.representation.data_classes.shift import Shift
 from model.data.database import download_employees, download_shifts
-
+from model.model import Generator
+from view.view import View
+from presentor.presentor import Scheduler
+from main_schedule import config_dev as config
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
@@ -53,7 +56,6 @@ def create_shift_list()-> None:
     json_formatted_shifts = [x.to_dict() for x in shift_objects]
     session['shifts'] = json_formatted_shifts
 
-
 @app.route('/')
 @login_required
 def index():
@@ -62,6 +64,7 @@ def index():
 
     if 'employees' not in session:
         create_employee_list()
+
     return render_template('index.html', employees=session['employees'])
 
 @app.route('/logout')
@@ -105,6 +108,8 @@ def add_employee_form():
 @app.route('/manage_shifts')
 @login_required
 def manage_shifts_page():
+    if 'shifts' not in session:
+        create_shift_list()
     return render_template('manage_shifts.html', shifts=session['shifts'])
 
 @app.route('/delete_shift', methods=['POST'])
@@ -113,7 +118,7 @@ def delete_shift():
     print(shift_id)
     
     # update shift list
-    shift_list = [shift for shift in shift_list if shift.id != shift_id]
+    session['shifts'] = [shift for shift in session['shifts'] if shift.id != shift_id]
     return jsonify({'result': 'success'}) 
 
 
@@ -126,10 +131,10 @@ def save_shift():
     # Convert the startStr and endStr into datetime.datetime objects
     start = datetime.strptime(start_str[:-6], '%Y-%m-%dT%H:%M:%S')
     end = datetime.strptime(end_str[:-6], '%Y-%m-%dT%H:%M:%S')
-    id = len(shift_list)
+    id = len(session['shifts'])
 
     # Save the shift to your database here
-    imported_shift_list.append(Shift(start, end, 1, 1))
+    session['shifts'].append(Shift(start, end, 1, 1))
 
     # Return a success response
     return jsonify({'result': 'success'})
@@ -148,7 +153,7 @@ def process_employee():
     availability = proces_availability()
     
     new_employee = Employee(fname, lname, availability, maximum, minimum, wage, level, task, location)
-    employee_list.append(new_employee)
+    session['employees'].append(new_employee)
 
     return redirect('/')
 
@@ -167,6 +172,7 @@ def proces_availability():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    ''' method to log a user in '''
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -180,3 +186,18 @@ def login():
             flash('Login unsuccessful. Please check your username and password.')
     return render_template('login.html')
 
+@app.route('/schedule')
+@login_required
+def schedule():
+    return render_template('schedule.html')
+
+@app.route('/generate_schedule', methods=['POST'])
+@login_required
+def generate_schedule():
+    ''' generate a schedule'''
+    _id = session['id']
+    S = Scheduler(Generator, View, _id)
+    print(S.get_schedule(config))
+
+    # for now do nothing with the schedule
+    return redirect(url_for('schedule'))

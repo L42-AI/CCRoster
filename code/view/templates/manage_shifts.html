@@ -91,10 +91,10 @@
             events: [
                 {% for shift in shifts %}
                 {
-                    id: '{{ shift.id }}',
+                    id: '{{ shift[id] }}',
                     title: '{{ shift }}',
-                    start: '{{ shift.start.isoformat() }}',
-                    end: '{{ shift.end.isoformat() }}',
+                    start: '{{ shift['start'].isoformat() }}',
+                    end: '{{ shift['end'].isoformat() }}',
                     className: 'shift-class',
                 },
                 {% endfor %}

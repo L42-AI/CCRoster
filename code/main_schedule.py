@@ -10,16 +10,24 @@ config = {
     'num_gens' : '20',
     'temperature' : '0.5',
 }
+config_dev = {
+    'runtype' : 'propagate',
+    'num_plants' : '100',
+    'num_gens' : '5',
+    'temperature' : '0.5',
+}
 
 import cProfile
 import pstats
 from io import StringIO
 
-def run_scheduler(session_id):
-
-    S = Scheduler(Generator, View, session_id)
-    print(S.get_schedule(config))
-
+def run_scheduler(session_id, dev=True):
+    if dev:
+        S = Scheduler(Generator, View, session_id)
+        print(S.get_schedule(config_dev))
+    else:
+        S = Scheduler(Generator, View, session_id)
+        print(S.get_schedule(config))
 
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300

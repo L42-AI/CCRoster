@@ -30,5 +30,5 @@ class Shift(Base):
         return self.id
     
     def to_dict(self) -> dict:
-        shift_dict = {'start': self.start}
+        shift_dict = {'id': self.id, 'start': self.start, 'end': self.end, 'location': self.location}
         return shift_dict

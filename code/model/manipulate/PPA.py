@@ -41,12 +41,13 @@ class PPA:
                 temperature += 0.1 if temperature < 0.5 else + 0
             print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
 
-        print(f'COST: {lowest.cost}')
-        for shift_id, employee_id in lowest.items():
+        ''' REVIEW ERROR LATER '''
+        # print(f'COST: {lowest.cost}')
+        # for shift_id, employee_id in lowest.items():
 
-            print(self.id_shift[shift_id], self.id_employee[employee_id])
-            print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
-            print("---------------")
+        #     print(self.id_shift[shift_id], self.id_employee[employee_id])
+        #     print(MalusCalc._compute_cost(winners[0].Workload, shift_id, employee_id), winners[0].Workload[employee_id])
+        #     print("---------------")
 
         return lowest
 
