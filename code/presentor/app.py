@@ -2,13 +2,15 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from model.data.representation.data_classes import Employee, Availability, Shift
-from controller.database import download_employees, download_shifts
 from datetime import datetime, timedelta
 import json
-import controller.database as database
-
 import os
+
+from model.representation.data_classes.employee import Employee
+from model.representation.data_classes.availability import Availability
+from model.representation.data_classes.shift import Shift
+from model.data.database import download_employees, download_shifts
+
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
