@@ -37,6 +37,9 @@ class User(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
+
+
+
 @login_required
 def create_employee_list():
     id = current_user.id
@@ -53,6 +56,7 @@ def create_shift_list():
 @login_required
 def index():
     employee_list = create_employee_list()
+    print(employee_list)
     return render_template('index.html', employees=employee_list)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -69,10 +73,12 @@ def register():
     return render_template('register.html')
 
 @app.route('/add_employee')
+@login_required
 def add_employee_form():
     return render_template('add_employee.html')
 
 @app.route('/manage_shifts')
+@login_required
 def manage_shifts_page():
     shift_list = download_shifts(current_user.id)
     return render_template('manage_shifts.html', shifts=shift_list)

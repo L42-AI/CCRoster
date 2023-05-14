@@ -19,10 +19,18 @@ class PPA:
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
-        self.id_employee = id_employee
-        self.id_shift = id_shift
+        self.session_id = session_id
+        self.id_employee, self.id_shift = self.id_objects()
         self.grow(TEMPERATURE)
 
+    def id_objects(self):
+        employee_list = download_employees(self.session_id)
+        shift_list = download_shifts(self.session_id)
+        id_employee = {x.id: x for x in employee_list}
+        id_shift = {x.id: x for x in shift_list}
+
+        return id_employee, id_shift
+ 
     def grow(self, temperature: float) -> None:
         winners = []
         plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
