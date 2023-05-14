@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -43,25 +43,53 @@ with app.app_context():
 
 
 @login_required
-def create_employee_list():
-    id = current_user.id
-    employee_list = download_employees(id)
+def create_employee_list()-> None:
+    _id = session['id']
+    employee_objects = download_employees(_id)
+    json_formatted_employees = [x.to_dict() for x in employee_objects]
+    session['employees'] = json_formatted_employees
+   
+    
 
-    return employee_list
-
-def create_shift_list():
+def create_shift_list()-> None:
     '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
-    pass
+    _id = session['id']
+    shift_objects = download_shifts(_id)
+    json_formatted_shifts = [x.to_dict() for x in shift_objects]
+    session['shifts'] = json_formatted_shifts
 
 
 @app.route('/')
 @login_required
 def index():
-    employee_list = create_employee_list()
-    print(employee_list)
-    return render_template('index.html', employees=employee_list)
+    if 'id' not in session:
+        session['id'] = current_user.id
 
+    if 'employees' not in session:
+        create_employee_list()
+    return render_template('index.html', employees=session['employees'])
+
+@app.route('/logout')
+@login_required
+def logout():
+    clear_session()
+    logout_user()
+    return redirect(url_for('login'))
+
+@login_required
+def clear_session():
+    if 'id' in session:
+        session.pop('id')
+    if 'shifts' in session:
+        session.pop('shifts')
+    if 'employees' in session:
+        session.pop('employees')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 @app.route('/register', methods=['GET', 'POST'])
+
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -82,8 +110,7 @@ def add_employee_form():
 @app.route('/manage_shifts')
 @login_required
 def manage_shifts_page():
-    shift_list = download_shifts(current_user.id)
-    return render_template('manage_shifts.html', shifts=shift_list)
+    return render_template('manage_shifts.html', shifts=session['shifts'])
 
 @app.route('/delete_shift', methods=['POST'])
 def delete_shift():
@@ -158,12 +185,3 @@ def login():
             flash('Login unsuccessful. Please check your username and password.')
     return render_template('login.html')
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))

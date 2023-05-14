@@ -15,30 +15,14 @@ import cProfile
 import pstats
 from io import StringIO
 
-def run(PROFILE):
-    if PROFILE:
-        pr = cProfile.Profile()
-        pr.enable()
+def run_scheduler(session_id):
 
-        S = Scheduler(Generator, View)
-        S.get_schedule(employee_list, shift_list, config)
-        
-        pr.disable()
-
-        # Create a StringIO object to store the profiling results
-        s = StringIO()
-        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-
-        # Print the results, sorted by cumulative time
-        ps.print_stats()
-        print(s.getvalue())
-    else:
-        S = Scheduler(Generator, View)
-        print(S.get_schedule(employee_list, shift_list, config))
+    S = Scheduler(Generator, View, session_id)
+    print(S.get_schedule(config))
 
 
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20
-    PROFILE = False
-    run(PROFILE)
+    session_id = 1 # DEVELOPER DATA
+    run_scheduler(session_id)

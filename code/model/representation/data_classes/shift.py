@@ -28,3 +28,7 @@ class Shift(Base):
         if self.id == -999:
             raise ValueError('No Valid ID assigned to shift')
         return self.id
+    
+    def to_dict(self) -> dict:
+        shift_dict = {'start': self.start}
+        return shift_dict

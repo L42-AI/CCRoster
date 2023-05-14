@@ -23,9 +23,9 @@
                 {% for employee in employees %}
                 
                 <tr>
-                    <td>{{ employee.first_name }} {{ employee.last_name }}</td>
-                    <td>{{ employee.level }}</td>
-                    <td>{{ employee.location }}</td>
+                    <td>{{ employee['first_name'] }} {{ employee['last_name'] }}</td>
+                    <td>{{ employee['level'] }}</td>
+                    <td>{{ employee['location'] }}</td>
                 </tr>
                 {% endfor %}
             </table>

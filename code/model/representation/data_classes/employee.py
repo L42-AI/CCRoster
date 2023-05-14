@@ -61,6 +61,15 @@ class Employee(Base):
 
         self.name = f'{first_name} {last_name}'
         self.priority = 0
+        
+    def to_dict(self)-> dict:
+        ''' app.py will use this dict to store info in the session. That info will be
+            stored on the users side in a cookie, so it can be viewed. That is why
+            I did not include wage here because it is not safe. If we later decide we need wage,
+            we should consider hashing it'''
+        
+        employee = {'first_name': self.first_name, 'last_name': self.last_name, 'level': self.level, 'location': self.location}
+        return employee
 
     def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
         availability_dict = {}

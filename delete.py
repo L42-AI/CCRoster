@@ -308,3 +308,27 @@ for day in range(3,31):
 #         # Format and print the schedule
 #         for shift_id, employee_id in schedule.items():
 #             print(id_shift[shift_id], id_employee[employee_id])
+
+
+
+'''MAIN WITH PROFILING'''
+# def run(PROFILE):
+#     if PROFILE:
+#         pr = cProfile.Profile()
+#         pr.enable()
+
+#         S = Scheduler(Generator, View, session_id)
+#         S.get_schedule(employee_list, shift_list, config)
+        
+#         pr.disable()
+
+#         # Create a StringIO object to store the profiling results
+#         s = StringIO()
+#         ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+
+#         # Print the results, sorted by cumulative time
+#         ps.print_stats()
+#         print(s.getvalue())
+#     else:
+#         S = Scheduler(Generator, View, session_id)
+#         print(S.get_schedule(employee_list, shift_list, config))
