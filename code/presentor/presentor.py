@@ -1,5 +1,5 @@
 from typing import Protocol
-from model.model import Model
+from model.model import Model, Generator
 from view.view import View
 
 class Presentor(Protocol):
@@ -29,11 +29,11 @@ class Scheduler(Presentor):
 
     def get_schedule(self, employee_list, shift_list, config):
         if config['runtype'] == 'random':
-            schedule = self.Model.create_random_schedule()
+            schedule = Generator.create_random_schedule()
         elif config['runtype'] == 'greedy':
-            schedule = self.Model.create_greedy_schedule(employee_list, shift_list)
+            schedule = Generator.create_greedy_schedule(employee_list, shift_list)
         elif config['runtype'] == 'propagate':
-            schedule = self.Model.propagate(employee_list, shift_list, **config)
+            schedule = Generator.propagate(employee_list, shift_list, **config)
         else:
             raise ValueError(f"{config['runtype']} not valid! Choose from: 'greedy', 'random' or 'propagate'")
         

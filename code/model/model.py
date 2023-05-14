@@ -31,7 +31,7 @@ class DB(Model):
     def upload(self, shift_list, employee_list):
         pass
     
-    def download(self, location_id):
+    def download(self, user_id):
         pass
 
 class Generator(Model):
