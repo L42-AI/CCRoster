@@ -19,7 +19,7 @@ class PPA:
         self.id_shift = id_shift
 
     def grow(self, temperature: float) -> None:
-        ''' this is the core of the PPA algo. If adjust plants is not activated it appears to find faster and 
+        ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
             more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
         winners = []
 
