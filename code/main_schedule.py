@@ -21,7 +21,7 @@ import cProfile
 import pstats
 from io import StringIO
 
-def run_scheduler(session_id, dev=True):
+def run_scheduler(session_id, dev=False):
     if dev:
         S = Scheduler(Generator, View, session_id)
         print(S.get_schedule(config_dev))

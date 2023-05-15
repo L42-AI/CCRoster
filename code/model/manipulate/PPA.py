@@ -19,28 +19,44 @@ class PPA:
         self.id_shift = id_shift
 
     def grow(self, temperature: float) -> None:
+        ''' this is the core of the PPA algo. If adjust plants is not activated it appears to find faster and 
+            more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
         winners = []
+
+        # generate plants
         plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS, self.standard_cost)
         lowest = plants[0]
         
+        # run the PPA
         for _ in range(self.NUMBER_OF_GENERATIONS):
             temperature = PPA.adjust_temperature(temperature)
 
+            # make mutations 
             plants_and_buds = list(chain(*[mutate(plant, temperature) for plant in plants]))
+
+            # select plants based off fitness
             plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
-            best_plant = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))[0]
-            winners.append(best_plant)
+
+            # change the number of mutations each plant gets
+            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))
+            winners.append(plants[0])            
+            plants = PPA.adjust_mutations(plants)
+
             
-            if best_plant.cost < lowest.cost:
-                lowest = best_plant
+            if winners[-1].cost < lowest.cost:
+                lowest = winners[-1]
                         
             if len(winners) > 5:
                 del winners[0]
 
+            # reheating scheme
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
             print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
-
+        print(lowest.cost)
+        print(lowest.cost)
+        print(lowest.cost)
+        print(lowest.cost)
         ''' REVIEW ERROR LATER '''
         # print(f'COST: {lowest.cost}')
         # for shift_id, employee_id in lowest.items():
@@ -56,6 +72,21 @@ class PPA:
         selected_plants = random.sample(plants, k)
         winner = min(selected_plants, key=lambda x: x.cost)
         return winner
+    
+    @staticmethod
+    def adjust_mutations(plants)-> list[Plant]:
+        ''' Fittest plants get fewer mutations, worse plants get few'''
+        lenght = len(plants)
+        for i, plant in enumerate(plants):
+            decrease = 4 - (4 * i) // lenght  # Decreasing decrease amount
+            plant.MUTATIONS = max(plant.MUTATIONS - decrease, 3)
+
+        # Reverse the list to decrease the highest scores
+        plants.reverse()  
+        for i, plant in enumerate(plants):
+            increase = 4 - (4 * i) // lenght  # Decreasing increase amount
+            plant.MUTATIONS = min(plant.MUTATIONS + increase, 20)
+        return plants
 
     @staticmethod
     def gen_plants(schedule: AbsSchedule, number_plants: int, standard_cost: float) -> list[Plant]:
