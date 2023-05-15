@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, and_
 from sqlalchemy.ext.declarative import declarative_base
-
 from model.representation.data_classes.employee import Employee, Weekly_max, Task
 from model.representation.data_classes.shift import Shift
 
@@ -33,7 +32,6 @@ def download_shifts(location_id: int) -> list[Shift]:
             Shift.start <= three_months_ahead
         )
     ).all()
-    print(shifts)
     return shifts
 
 def create_employee_availability(employee):
@@ -70,5 +68,8 @@ def upload(shift_list: list[Shift], employee_list: list[Employee]) -> None:
 
 def download(location_id: int) -> tuple[list[Shift], list[Employee]]:
     employee_list = download_employees(location_id)
+    print(employee_list)
+    [x.init_weekly_max() for x in employee_list]
+    [x.init_id() for x in employee_list]
     shift_list = download_shifts(location_id)
     return shift_list, employee_list

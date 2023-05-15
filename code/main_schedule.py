@@ -1,9 +1,12 @@
 from presentor.presentor import Presentor, Scheduler
 from model.model import Model, Generator
 from view.view import View, Viewer
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to Agg
 
-from model.data.assign import shift_list, employee_list
+import matplotlib.pyplot as plt
 
+session_id = 1
 config = {
     'runtype' : 'propagate',
     'num_plants' : '300',
@@ -22,13 +25,27 @@ import pstats
 from io import StringIO
 
 def run_scheduler(session_id, dev=False):
+    score_adjust = []
+    score_normal = []
     if dev:
         S = Scheduler(Generator, View, session_id)
         print(S.get_schedule(config_dev))
     else:
         S = Scheduler(Generator, View, session_id)
-        print(S.get_schedule(config))
-
+        for i in range(5):
+            schedule = S.get_schedule(True, config_dev)
+            score_adjust.append(schedule.cost)
+            print('done')
+        for i in range(5):
+            schedule = S.get_schedule(False, config_dev)
+            score_normal.append(schedule.cost)
+            print('done')
+        print(score_adjust)
+        plt.hist(score_adjust, alpha=0.5, label='adjust mutations', bins=10)
+        plt.hist(score_normal, alpha=0.5, label='do not adjust mutations', bins=10)
+        plt.savefig('adjust_vs_not_adjust')
+        plt.show()
+        
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20

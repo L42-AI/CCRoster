@@ -1,7 +1,6 @@
 from model.representation.data_classes.employee import Employee
 
-from model.data.assign import employee_list
-from helpers import get_weeknumber, id_employee
+from helpers import get_weeknumber, id_employee, employee_list
 
 class Workload(dict):
 

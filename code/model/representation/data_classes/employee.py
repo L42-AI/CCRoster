@@ -48,6 +48,7 @@ class Employee(Base):
     task = relationship("Task", back_populates="employee")
 
     def __init__(self, first_name: str, last_name: str, availability, maximum:dict[int, int], min_hours: int, wage: float, level: int, tasks: list[int], location: str) -> None:
+        self.id = None
         self.first_name = first_name
         self.last_name = last_name
         self.availability = availability
@@ -70,6 +71,14 @@ class Employee(Base):
         
         employee = {'first_name': self.first_name, 'last_name': self.last_name, 'level': self.level, 'location': self.location}
         return employee
+    
+    def init_id(self)-> int:
+        self.id = self.id
+    
+    def init_weekly_max(self)-> dict:
+        ''' converts the list with strings from the database into weekly_max dicts'''
+        print([x.week for x in self.weekly_maxs])
+        self.weekly_max = {x.week: x.max for x in self.weekly_maxs} # weekly_maxs is a list from the database with string info
 
     def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
         availability_dict = {}
@@ -113,3 +122,4 @@ class Employee(Base):
 
     def __str__(self) -> str:
         return f"{self.name} (ID: {self.id})"
+    

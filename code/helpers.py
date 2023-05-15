@@ -1,7 +1,8 @@
 import random
-from model.data.assign import employee_list, shift_list
+from model.data.database import download
 from model.representation.behaviour_classes.schedule_constants import total_availabilities
 
+shift_list, employee_list = download(1)
 id_employee = {employee.id: employee for employee in employee_list}
 id_shift = {shift.id: shift for shift in shift_list}
 

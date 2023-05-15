@@ -18,7 +18,7 @@ class PPA:
         self.id_employee = id_employee
         self.id_shift = id_shift
 
-    def grow(self, temperature: float) -> None:
+    def grow(self, adjust, temperature: float) -> None:
         ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
             more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
         winners = []
@@ -39,8 +39,9 @@ class PPA:
 
             # change the number of mutations each plant gets
             plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))
-            winners.append(plants[0])            
-            plants = PPA.adjust_mutations(plants)
+            winners.append(plants[0]) 
+            if adjust:           
+                plants = PPA.adjust_mutations(plants)
 
             
             if winners[-1].cost < lowest.cost:
@@ -52,11 +53,8 @@ class PPA:
             # reheating scheme
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
-            print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
-        print(lowest.cost)
-        print(lowest.cost)
-        print(lowest.cost)
-        print(lowest.cost)
+            # print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
+
         ''' REVIEW ERROR LATER '''
         # print(f'COST: {lowest.cost}')
         # for shift_id, employee_id in lowest.items():
