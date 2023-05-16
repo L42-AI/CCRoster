@@ -1,7 +1,36 @@
 from typing import Protocol
 from flask import render_template, redirect, url_for, request
 class View(Protocol):
-    def home():
+    @staticmethod
+    def home(employees_list):
+        ...    
+
+    @staticmethod
+    def schedule():
+        ...
+    
+    @staticmethod
+    def register():
+        ...
+
+    @staticmethod
+    def login():
+        ...
+    
+    @staticmethod
+    def login_correct():
+        ...
+    
+    @staticmethod
+    def add_employee():
+        ...
+    
+    @staticmethod
+    def manage_shifts(shifts):
+        ...
+
+    @staticmethod   
+    def redirect():
         ...
 
 class Viewer(View):
