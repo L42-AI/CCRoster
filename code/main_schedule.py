@@ -32,17 +32,18 @@ def run_scheduler(session_id, dev=False):
         print(S.get_schedule(config_dev))
     else:
         S = Scheduler(Generator, View, session_id)
-        for i in range(5):
+        for i in range(15):
             schedule = S.get_schedule(True, config)
             score_adjust.append(schedule.cost)
             print('done')
-        for i in range(5):
+        for i in range(15):
             schedule = S.get_schedule(False, config)
             score_normal.append(schedule.cost)
             print('done')
         print(score_adjust)
-        plt.hist(score_adjust, alpha=0.5, legend='adjust mutations', bins=10)
-        plt.hist(score_normal, alpha=0.5, legend='do not adjust mutations', bins=10)
+        plt.hist(score_adjust, alpha=0.5, label='adjust mutations', bins=10)
+        plt.hist(score_normal, alpha=0.5, label='do not adjust mutations', bins=10)
+        plt.legend(loc='upper right')
         plt.savefig('adjust_vs_not_adjust')
         plt.show()
         
