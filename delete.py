@@ -317,7 +317,7 @@ for day in range(3,31):
 #         pr = cProfile.Profile()
 #         pr.enable()
 
-#         S = Scheduler(Generator, View, session_id)
+#         S = Presenter(Generator, View, session_id)
 #         S.get_schedule(employee_list, shift_list, config)
         
 #         pr.disable()
@@ -330,5 +330,5 @@ for day in range(3,31):
 #         ps.print_stats()
 #         print(s.getvalue())
 #     else:
-#         S = Scheduler(Generator, View, session_id)
+#         S = Presenter(Generator, View, session_id)
 #         print(S.get_schedule(employee_list, shift_list, config))

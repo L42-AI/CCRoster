@@ -11,8 +11,8 @@ from model.representation.data_classes.availability import Availability
 from model.representation.data_classes.shift import Shift
 from model.data.database import download_employees, download_shifts
 from model.model import Generator
-from view.view import View
-from presentor.presentor import Scheduler
+from view.view import Viewer
+from presenter.presenter import Presenter
 from main_schedule import config_dev as config
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -42,38 +42,27 @@ class User(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
-@login_required
-def create_employee_list()-> None:
-    _id = session['id']
-    employee_objects = download_employees(_id)
-    json_formatted_employees = [x.to_dict() for x in employee_objects]
-    session['employees'] = json_formatted_employees
-   
-def create_shift_list()-> None:
-    '''Hier moeten we even over nadenken... willen we altijd alle shifts inladen? of alleen van afgelopen maand en aankomende 3 maanden bijv?'''
-    _id = session['id']
-    shift_objects = download_shifts(_id)
-    json_formatted_shifts = [x.to_dict() for x in shift_objects]
-    session['shifts'] = json_formatted_shifts
-
 @app.route('/')
 @login_required
 def index():
+    ''' this is the home page, it checks if the user has info stored already
+        and downloads it if needed'''
+    
     if 'id' not in session:
         session['id'] = current_user.id
 
     if 'employees' not in session:
-        create_employee_list()
-
-    return render_template('index.html', employees=session['employees'])
-
+        PresenterClass = Presenter(Generator, session['id'])
+        session['employees'] = PresenterClass.get_employees()
+    return Viewer.home(session['employees'])
+    
 @app.route('/logout')
 @login_required
 def logout():
     clear_session()
     logout_user()
-    return redirect(url_for('login'))
-
+    return Viewer.login()
+    
 @login_required
 def clear_session():
     if 'id' in session:
@@ -86,8 +75,8 @@ def clear_session():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-@app.route('/register', methods=['GET', 'POST'])
 
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -97,20 +86,21 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         flash('Account created successfully!')
-        return redirect(url_for('login'))
-    return render_template('register.html')
+        return Viewer.login()
+    return Viewer.register()
 
 @app.route('/add_employee')
 @login_required
 def add_employee_form():
-    return render_template('add_employee.html')
+    Viewer.add_employee()
 
 @app.route('/manage_shifts')
 @login_required
 def manage_shifts_page():
     if 'shifts' not in session:
-        create_shift_list()
-    return render_template('manage_shifts.html', shifts=session['shifts'])
+        PresenterClass = Presenter(Generator, session['id'])
+        session['shifts'] = PresenterClass.get_shifts()
+    return Viewer.manage_shifts(session['shifts'])
 
 @app.route('/delete_shift', methods=['POST'])
 def delete_shift():
@@ -149,13 +139,11 @@ def process_employee():
     level = int(request.form['level'])
     task = request.form['task']
     location = int(request.form['location'])
-
     availability = proces_availability()
-    
     new_employee = Employee(fname, lname, availability, maximum, minimum, wage, level, task, location)
     session['employees'].append(new_employee)
 
-    return redirect('/')
+    return Viewer.redirect()
 
 @app.route('/add_availability/')
 def proces_availability():
@@ -180,24 +168,23 @@ def login():
 
         if user and check_password_hash(user.password_hash, password):
             login_user(user, remember=True)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+            return Viewer.login_correct()
         else:
             flash('Login unsuccessful. Please check your username and password.')
-    return render_template('login.html')
+    return Viewer.login()
 
 @app.route('/schedule')
 @login_required
 def schedule():
-    return render_template('schedule.html')
+    return Viewer.schedule()
 
 @app.route('/generate_schedule', methods=['POST'])
 @login_required
 def generate_schedule():
     ''' generate a schedule'''
-    _id = session['id']
-    S = Scheduler(Generator, View, _id)
-    print(S.get_schedule(config))
+    PresenterClass = Presenter(Generator, session['id'])
+    PresenterClass.get_schedule(config) # HARDCODED CONFIG SETTINGS
 
     # for now do nothing with the schedule
-    return redirect(url_for('schedule'))
+    return Viewer.schedule()
+

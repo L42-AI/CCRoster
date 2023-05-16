@@ -1,4 +1,4 @@
-from presentor.presentor import Presentor, Scheduler
+from presenter.presenter import Presenter
 from model.model import Model, Generator
 from view.view import View, Viewer
 import matplotlib
@@ -24,20 +24,20 @@ import cProfile
 import pstats
 from io import StringIO
 
-def run_scheduler(session_id, dev=False):
+def run_Presenter(session_id, dev=False):
     score_adjust = []
     score_normal = []
     if dev:
-        S = Scheduler(Generator, View, session_id)
+        S = Presenter(Generator, View, session_id)
         print(S.get_schedule(config_dev))
     else:
-        S = Scheduler(Generator, View, session_id)
+        S = Presenter(Generator, View, session_id)
         for i in range(15):
-            schedule = S.get_schedule(True, config)
+            schedule = S.get_schedule(config)
             score_adjust.append(schedule.cost)
             print('done')
         for i in range(15):
-            schedule = S.get_schedule(False, config)
+            schedule = S.get_schedule(config)
             score_normal.append(schedule.cost)
             print('done')
         print(score_adjust)
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20
     session_id = 1 # DEVELOPER DATA
-    run_scheduler(session_id)
+    run_Presenter(session_id)

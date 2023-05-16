@@ -6,7 +6,7 @@ from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.schedule import AbsSchedule, Plant
 from model.representation.behaviour_classes.shift_constraints import Shiftconstraints
 from model.manipulate.mutate import Mutate
-from presentor.helpers import recursive_copy
+from presenter.helpers import recursive_copy
 
 class PPA:
     def __init__(self, start_schedule: AbsSchedule, **kwargs) -> None:
@@ -21,7 +21,7 @@ class PPA:
         self.mutate = Mutate(kwargs['employees'], kwargs['shifts'], self.standard_cost, self.shiftconstraints)        
         self.kwargs = kwargs
 
-    def grow(self, adjust) -> None:
+    def grow(self) -> None:
         ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
             more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
         winners = []
@@ -44,8 +44,7 @@ class PPA:
             # change the number of mutations each plant gets
             plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))
             winners.append(plants[0]) 
-            if adjust:           
-                plants = PPA.adjust_mutations(plants)
+            plants = PPA.adjust_mutations(plants)
 
             
             if winners[-1].cost < lowest.cost:

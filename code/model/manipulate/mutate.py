@@ -8,7 +8,7 @@ from model.representation.data_classes.schedule import AbsSchedule, Plant
 from model.manipulate.fill import Fill
 from model.representation.behaviour_classes.shift_constraints import Shiftconstraints
 
-from presentor.helpers import recursive_copy
+from presenter.helpers import recursive_copy
 
 """ MUTATE """
 class Mutate(Fill):

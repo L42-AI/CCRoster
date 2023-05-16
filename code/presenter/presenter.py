@@ -9,7 +9,7 @@ from model.data.database import download
 
 
 
-class Presentor(Protocol):
+class BasePresenter(Protocol):
     def get_schedule():
         ...
     
@@ -28,28 +28,34 @@ class Presentor(Protocol):
     def display_employees():
         ...
 
-class Scheduler(Presentor):
-
-    def __init__(self, Model: Model, View: View, session_id: int) -> None:
+class Presenter(BasePresenter):
+    ''' Handles traffic between Viewer and Model. Now always downloads employees and shifts
+        when initialised, that should perheaps be changed in a later stage (let the methods receive
+        a session_id so they can download themself?)'''
+    def __init__(self, Model: Model, session_id: int) -> None:
         self.Model = Model
-        self.View = View
         self.shift_list, self.employee_list = download(session_id)
 
 
-    def get_schedule(self, adjust_, config):
-        config['employees'] = self.employee_list
+    def get_schedule(self, config):
+        config['employees']  = self.employee_list
         config['shifts'] = self.shift_list
         if config['runtype'] == 'random':
             schedule = Generator.create_random_schedule()
         elif config['runtype'] == 'greedy':
             schedule = Generator.create_greedy_schedule(self.employee_list, self.shift_list)
         elif config['runtype'] == 'propagate':
-            schedule = Generator.propagate(self.employee_list, self.shift_list, adjust=adjust_, **config)
+            schedule = Generator.propagate(self.employee_list, self.shift_list, **config)
         else:
             raise ValueError(f"{config['runtype']} not valid! Choose from: 'greedy', 'random' or 'propagate'")
         
         return schedule
     
+    def get_employees(self):
+        return self.employee_list
+    
+    def get_shifts(self):
+        return self.shift_list
     
     
 

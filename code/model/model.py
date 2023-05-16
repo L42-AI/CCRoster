@@ -44,7 +44,7 @@ class Generator(Model):
     def create_greedy_schedule(employee_list: list[Employee], shift_list: list[Shift]):
         return Greedy.fill(employee_list, shift_list, Schedule(Workload(), CurrentAvailabilities()))
 
-    def propagate(employee_list: list[Employee], shift_list: list[Shift], adjust=False, **kwargs):
+    def propagate(employee_list: list[Employee], shift_list: list[Shift], **kwargs):
 
         # create a shift constraints instance that will be used by PPA and Fill
         shift_constraints = Shiftconstraints(kwargs['shifts'], kwargs['employees'])
@@ -55,7 +55,7 @@ class Generator(Model):
         schedule = FillClass.fill(AbsSchedule(Workload(shift_list, employee_list)))
 
         P = PPA(schedule, **kwargs)
-        schedule = P.grow(adjust)
+        schedule = P.grow()
 
         return schedule
     
