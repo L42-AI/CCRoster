@@ -24,6 +24,9 @@ class Shift(Base):
         end_time = self.end.strftime("%m-%d %H:%M")
         return f"Task {self.task}, {start_time} - {end_time}"
     
+    def db_to_instance(self):
+        self.duration = (self.end - self.start).total_seconds() / 3600
+    
     def get_id(self) -> int:
         if self.id == -999:
             raise ValueError('No Valid ID assigned to shift')

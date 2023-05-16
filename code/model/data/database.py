@@ -15,10 +15,16 @@ Base.metadata.create_all(engine)
 session = Session(engine)
 
 def download_employees(location_id: int) -> list[Employee]:
+    print('step 1')
     employees = session.query(Employee).filter(Employee.location == location_id).all()
+    print('step 2')
+
+    [x.db_to_instance() for x in employees]
+
     return employees
 
 def download_shifts(location_id: int) -> list[Shift]:
+    print('step 3')
     # Calculate the date range
     now = datetime.now()
     two_months_ago = now - timedelta(days=60)
@@ -32,6 +38,8 @@ def download_shifts(location_id: int) -> list[Shift]:
             Shift.start <= three_months_ahead
         )
     ).all()
+    [x.db_to_instance() for x in shifts]
+    print('step 4')
     return shifts
 
 def create_employee_availability(employee):
@@ -68,8 +76,5 @@ def upload(shift_list: list[Shift], employee_list: list[Employee]) -> None:
 
 def download(location_id: int) -> tuple[list[Shift], list[Employee]]:
     employee_list = download_employees(location_id)
-    print(employee_list)
-    [x.init_weekly_max() for x in employee_list]
-    [x.init_id() for x in employee_list]
     shift_list = download_shifts(location_id)
     return shift_list, employee_list

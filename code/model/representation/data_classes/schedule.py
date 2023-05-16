@@ -6,17 +6,16 @@ from sqlalchemy import Column, Integer, DateTime
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.setup import Base
-from model.data.assign import shift_list
+
 
 class AbsSchedule(dict):
     def __init__(self, Workload: Workload, set_schedule: dict[int, int] = None):
         self.Workload = Workload
-
         if set_schedule is not None:
             for shift_id in set_schedule:
                 self[shift_id] = set_schedule[shift_id]
         else:
-            for shift in shift_list:
+            for shift in self.Workload.shift_list:
                 self[shift.id] = None
 
 class Schedule(AbsSchedule):

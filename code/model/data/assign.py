@@ -1,10 +1,9 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from model.representation.data_classes.availability import Availability
-from model.representation.data_classes.employee import Employee, Weekly_max, Task
+from model.representation.data_classes.employee import Employee, Availability, Weekly_max, Task
 from model.representation.data_classes.shift import Shift
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 database_url = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'
@@ -29,10 +28,12 @@ def create_employee_weekly_max(employee):
 def create_employee_tasks(employee):
     for task in employee.tasks:
         tsk = Task(employee_id=employee.id, task=task)
+        tsk.employee = employee
         session.add(tsk)
 
-employee_list: list[Employee] = []
-shift_list: list[Shift] = []
+
+employee_list = []
+shift_list = []
 
 employee_list.append(Employee('Emma', 'Deckers', [Availability(start=datetime(2023, 4,29,0), end=datetime(2023, 4,29,23,59)),
                                                   Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
@@ -141,11 +142,7 @@ for day in range(4,6):
                          end=datetime(2023, 5, day, 18, 0),
                          task=1, location=1))
 
-for id_, employee in enumerate(employee_list):
-    employee.id = id_
-    
-for id_, shift in enumerate(shift_list):
-    shift.id = id_
+
 for emp in employee_list:
     session.add(emp)
     create_employee_tasks(emp)
@@ -153,7 +150,7 @@ for emp in employee_list:
     create_employee_weekly_max(emp)
 
 
-# for shift in shift_list:
-#     session.add(shift)
+for shift in shift_list:
+    session.add(shift)
 session.commit()
 session.close()

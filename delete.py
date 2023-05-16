@@ -130,7 +130,7 @@ for day in range(3,31):
 # import random
 # import copy
 # import math
-# from representation.shift_constraints import ShiftConstrains
+# from representation.shift_constraints import Shiftconstraints
 # from representation.malus_calc import MalusCalc
 # from representation.workload import Workload
 # from representation.schedule import Schedule
@@ -148,7 +148,7 @@ for day in range(3,31):
 #         self.id_employee = id_employee
 #         self.id_shift = id_shift
 
-#         self.ShiftConstrains = ShiftConstrains()
+#         self.Shiftconstraints = Shiftconstraints()
 #         self.Workload = Workload()
 #         self.standard_cost = MalusCalc.standard_cost(self.employees)
 
@@ -201,7 +201,7 @@ for day in range(3,31):
 #         # check if new worker wants to work additional shift, if not, use mutate_max
 #         if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
 
-#             if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
+#             if Shiftconstraints.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
 #                 self.schedule_swap(replace_shift_id, replace_employee_id, schedule)
 #                 buds = self.accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id, skip_shift_id=replace_shift_id)            
                 
@@ -265,7 +265,7 @@ for day in range(3,31):
 
 #         # check if worker that will take over the shift, still wants to work additional shift
 #         if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
-#             if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
+#             if Shiftconstraints.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
 
 #                 self.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
 

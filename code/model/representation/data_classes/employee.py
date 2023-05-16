@@ -52,7 +52,6 @@ class Employee(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.availability = availability
-        self.availability_dict = self.sort_availability(availability)
         self.wage = wage
         self.weekly_max = maximum
         self.min_hours = min_hours
@@ -62,6 +61,7 @@ class Employee(Base):
 
         self.name = f'{first_name} {last_name}'
         self.priority = 0
+        self.init_availability(self.availability)
         
     def to_dict(self)-> dict:
         ''' app.py will use this dict to store info in the session. That info will be
@@ -72,15 +72,20 @@ class Employee(Base):
         employee = {'first_name': self.first_name, 'last_name': self.last_name, 'level': self.level, 'location': self.location}
         return employee
     
+    def db_to_instance(self):
+        self.init_id()
+        self.init_availability(self.availability)
+        self.init_weekly_max()
+        self.init_tasks()
+    
     def init_id(self)-> int:
         self.id = self.id
     
     def init_weekly_max(self)-> dict:
         ''' converts the list with strings from the database into weekly_max dicts'''
-        print([x.week for x in self.weekly_maxs])
         self.weekly_max = {x.week: x.max for x in self.weekly_maxs} # weekly_maxs is a list from the database with string info
 
-    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+    def init_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
         availability_dict = {}
         
         for availability in av:
@@ -90,8 +95,11 @@ class Employee(Base):
                 availability_dict[weeknum] = []
 
             availability_dict[weeknum].append(availability)
-        return availability_dict
-    
+        self.availability_dict = availability_dict
+
+    def init_tasks(self):
+        self.tasks = self.task
+
     """ Get """
     def get_name(self) -> str:
         return self.name

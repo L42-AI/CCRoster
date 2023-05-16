@@ -2,9 +2,11 @@ from typing import Protocol
 
 from model.representation.data_classes.schedule import AbsSchedule, Schedule
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.employee import Employee
+from model.representation.data_classes.employee import Employee, Availability
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
+from model.representation.behaviour_classes.malus_calc import MalusCalc
+from model.representation.behaviour_classes.shift_constraints import Shiftconstraints
 
 from model.manipulate.fill import Fill, Greedy
 from model.manipulate.PPA import PPA
@@ -43,8 +45,18 @@ class Generator(Model):
         return Greedy.fill(employee_list, shift_list, Schedule(Workload(), CurrentAvailabilities()))
 
     def propagate(employee_list: list[Employee], shift_list: list[Shift], adjust=False, **kwargs):
-        schedule = Fill.fill(AbsSchedule(Workload()))
-        # schedule = Greedy.fill(employee_list, shift_list, Schedule(Workload(), CurrentAvailabilities()))
-        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']))
-        schedule = P.grow(adjust, float(kwargs['temperature']))
+
+        # create a shift constraints instance that will be used by PPA and Fill
+        shift_constraints = Shiftconstraints(kwargs['shifts'], kwargs['employees'])
+        kwargs['shiftconstraints'] = shift_constraints
+
+        # create Fill
+        FillClass = Fill(shift_constraints)
+        schedule = FillClass.fill(AbsSchedule(Workload(shift_list, employee_list)))
+
+        P = PPA(schedule, **kwargs)
+        schedule = P.grow(adjust)
+
         return schedule
+    
+
