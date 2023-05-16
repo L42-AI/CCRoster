@@ -1,0 +1,121 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Add Employee</h1>
+    <form action="{{ url_for('process_employee') }}" method="POST">
+        <div class="form-group">
+            <input type="text" name="fname" class="form-control" placeholder="First Name" required>
+        </div>
+        <div class="form-group">
+            <input type="text" name="lname" class="form-control" placeholder="Last Name" required>
+        </div>
+        <div class="form-group">
+            <label for="maximum">Maximum Hours:</label>
+            <input type="number" id="maximum" name="maximum" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="minimum">Minimum Hours:</label>
+            <input type="number" id="minimum" name="minimum" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="wage">Wage:</label>
+            <input type="number" step="0.01" id="wage" name="wage" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="level">Level:</label>
+            <input type="number" id="level" name="level" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="task">Task:</label>
+            <input type="text" id="task" name="task" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="number" id="location" name="location" class="form-control" required>
+        </div>
+
+        <h1>Manage Availabilities</h1>
+        <button id="closeBtn" type="button" class="btn btn-secondary" style="display:none;">Close</button>
+        <div class="calendar-container">
+            <div id="calendar"></div>
+            <div class="grid-overlay"></div>
+            <div class="grid-cells"></div>
+        </div>
+        <input type="hidden" id="availability" name="availability">
+        <button type="submit" class="btn btn-primary">Add Employee</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var singleClickTimer;
+
+    const doubleClickDelay = 300;
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
+        selectMirror: true,
+        events: [],
+        dateClick: function(info) {
+            if (singleClickTimer) {
+                clearTimeout(singleClickTimer);
+                singleClickTimer = null;
+
+                // Handle double-click event
+                const defaultStartTimeMonthGrid = 'T00:00:00+02:00';
+                const defaultEndTimeMonthGrid = 'T23:59:59+02:00';
+
+                var eventData = {
+                    start: info.dateStr + defaultStartTimeMonthGrid,
+                    end: info.dateStr + defaultEndTimeMonthGrid,
+                };
+                calendar.addEvent(eventData);
+                var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
+                availabilityData.push(eventData);
+                document.getElementById('availability').value = JSON.stringify(availabilityData);
+            } else {
+                singleClickTimer = setTimeout(function() {
+                    singleClickTimer = null;
+
+                    // Handle single-click event
+                    calendar.changeView('timeGridDay', info.date);
+                    document.getElementById('closeBtn').style.display = 'inline-block';
+
+                    if (calendar.view.type === 'timeGridDay') {
+                        calendar.setOption('select', function(info) {
+                            const defaultStartTimeDayGrid = 'T00:00:00+02:00';
+                            const defaultEndTimeDayGrid = 'T00:00:00+02:00';
+                            var eventData = {
+                                start: info.startStr.includes('T') ? info.startStr : info.startStr + defaultStartTimeDayGrid,
+                                end: info.endStr.includes('T') ? info.endStr : info.endStr + defaultEndTimeDayGrid,
+                            };
+                            calendar.addEvent(eventData);
+
+                            // Save the availability data to the hidden input field
+                            var availabilityData = JSON.parse(document.getElementById('availability').value || '[]');
+                            availabilityData.push(eventData);
+                            document.getElementById('availability').value = JSON.stringify(availabilityData);
+
+                            calendar.unselect();
+                        });
+                    }
+                }, doubleClickDelay);
+            }
+        },
+    });
+
+    calendar.render();
+
+    var closeBtn = document.getElementById('closeBtn');
+    closeBtn.addEventListener('click', function() {
+        calendar.changeView('dayGridMonth');
+        closeBtn.style.display = 'none';
+    });
+});
+
+</script>
+{% endblock %}
