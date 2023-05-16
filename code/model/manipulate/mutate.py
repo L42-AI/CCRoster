@@ -27,16 +27,15 @@ class Mutate(Fill):
         '''
 
         # buds will be the mutated schedules
-        buds = []
+        buds = [schedule,]
         old_cost = schedule.cost
-        for i in range(100):
-            if len(buds) > 9:
-                continue
-            
+
+        for _ in range(schedule.MUTATIONS):
             # copy the original schedule
             bud_schedule = Plant(Workload(schedule.Workload.shift_list, schedule.Workload.employee_list, recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
-            for _ in range(schedule.MUTATIONS):
-                buds = self.modification(buds, bud_schedule, T)
+            buds = self.modification(buds, bud_schedule, T)
+        if buds[0] == None:
+            print('None!')
         return buds
 
     def modification(self, buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
@@ -75,7 +74,8 @@ class Mutate(Fill):
             bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
         else:
-            bud_schedule.cost = MalusCalc.compute_cost(self.standard_cost, bud_schedule)
+            accept_ch = True # DEBUGGING
+            bud_schedule.cost = MalusCalc.compute_cost(self.standard_cost, bud_schedule, accept_ch)
         
         # store the costs in bud_schedule
 

@@ -1,20 +1,27 @@
-# list1 = [(None, None) for _ in range(1000)]
+import csv
 
-# print(list1)
+# Define your lists
+list1 = [1, 2, 3, 4, 5]
+list2 = ['a', 'b', 'c', 'd', 'e']
+list3 = [True, False, True, False, True]
 
+# Create a list of tuples containing the name and values of each list
+lists = [('List 1', list1), ('List 2', list2), ('List 3', list3)]
 
+# Specify the output CSV file path
+output_file = 'output.csv'
 
-# """Mijn versie"""
-# cost = hourly * wage
+# Open the CSV file in write mode
+with open(output_file, 'w', newline='') as file:
+    writer = csv.writer(file)
 
-# """"Jou versie""""
-# cost = __get_cost(hours, wage)
+    # Write the header row
+    header_row = ['List Name', 'Values']
+    writer.writerow(header_row)
 
-# def __get_cost(hours, wage):
-#     return hours * wage
+    # Write the data rows
+    for name, values in lists:
+        data_row = [name] + values
+        writer.writerow(data_row)
 
-from datetime import datetime, timedelta
-
-date1 = datetime(2023, 1, 3, 7, 30)
-date2 = datetime(2023, 1, 3, 7, 45)
-print((date2 - date1))
+print('CSV export completed!')

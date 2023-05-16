@@ -332,3 +332,26 @@ for day in range(3,31):
 #     else:
 #         S = Presenter(Generator, View, session_id)
 #         print(S.get_schedule(employee_list, shift_list, config))
+
+''' OLD COST METHOD FROM MALUSCALC?'''
+@staticmethod
+    def _compute_cost(workload: Workload, shift_id: int, employee_id: int, skip_shift_id=None) -> float:
+        """
+        returns the total pay using the wage and shift in hours. Also takes into account that if an employee has a
+        a guaranteed working hours, those hours are 'free'
+        """
+
+        employee_obj = workload.id_employee[employee_id]
+        weeknumber = get_weeknumber(shift_id)
+        minimal_hours = employee_obj.get_minimal_hours()
+        hours = workload.id_shift[shift_id].duration
+        wage = employee_obj.get_wage()
+
+        # check if employee has obligated contract hours left
+        total_scheduled_duration = sum(workload.id_shift[x].duration for x in workload[weeknumber] if x != skip_shift_id)
+        remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) > 0 else 0
+
+        # subtract those hours, which are part of generator.standard_cost, from working hours to avoid double counting
+        billable_hours = hours - remaining_min_hours if hours - remaining_min_hours > 0 else 0
+
+        return wage * billable_hours # Multiply duration with hourly wage to get total pay

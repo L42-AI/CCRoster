@@ -31,7 +31,7 @@ class Plant(AbsSchedule):
         self.fitness: float = None
         self.p: float = None
         self.BUDS = 10 # number of buds this plant can have
-        self.MUTATIONS = random.randint(1, 5)
+        self.MUTATIONS = random.randint(3, 20)
 
 class UploadSchedule(Base):
     __tablename__ = 'schedules'

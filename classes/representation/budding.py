@@ -279,7 +279,6 @@ class Generator:
                         break
                     
             winner = sorted(plants, key= lambda x: x.cost)[0]
-            print(winner.cost)
 
             
 

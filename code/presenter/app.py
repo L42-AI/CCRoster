@@ -105,7 +105,6 @@ def manage_shifts_page():
 @app.route('/delete_shift', methods=['POST'])
 def delete_shift():
     shift_id = id
-    print(shift_id)
     
     # update shift list
     session['shifts'] = [shift for shift in session['shifts'] if shift.id != shift_id]
