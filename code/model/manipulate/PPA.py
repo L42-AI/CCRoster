@@ -54,7 +54,7 @@ class PPA:
                         
             if len(winners) > 5:
                 del winners[0]
-
+            print(lowest.cost)
             # reheating scheme
             if all(x == winners[0] for x in winners):
                 self.temperature += 0.1 if self.temperature < 0.5 else + 0

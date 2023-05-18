@@ -83,7 +83,8 @@ class Employee(Base):
     
     def init_weekly_max(self)-> dict:
         ''' converts the list with strings from the database into weekly_max dicts'''
-        self.weekly_max = {x.week: x.max for x in self.weekly_maxs} # weekly_maxs is a list from the database with string info
+        self.weekly_max = {x.week: x.max for x in self.weekly_maxs}
+        print(self.weekly_max) # weekly_maxs is a list from the database with string info
 
     def init_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
         availability_dict = {}

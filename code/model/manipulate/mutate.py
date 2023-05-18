@@ -6,7 +6,6 @@ from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.schedule import AbsSchedule, Plant
 from model.manipulate.fill import Fill
-from model.representation.behaviour_classes.shift_constraints import Shiftconstraints
 
 from presenter.helpers import recursive_copy
 
@@ -39,7 +38,7 @@ class Mutate(Fill):
         return buds
 
     def modification(self, buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
-        # find a modification            
+        # find a modification
         replace_shift_id = self.get_random_shift(schedule.Workload.shift_list)
         current_employee_id = schedule[replace_shift_id]
         replace_employee_id = self.get_random_employee(replace_shift_id, current_employee_id)
@@ -51,14 +50,56 @@ class Mutate(Fill):
             if self.shift_constraints.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
                 Fill.schedule_swap(replace_shift_id, replace_employee_id, schedule)
                 buds = self.accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id)            
-                
+
             return buds
+
         else: # if worker does not want an additional shift, have someone else work on of the worker's shift
-            schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
+            # print('mutatemax')
+            # print(schedule)
+            # print(replace_shift_id, replace_employee_id)
+            success = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
+            if success:
+                # Schedule the original worker for the new shift since we freed up their capacity
+                if self.shift_constraints.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
+                    Fill.schedule_swap(replace_shift_id, replace_employee_id, schedule)
+                    buds = self.accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id)            
+                    # print('succes')
+                    # print(schedule)
+                    # print()
+
             buds = self.accept_change(schedule, old_cost, buds, T)
-            ''' DOES THE ORIGINAL WORKER EVEN GET SCHEDULED IN THIS SCENARIO??'''
             return buds
-    
+
+    def mutate_max_workload(self, shift_to_replace_id: int, possible_employee_id: int, schedule: Plant) -> tuple((bool, list[tuple[int, int]])):
+        # get the shortest shift the busy person is working
+        shifts_busy_person = [x for x in schedule if schedule[x] == possible_employee_id]
+        if len(shifts_busy_person) == 0:
+            return False, schedule
+        shortest_shift_id = sorted(shifts_busy_person, key=lambda x: schedule.Workload.id_shift[x].duration)[0]
+
+        # make sure we do not get stuck in recursive loop
+        if shift_to_replace_id == shortest_shift_id:
+            return False, schedule
+
+        # pick new employee to work the shortest shift
+        shortest_shift_employee_id = self.get_random_employee(shortest_shift_id, possible_employee_id)
+
+        # check if worker that will take over the shift, still wants to work additional shift
+        if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
+            if self.shift_constraints.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
+                self.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
+                return True, schedule
+
+        # find replacement for the replacement worker
+        else: 
+            success, schedule = self.mutate_max_workload(shortest_shift_id, shortest_shift_employee_id, schedule)
+            if success:
+ 
+                return True, schedule
+        return False, schedule
+
+
+
     def accept_change(self, bud_schedule: Plant, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
         ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
             and a simulated annealing probability'''
@@ -96,35 +137,6 @@ class Mutate(Fill):
         return buds
     
     
-    def mutate_max_workload(self, shift_to_replace_id: int, possible_employee_id: int, schedule: Plant) -> list[tuple[int, int]]:
-        '''
-        Method gets called when mutate wants to schedule a worker for a shift but the worker is already
-        working his/hers max. This method will replace one of his/her shifts to check if that will be cheaper
-        '''
-
-        # get the shortest shift the busy person is working
-        shifts_busy_person = [x for x in schedule if schedule[x] == possible_employee_id]
-        if len(shifts_busy_person) == 0:
-            return schedule
-        shortest_shift_id = sorted(shifts_busy_person, key=lambda x: schedule.Workload.id_shift[x].duration)[0]
-
-        # make sure we do not get stuck in recursive loop
-        if shift_to_replace_id == shortest_shift_id:
-            return schedule
-
-        # pick new employee to work the shortest shift
-        shortest_shift_employee_id = self.get_random_employee(shortest_shift_id, possible_employee_id)
-
-        # check if worker that will take over the shift, still wants to work additional shift
-        if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
-            if self.shift_constraints.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
-
-                self.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
-
-        # find replacement for the replacement worker
-        else: 
-            self.mutate_max_workload(shortest_shift_id, shortest_shift_employee_id, schedule)
-        return schedule
 
     """ Helper methods """
 

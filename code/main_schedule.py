@@ -8,42 +8,42 @@ import matplotlib.pyplot as plt
 import csv
 session_id = 1
 configurations = [
-    # {
-    #     'runtype': 'propagate',
-    #     'num_plants': '100',
-    #     'num_gens': '60',
-    #     'temperature': '0.5',
-    # },
-    #  {
-    #     'runtype': 'propagate',
-    #     'num_plants': '100',
-    #     'num_gens': '40',
-    #     'temperature': '0.5',
-    # },
-    #  {
-    #     'runtype': 'propagate',
-    #     'num_plants': '100',
-    #     'num_gens': '30',
-    #     'temperature': '0.5',
-    # },
-    # {
-    #     'runtype': 'propagate',
-    #     'num_plants': '200',
-    #     'num_gens': '60',
-    #     'temperature': '0.5',
-    # },
-    # {
-    #     'runtype': 'propagate',
-    #     'num_plants': '200',
-    #     'num_gens': '40',
-    #     'temperature': '0.5',
-    # },
-    # {
-    #     'runtype': 'propagate',
-    #     'num_plants': '200',
-    #     'num_gens': '60',
-    #     'temperature': '0.9',
-    # } ''' '''
+    {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+     {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '100',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '30',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '60',
+        'temperature': '0.9',
+    }, 
     {
         'runtype': 'propagate',
         'num_plants': '300',
@@ -137,10 +137,10 @@ def run_once(session_id, dev=False):
         print(presenter.get_schedule(config_dev))
     else:
         presenter= Presenter(Generator, session_id)
-        print(presenter.get_schedule(config))
+        print(presenter.get_schedule(configurations[1]))
 
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20
     session_id = 1 # DEVELOPER DATA
-    plot_results(session_id)
+    run_once(session_id)

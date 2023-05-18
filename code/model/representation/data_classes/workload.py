@@ -38,7 +38,6 @@ class Workload(dict):
         if employee_obj.get_week_max(weeknumber) > (len(self[employee_id][weeknumber])):
             return True
         else:
-            # if the person will not take on the shift, delete it from the workload
             return False
 
     def update(self, shift_id: int, employee_id: int, add=False) -> None:
