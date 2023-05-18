@@ -56,7 +56,6 @@ class Mutate(Fill):
         else: # if worker does not want an additional shift, have someone else work on of the worker's shift
             schedule = self.mutate_max_workload(replace_shift_id, replace_employee_id, schedule) 
             buds = self.accept_change(schedule, old_cost, buds, T)
-            ''' DOES THE ORIGINAL WORKER EVEN GET SCHEDULED IN THIS SCENARIO??'''
             return buds
     
     def accept_change(self, bud_schedule: Plant, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
