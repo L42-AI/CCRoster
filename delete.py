@@ -355,3 +355,85 @@ for day in range(3,31):
         billable_hours = hours - remaining_min_hours if hours - remaining_min_hours > 0 else 0
 
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
+
+''' CONFIGURATIONS! REMEMBER ORDER TO FIND BEST SETTING:'''
+configurations = [
+    {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+     {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+     {
+        'runtype': 'propagate',
+        'num_plants': '100',
+        'num_gens': '30',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '200',
+        'num_gens': '60',
+        'temperature': '0.9',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '60',
+        'temperature': '0.9',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '30',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '400',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '400',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '400',
+        'num_gens': '20',
+        'temperature': '0.5',
+    }
+]

@@ -8,63 +8,63 @@ import matplotlib.pyplot as plt
 import csv
 session_id = 1
 configurations = [
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '60',
+    #     'temperature': '0.5',
+    # },
+    #  {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '40',
+    #     'temperature': '0.5',
+    # },
+    #  {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '30',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '60',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '40',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '60',
+    #     'temperature': '0.9',
+    # } ''' '''
     {
         'runtype': 'propagate',
-        'num_plants': '100',
+        'num_plants': '300',
         'num_gens': '60',
         'temperature': '0.5',
     },
-     {
-        'runtype': 'propagate',
-        'num_plants': '100',
-        'num_gens': '40',
-        'temperature': '0.5',
-    },
-     {
-        'runtype': 'propagate',
-        'num_plants': '100',
-        'num_gens': '30',
-        'temperature': '0.5',
-    },
     {
         'runtype': 'propagate',
-        'num_plants': '200',
-        'num_gens': '60',
-        'temperature': '0.5',
-    },
-    {
-        'runtype': 'propagate',
-        'num_plants': '200',
+        'num_plants': '300',
         'num_gens': '40',
         'temperature': '0.5',
     },
     {
         'runtype': 'propagate',
-        'num_plants': '200',
+        'num_plants': '300',
         'num_gens': '60',
         'temperature': '0.9',
     },
     {
         'runtype': 'propagate',
         'num_plants': '300',
-        'num_gens': '60',
-        'temperature': '0.5',
-    },
-    {
-        'runtype': 'propagate',
-        'num_plants': '300',
-        'num_gens': '40',
-        'temperature': '0.5',
-    },
-    {
-        'runtype': 'propagate',
-        'num_plants': '300',
-        'num_gens': '60',
-        'temperature': '0.9',
-    },
-    {
-        'runtype': 'propagate',
-        'num_plants': '300',
         'num_gens': '30',
         'temperature': '0.5',
     },
@@ -78,14 +78,14 @@ configurations = [
         'runtype': 'propagate',
         'num_plants': '400',
         'num_gens': '40',
-        'temperature': '0.5',
-    },
-    {
-        'runtype': 'propagate',
-        'num_plants': '400',
-        'num_gens': '20',
         'temperature': '0.5',
     }
+#     # { # this one always gets stuck somehow..
+#     #     'runtype': 'propagate',
+#     #     'num_plants': '400',
+#     #     'num_gens': '20',
+#     #     'temperature': '0.5',
+#     # }
 ]
 
 
@@ -112,8 +112,8 @@ def plot_results(session_id, dev=False):
             schedule = presenter.get_schedule(config)
             scores.append(schedule.cost)
         
-        ax.hist(scores, alpha=0.4, label=f'PPA config{i+1}', bins=10)
-        data.extend([(f'PPA config{i+1}', score) for score in scores])
+        ax.hist(scores, alpha=0.4, label=f'PPA config{i+7}', bins=10)
+        data.extend([(f'PPA config{i+7}', score) for score in scores])
 
     ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.xlabel('Cost')
@@ -124,7 +124,7 @@ def plot_results(session_id, dev=False):
 
     # Store data in a CSV file
     output_file = 'PPA_results.csv'
-    with open(output_file, 'w', newline='') as file:
+    with open(output_file, 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Configuration', 'Cost'])
         writer.writerows(data)
