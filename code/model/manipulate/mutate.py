@@ -123,7 +123,7 @@ class Mutate(Fill):
         new_cost = bud_schedule.cost
 
         # if cost lower, do not make math calculation
-        if new_cost < old_cost:
+        if new_cost <= old_cost:
             buds.append(bud_schedule)
             return buds
         
