@@ -85,8 +85,6 @@ class Fill:
         """
 
         shift_id = random.choice(shift_list).id
-        while len(self.shift_constraints.total_availabilities[shift_id]) < 2:
-            shift_id = random.choice(shift_list).id
         return shift_id
 
     def get_random_employee(self, shift_id: int, existing_employee: int = None) -> int:

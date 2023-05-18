@@ -29,7 +29,7 @@ class PPA:
         # generate plants
         plants = self.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS, self.standard_cost)
         lowest = plants[0]
-        print(lowest.cost)
+        # print(lowest.cost)
         
         # run the PPA
         for _ in range(self.NUMBER_OF_GENERATIONS):
@@ -38,11 +38,13 @@ class PPA:
             # make mutations 
             plants_and_buds = list(chain(*[self.mutate.mutate(plant, self.temperature) for plant in plants]))
 
-            # select plants based off fitness
-            plants = [PPA.tournament_selection(plants_and_buds, self.temperature) for _ in range(self.NUMBER_OF_PLANTS)]
+            # Calculate fitness values
+            fitness_values = [1 / plant.cost for plant in plants_and_buds]
 
+            # select plants based off fitness
+            plants = [PPA.fitness_proportionate_selection(plants_and_buds, fitness_values) for _ in range(self.NUMBER_OF_PLANTS)]
             # change the number of mutations each plant gets
-            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))
+            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x, plants))
             winners.append(plants[0]) 
             plants = PPA.adjust_mutations(plants)
 
@@ -69,6 +71,17 @@ class PPA:
         return lowest
 
     @staticmethod
+    def fitness_proportionate_selection(plants: list[Plant], fitness_values: list[float]) -> Plant:
+        total_fitness = sum(fitness_values)
+        rel_fitnesses = [fitness / total_fitness for fitness in fitness_values]
+
+        spin = random.random()  # spin the wheel
+        for i, rel_fitness in enumerate(rel_fitnesses):
+            spin -= rel_fitness
+            if spin <= 0:
+                return plants[i]
+
+    @staticmethod
     def tournament_selection(plants: list[Plant], T: float, k: int = 5) -> Plant:  # k is the tournament size
         selected_plants = random.sample(plants, k)
         winner = min(selected_plants, key=lambda x: x.cost)
@@ -91,11 +104,12 @@ class PPA:
 
     def gen_plants(self, schedule: AbsSchedule, number_plants: int, standard_cost: float) -> list[Plant]:
         plants = []
+        gen = True
         for _ in range(number_plants):
             plants.append(
                 Plant(
                     Workload = Workload(self.shift_list, self.employee_list, set_workload=recursive_copy(schedule.Workload)),
-                    cost = MalusCalc.compute_cost(standard_cost, schedule),
+                    cost = MalusCalc.compute_cost(standard_cost, schedule, gen),
                     set_schedule = recursive_copy(schedule)
                 )
             )

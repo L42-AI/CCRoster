@@ -5,14 +5,90 @@ import matplotlib
 matplotlib.use('Agg')  # Set the backend to Agg
 
 import matplotlib.pyplot as plt
-
+import csv
 session_id = 1
-config = {
-    'runtype' : 'propagate',
-    'num_plants' : '200',
-    'num_gens' : '40',
-    'temperature' : '0.5',
-}
+configurations = [
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '60',
+    #     'temperature': '0.5',
+    # },
+    #  {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '40',
+    #     'temperature': '0.5',
+    # },
+    #  {
+    #     'runtype': 'propagate',
+    #     'num_plants': '100',
+    #     'num_gens': '30',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '60',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '40',
+    #     'temperature': '0.5',
+    # },
+    # {
+    #     'runtype': 'propagate',
+    #     'num_plants': '200',
+    #     'num_gens': '60',
+    #     'temperature': '0.9',
+    # } ''' '''
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '40',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '60',
+        'temperature': '0.9',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '300',
+        'num_gens': '30',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '400',
+        'num_gens': '60',
+        'temperature': '0.5',
+    },
+    {
+        'runtype': 'propagate',
+        'num_plants': '400',
+        'num_gens': '40',
+        'temperature': '0.5',
+    }
+#     # { # this one always gets stuck somehow..
+#     #     'runtype': 'propagate',
+#     #     'num_plants': '400',
+#     #     'num_gens': '20',
+#     #     'temperature': '0.5',
+#     # }
+]
+
+
 config_dev = {
     'runtype' : 'propagate',
     'num_plants' : '100',
@@ -24,31 +100,47 @@ import cProfile
 import pstats
 from io import StringIO
 
-def run_Presenter(session_id, dev=False):
-    score_adjust = []
-    score_normal = []
-    if dev:
-        S = Presenter(Generator, View, session_id)
-        print(S.get_schedule(config_dev))
-    else:
-        S = Presenter(Generator, View, session_id)
-        for i in range(15):
-            schedule = S.get_schedule(config)
-            score_adjust.append(schedule.cost)
-            print('done')
-        for i in range(15):
-            schedule = S.get_schedule(config)
-            score_normal.append(schedule.cost)
-            print('done')
-        print(score_adjust)
-        plt.hist(score_adjust, alpha=0.5, label='adjust mutations', bins=10)
-        plt.hist(score_normal, alpha=0.5, label='do not adjust mutations', bins=10)
-        plt.legend(loc='upper right')
-        plt.savefig('adjust_vs_not_adjust')
-        plt.show()
+def plot_results(session_id, dev=False):
+    presenter = Presenter(Generator, session_id)
+    fig, ax = plt.subplots()
+
+    data = []
+    for i, config in enumerate(configurations):
+        scores = []
+        for _ in range(30):
+            print(f'i: {i}, #: {_}')
+            schedule = presenter.get_schedule(config)
+            scores.append(schedule.cost)
         
+        ax.hist(scores, alpha=0.4, label=f'PPA config{i+7}', bins=10)
+        data.extend([(f'PPA config{i+7}', score) for score in scores])
+
+    ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.xlabel('Cost')
+    plt.ylabel('Frequency')
+    plt.title('PPA Results')
+    plt.savefig('PPA_results.png')
+    plt.show()
+
+    # Store data in a CSV file
+    output_file = 'PPA_results.csv'
+    with open(output_file, 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Configuration', 'Cost'])
+        writer.writerows(data)
+
+    print(f'Data exported to {output_file}.')
+        
+def run_once(session_id, dev=False):
+    if dev:
+        presenter= Presenter(Generator, session_id)
+        print(presenter.get_schedule(config_dev))
+    else:
+        presenter= Presenter(Generator, session_id)
+        print(presenter.get_schedule(config))
+
 if __name__ == "__main__":
     NUMBER_OF_PLANTS = 300
     NUMBER_OF_GENS = 20
     session_id = 1 # DEVELOPER DATA
-    run_Presenter(session_id)
+    plot_results(session_id)
