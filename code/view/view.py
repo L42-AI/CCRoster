@@ -49,7 +49,7 @@ class Viewer(View):
 
     @staticmethod
     def login():
-        return redirect(url_for('login'))
+        return render_template('login.html')
     
     @staticmethod
     def login_correct():
@@ -62,7 +62,7 @@ class Viewer(View):
     
     @staticmethod
     def manage_shifts(shifts):
-        return render_template('manage_shifts.html', shifts)
+        return render_template('manage_shifts.html', shifts=shifts)
 
     @staticmethod   
     def redirect():

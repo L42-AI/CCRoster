@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy import Column, Integer, DateTime, VARCHAR
 
 from model.representation.data_classes.setup import Base
 
@@ -33,5 +33,7 @@ class Shift(Base):
         return self.id
     
     def to_dict(self) -> dict:
-        shift_dict = {'id': self.id, 'start': self.start, 'end': self.end, 'location': self.location}
+        shift_dict = {'id': self.id, 'start': self.start, 'end': self.end, 'location': self.location, 'task': self.task}
         return shift_dict
+    
+

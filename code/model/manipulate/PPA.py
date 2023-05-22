@@ -117,4 +117,4 @@ class PPA:
 
     @staticmethod
     def adjust_temperature(T: float) -> float:
-        return T*0.90
+        return T*0.95

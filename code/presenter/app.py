@@ -59,8 +59,8 @@ def index():
 @app.route('/logout')
 @login_required
 def logout():
-    clear_session()
     logout_user()
+    clear_session()
     return Viewer.login()
     
 @login_required

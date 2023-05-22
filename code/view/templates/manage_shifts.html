@@ -87,14 +87,15 @@
             height: 'auto',
             initialView: 'dayGridMonth',
             slotEventOverlap: false,
+            displayEventTime: false,
             selectable: true,
             events: [
                 {% for shift in shifts %}
                 {
-                    id: '{{ shift[id] }}',
-                    title: '{{ shift }}',
-                    start: '{{ shift['start'].isoformat() }}',
-                    end: '{{ shift['end'].isoformat() }}',
+                    id: '{{ shift["id"] }}',
+                    title: '{{ shift["task"] }}',
+                    start: '{{ shift["start"].isoformat() }}',
+                    end: '{{ shift["end"].isoformat() }}',
                     className: 'shift-class',
                 },
                 {% endfor %}

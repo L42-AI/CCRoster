@@ -52,10 +52,10 @@ class Presenter(BasePresenter):
         return schedule
     
     def get_employees(self):
-        return self.employee_list
+        return [x.to_dict() for x in self.employee_list]
     
     def get_shifts(self):
-        return self.shift_list
+        return [x.to_dict() for x in self.shift_list]
     
     
 

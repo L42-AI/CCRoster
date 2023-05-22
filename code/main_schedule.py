@@ -17,8 +17,8 @@ configurations = [
      {
         'runtype': 'propagate',
         'num_plants': '100',
-        'num_gens': '1000',
-        'temperature': '0.5',
+        'num_gens': '100',
+        'temperature': '0.9',
     },
     {
         'runtype': 'propagate',
