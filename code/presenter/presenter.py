@@ -11,10 +11,18 @@ class Presenter:
     def __init__(self, session_id: int) -> None:
         self.shift_list, self.employee_list = download(session_id)
 
+        self.total_availabilities = Model.schedule_specific_variables(self.employee_list, self.shift_list)
+        self.standard_costs = Model.get_standard_cost(self.employee_list)
+        self.coliding_dict = Model.get_coliding_dict(self.shift_list)
+
     def get_schedule(self, config):
         config['employees'] = self.employee_list
         config['shifts'] = self.shift_list
-        
+        config['total_availabilities'] = self.total_availabilities
+        config['standard_costs'] = self.standard_costs
+        config['coliding_dict'] = self.coliding_dict
+
+
         if config['runtype'] == 'random':
             schedule = Model.create_random_schedule(**config)
         elif config['runtype'] == 'greedy':
