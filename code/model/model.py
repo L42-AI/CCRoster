@@ -11,7 +11,7 @@ from model.representation.behaviour_classes.shift_constraints import Shiftconstr
 from model.manipulate.fill import Fill, Greedy
 from model.manipulate.PPA import PPA
 
-class Model(Protocol):
+class Model():
     """ DATABASE """
     def upload(shift_list, employee_list):
         ...
@@ -20,21 +20,27 @@ class Model(Protocol):
         ...
     
     """ SCHEDULE """
-    def create_random_schedule():
-        ...
 
-    def create_greedy_schedule(employee_list: list[Employee], shift_list: list[Shift]):
-        ...
+    def create_random_schedule(**config):
+        return Fill.fill(AbsSchedule(Workload(config['shifts'], config['employees'])))
 
-    def propagate(shift_list, **kwargs):
-        ...
+    def create_greedy_schedule(**config):
+        return Greedy.fill(config['employees'], config['shifts'], Schedule(Workload(config['shifts'], config['employees']), CurrentAvailabilities()))
 
-class DB(Model):
-    def upload(self, shift_list, employee_list):
-        pass
-    
-    def download(self, user_id):
-        pass
+    def propagate(**config):
+
+        # create a shift constraints instance that will be used by PPA and Fill
+        shift_constraints = Shiftconstraints(config['shifts'], config['employees'])
+        config['shiftconstraints'] = shift_constraints
+
+        # create Fill
+        FillClass = Fill(shift_constraints)
+        schedule = FillClass.fill(AbsSchedule(Workload(config['shifts'], config['employees'])))
+
+        P = PPA(schedule, **config)
+        schedule = P.grow()
+
+        return schedule
 
 class Generator(Model):
 
