@@ -107,10 +107,9 @@ class Greedy(Fill):
         shift_id_list = [shift.id for shift in shift_list]
         while filled < len(Schedule):
             
+            # print(Schedule.CurrentAvailabilities[8])
+            
             shift_id = sorted(shift_id_list, key=lambda x: len(Schedule.CurrentAvailabilities[x][1]) if Schedule.CurrentAvailabilities[x][0] == 0 else 999)[0]
-
-            [print(Schedule.CurrentAvailabilities[shift_ID]) for shift_ID in Schedule.CurrentAvailabilities]
-            print(shift_id)
 
             # Skip if shift scheduled
             if Schedule[shift_id] is not None:
