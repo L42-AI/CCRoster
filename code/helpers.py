@@ -5,8 +5,13 @@ from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.availability import Availability
 
 
-def gen_id_dict(list: list) -> dict[int, object]:
-    return {x.id : x for x in list}
+def gen_id_dict(l: list[object]) -> dict[int, object]:
+    try:
+        l[0].id
+    except:
+        raise AttributeError('List contents have no ID attribute')
+    
+    return {x.id : x for x in l}
 
 def gen_time_conflict_dict(shift_list: list[Shift]) -> dict[int, set[int]]:
     time_conflict_dict = {shift.id: set() for shift in shift_list}
@@ -25,10 +30,10 @@ def get_standard_cost(employee_list: list[Employee]) -> float:
     total = sum([employee.get_minimal_hours() * employee.get_wage()  for employee in employee_list])
     return round(total, 2)
 
-def get_random_shift(shift_list: list[Shift]) -> int:
+def get_random_shift_id(shift_list: list[Shift]) -> int:
     return random.choice(shift_list).id
 
-def get_random_employee(total_availabilities: dict, shift_id: int, existing_employee: int = None) -> int:
+def get_random_employee_id(total_availabilities: dict[int, set[int]], shift_id: int, existing_employee: int = None) -> int:
     """
     returns an employee id
     """
@@ -89,5 +94,5 @@ def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[i
 
     return availabilities
 
-def gen_total_availabilities(employee_list: list[Employee], shift_list: list[Shift]):
+def gen_total_availabilities(employee_list: list[Employee], shift_list: list[Shift]) -> dict[int, set[int]]:
     return {shift.id: _employee_availability(shift, employee_list) for shift in shift_list}

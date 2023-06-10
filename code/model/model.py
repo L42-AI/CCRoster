@@ -15,29 +15,29 @@ class Model:
 
     """ DATABASE """
 
-    def get_offline_data():
+    def get_offline_data() -> tuple[list[Shift], list[Employee]]:
         return shift_list, employee_list
     
-    def download(location_id):
-        ...
+    def download(location_id: int) -> tuple[list[Shift], list[Employee]]:
+        raise NotImplementedError
     
     """ SCHEDULE """
 
-    def gen_random_schedule(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
+    def random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._random(employee_list, shift_list)
 
-    def gen_greedy_schedule(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
+    def greedy(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._greedy(employee_list, shift_list)
 
-    def propagate(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:
+    def propagate(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
         schedule = Model._random(employee_list, shift_list)
         # schedule = Model._greedy(employee_list, shift_list)
-        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']))
-        return P.grow(float(kwargs['temperature']))
+        P = PPA(schedule)
+        return P.grow(config)
 
-    def optimal(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:
+    def optimal(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
         fail = 0
-        for _ in tqdm(range(int(kwargs['optimize_runs']))):
+        for _ in tqdm(range(int(config['optimize_runs']))):
             try:
                 schedule = Model._greedy(employee_list, shift_list)
             except:

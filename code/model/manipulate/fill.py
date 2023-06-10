@@ -7,13 +7,13 @@ from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.shift import Shift
 
-from helpers import get_random_shift
+from helpers import get_random_shift_id
 
 """ Schedule manipulation """
 
 class Fill:
 
-    def __init__(self, total_availabilities: dict, time_conflict_dict: dict, id_employee, id_shift) -> None:
+    def __init__(self, total_availabilities: dict[int, set[int]], time_conflict_dict: dict[int, set[int]], id_employee: dict[int, Employee], id_shift: dict[int, Shift]) -> None:
         self.total_availabilities = total_availabilities
         self.time_conflict_dict = time_conflict_dict
         self.id_employee_dict = id_employee
@@ -21,11 +21,11 @@ class Fill:
 
     """ Main """
 
-    def generate(self, employee_list: list[Employee], shift_list: list[Shift]):
+    def generate(self, employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
         filled = 0
         while filled < len(schedule):
-            shift_id = get_random_shift(schedule.Workload.shift_list)
+            shift_id = get_random_shift_id(shift_list)
 
             if schedule[shift_id] is not None:
                 continue
@@ -80,9 +80,6 @@ class Fill:
 
 class Greedy(Fill):
 
-    def __init__(self, total_availabilities: dict, time_conflict_dict: dict, id_employee: dict[int, Employee], id_shift: dict[int, Shift]) -> None:
-        super().__init__(total_availabilities, time_conflict_dict, id_employee, id_shift)
-
     """ Main """
 
     def generate(self, employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
@@ -107,7 +104,6 @@ class Greedy(Fill):
             weeknum = self.get_weeknumber(shift_id)
 
             Greedy.compute_priority(employee_list, schedule, weeknum)
-            Greedy.update_highest_priority_list(employee_list)
 
             possible_employee_ids = schedule.CurrentAvailabilities[shift_id][1]
             selected_employee_id = random.choice(tuple(possible_employee_ids))

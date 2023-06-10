@@ -11,34 +11,37 @@ from model.manipulate.mutate import mutate
 from helpers import recursive_copy, gen_total_availabilities
 
 class PPA:
-    def __init__(self, start_schedule: Schedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+    def __init__(self, start_schedule: Schedule) -> None:
         self.Schedule = start_schedule
-        self.NUMBER_OF_PLANTS = num_plants
-        self.NUMBER_OF_GENERATIONS = num_gens
         self.id_employee = start_schedule.Workload.id_employee
         self.id_shift = start_schedule.Workload.id_shift
 
-    def grow(self, temperature: float) -> None:
+    def grow(self, config: dict[str, str]) -> None:
         ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
             more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
+        
+        temperature = float(config['temperature'])
+        NUM_PLANTS = int(config['num_plants'])
+        NUM_GENERATIONS = int(config['num_gens'])
+        
         winners = []
 
         # generate plants
-        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
+        plants = PPA.gen_plants(self.Schedule, NUM_PLANTS)
         lowest = plants[0]
         
         # run the PPA
-        for _ in range(self.NUMBER_OF_GENERATIONS):
+        for _ in range(NUM_GENERATIONS):
             temperature = PPA.adjust_temperature(temperature)
 
             # make mutations 
             plants_and_buds = list(chain(*[mutate(plant, temperature) for plant in plants]))
 
             # select plants based off fitness
-            plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
+            plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(NUM_PLANTS)]
 
             # change the number of mutations each plant gets
-            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(x))
+            plants = sorted(plants, key=lambda schedule: MalusCalc.compute_cost(schedule))
             winners.append(plants[0])            
             plants = PPA.adjust_mutations(plants)
 
@@ -53,10 +56,7 @@ class PPA:
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
             print(MalusCalc.compute_cost(winners[-1]))
-        print(lowest.cost)
-        print(lowest.cost)
-        print(lowest.cost)
-        print(lowest.cost)
+
         ''' REVIEW ERROR LATER '''
         # print(f'COST: {lowest.cost}')
         # for shift_id, employee_id in lowest.items():
@@ -68,13 +68,13 @@ class PPA:
         return lowest
 
     @staticmethod
-    def tournament_selection(plants: list[Plant], T: float, k: int = 5) -> Plant:  # k is the tournament size
-        selected_plants = random.sample(plants, k)
+    def tournament_selection(plants: list[Plant], T: float, tournement_size: int = 5) -> Plant:
+        selected_plants = random.sample(plants, tournement_size)
         winner = min(selected_plants, key=lambda x: x.cost)
         return winner
     
     @staticmethod
-    def adjust_mutations(plants)-> list[Plant]:
+    def adjust_mutations(plants: list[Plant]) -> list[Plant]:
         ''' Fittest plants get fewer mutations, worse plants get few'''
         lenght = len(plants)
         for i, plant in enumerate(plants):
@@ -98,14 +98,14 @@ class PPA:
         for _ in range(number_plants):
             plants.append(
                 Plant(
-                    Workload = Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
-                    CurrentAvailabilities=CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
-                    cost = MalusCalc.compute_cost(schedule),
-                    set_schedule = recursive_copy(schedule)
+                    Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
+                    CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
+                    MalusCalc.compute_cost(schedule),
+                    recursive_copy(schedule)
                 )
             )
         return plants
 
     @staticmethod
-    def adjust_temperature(T: float) -> float:
-        return T*0.90
+    def adjust_temperature(temp: float) -> float:
+        return temp * .9

@@ -9,7 +9,7 @@ from model.manipulate.fill import Fill
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 
 
-from helpers import recursive_copy, get_random_employee, get_random_shift, gen_total_availabilities, gen_time_conflict_dict
+from helpers import recursive_copy, get_random_employee_id, get_random_shift_id, gen_total_availabilities, gen_time_conflict_dict
 
 """ MUTATE """
 
@@ -40,9 +40,9 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
 
 def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # find a modification            
-    replace_shift_id = get_random_shift(schedule.Workload.shift_list)
+    replace_shift_id = get_random_shift_id(schedule.Workload.shift_list)
     current_employee_id = schedule[replace_shift_id]
-    replace_employee_id = get_random_employee(schedule.CurrentAvailabilities.total_availabilities, replace_shift_id, current_employee_id)
+    replace_employee_id = get_random_employee_id(schedule.CurrentAvailabilities.total_availabilities, replace_shift_id, current_employee_id)
     old_cost = schedule.cost
 
     # check if new worker wants to work additional shift, if not, use mutate_max
@@ -109,7 +109,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
         return schedule
 
     # pick new employee to work the shortest shift
-    shortest_shift_employee_id = get_random_employee(schedule.CurrentAvailabilities.total_availabilities, shortest_shift_id, possible_employee_id)
+    shortest_shift_employee_id = get_random_employee_id(schedule.CurrentAvailabilities.total_availabilities, shortest_shift_id, possible_employee_id)
 
     # check if worker that will take over the shift, still wants to work additional shift
     if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
