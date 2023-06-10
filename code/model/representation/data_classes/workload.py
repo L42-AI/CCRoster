@@ -7,6 +7,8 @@ class Workload(dict):
     def __init__(self, employee_list, shift_list, set_workload=None) -> None:
         super().__init__(self)
 
+        self.employee_list = employee_list
+        self.shift_list = shift_list
         self.id_employee = {x.id: x for x in employee_list}
         self.id_shift = {x.id: x for x in shift_list}
 

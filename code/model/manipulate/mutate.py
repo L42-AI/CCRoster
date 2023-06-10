@@ -6,8 +6,10 @@ from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.schedule import Plant
 from model.manipulate.fill import Fill
+from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 
-from helpers import recursive_copy, get_random_employee, get_random_shift
+
+from helpers import recursive_copy, get_random_employee, get_random_shift, gen_total_availabilities, gen_time_conflict_dict
 
 """ MUTATE """
 
@@ -20,10 +22,19 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
     # buds will be the mutated schedules
     buds = []
     old_cost = MalusCalc.compute_cost(schedule)
+
+    employee_list = schedule.Workload.employee_list
+    shift_list = schedule.Workload.shift_list
+
     while len(buds) < 10:
         
         # copy the original schedule
-        bud_schedule = Plant(Workload(recursive_copy(schedule.Workload)), old_cost, recursive_copy(schedule))
+        bud_schedule = Plant(
+            shift_list,
+            Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
+            CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
+            old_cost,
+            recursive_copy(schedule))
         for _ in range(schedule.MUTATIONS):
             buds = modification(buds, bud_schedule, T)
     return buds
@@ -38,7 +49,7 @@ def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # check if new worker wants to work additional shift, if not, use mutate_max
     if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
 
-        if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule):
+        if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule, gen_time_conflict_dict(schedule.shift_list)):
             Fill.schedule_swap(replace_shift_id, replace_employee_id, schedule)
             buds = accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id)            
             
@@ -103,7 +114,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
 
     # check if worker that will take over the shift, still wants to work additional shift
     if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
-        if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule):
+        if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule, gen_time_conflict_dict(schedule.shift_list)):
 
             Fill.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
 

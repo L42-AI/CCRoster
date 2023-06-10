@@ -32,8 +32,8 @@ class Model:
     def propagate(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:
         schedule = Model._random(employee_list, shift_list)
         # schedule = Model._greedy(employee_list, shift_list)
-        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens'], get_standard_cost(employee_list)))
-        P.grow(float(kwargs['temperature']))
+        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']), get_standard_cost(employee_list))
+        return P.grow(float(kwargs['temperature']))
 
     def optimal(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:
         fail = 0

@@ -4,10 +4,11 @@ import random
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.schedule import Schedule, Plant
+from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 
 from model.manipulate.mutate import mutate
 
-from helpers import recursive_copy
+from helpers import recursive_copy, gen_total_availabilities
 
 class PPA:
     def __init__(self, start_schedule: Schedule, num_plants: int, num_gens: int, standard_cost: float, TEMPERATURE: float=.5) -> None:
@@ -38,7 +39,7 @@ class PPA:
             plants = [PPA.tournament_selection(plants_and_buds, temperature) for _ in range(self.NUMBER_OF_PLANTS)]
 
             # change the number of mutations each plant gets
-            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(self.standard_cost, x))
+            plants = sorted(plants, key=lambda x: MalusCalc.compute_cost(x))
             winners.append(plants[0])            
             plants = PPA.adjust_mutations(plants)
 
@@ -52,7 +53,7 @@ class PPA:
             # reheating scheme
             if all(x == winners[0] for x in winners):
                 temperature += 0.1 if temperature < 0.5 else + 0
-            print(MalusCalc.compute_cost(self.standard_cost, winners[-1]))
+            print(MalusCalc.compute_cost(winners[-1]))
         print(lowest.cost)
         print(lowest.cost)
         print(lowest.cost)
@@ -90,12 +91,18 @@ class PPA:
 
     @staticmethod
     def gen_plants(schedule: Schedule, number_plants: int, standard_cost: float) -> list[Plant]:
+        
+        employee_list = schedule.Workload.employee_list
+        shift_list = schedule.Workload.shift_list
+        
         plants = []
         for _ in range(number_plants):
             plants.append(
                 Plant(
-                    Workload = Workload(recursive_copy(schedule.Workload)),
-                    cost = MalusCalc.compute_cost(standard_cost, schedule),
+                    shift_list=shift_list,
+                    Workload = Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
+                    CurrentAvailabilities=CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
+                    cost = MalusCalc.compute_cost(schedule),
                     set_schedule = recursive_copy(schedule)
                 )
             )
