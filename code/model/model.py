@@ -9,7 +9,7 @@ from model.representation.data_classes.shift import Shift
 from model.manipulate.fill import Fill, Greedy
 from model.manipulate.PPA import PPA
 
-from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_total_availabilities, get_standard_cost
+from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_total_availabilities
 
 class Model:
 
@@ -32,7 +32,7 @@ class Model:
     def propagate(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:
         schedule = Model._random(employee_list, shift_list)
         # schedule = Model._greedy(employee_list, shift_list)
-        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']), get_standard_cost(employee_list))
+        P = PPA(schedule, int(kwargs['num_plants']), int(kwargs['num_gens']))
         return P.grow(float(kwargs['temperature']))
 
     def optimal(employee_list: list[Employee], shift_list: list[Shift], **kwargs) -> Schedule:

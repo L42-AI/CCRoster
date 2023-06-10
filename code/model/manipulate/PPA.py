@@ -11,9 +11,8 @@ from model.manipulate.mutate import mutate
 from helpers import recursive_copy, gen_total_availabilities
 
 class PPA:
-    def __init__(self, start_schedule: Schedule, num_plants: int, num_gens: int, standard_cost: float, TEMPERATURE: float=.5) -> None:
+    def __init__(self, start_schedule: Schedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
         self.Schedule = start_schedule
-        self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
         self.id_employee = start_schedule.Workload.id_employee
@@ -25,7 +24,7 @@ class PPA:
         winners = []
 
         # generate plants
-        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS, self.standard_cost)
+        plants = PPA.gen_plants(self.Schedule, self.NUMBER_OF_PLANTS)
         lowest = plants[0]
         
         # run the PPA
@@ -90,7 +89,7 @@ class PPA:
         return plants
 
     @staticmethod
-    def gen_plants(schedule: Schedule, number_plants: int, standard_cost: float) -> list[Plant]:
+    def gen_plants(schedule: Schedule, number_plants: int) -> list[Plant]:
         
         employee_list = schedule.Workload.employee_list
         shift_list = schedule.Workload.shift_list
@@ -99,7 +98,6 @@ class PPA:
         for _ in range(number_plants):
             plants.append(
                 Plant(
-                    shift_list=shift_list,
                     Workload = Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
                     CurrentAvailabilities=CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
                     cost = MalusCalc.compute_cost(schedule),

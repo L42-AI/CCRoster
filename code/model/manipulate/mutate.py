@@ -30,7 +30,6 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
         
         # copy the original schedule
         bud_schedule = Plant(
-            shift_list,
             Workload(employee_list, shift_list, recursive_copy(schedule.Workload)),
             CurrentAvailabilities(gen_total_availabilities(employee_list, shift_list)),
             old_cost,
@@ -41,7 +40,7 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
 
 def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # find a modification            
-    replace_shift_id = get_random_shift(schedule.shift_list)
+    replace_shift_id = get_random_shift(schedule.Workload.shift_list)
     current_employee_id = schedule[replace_shift_id]
     replace_employee_id = get_random_employee(schedule.CurrentAvailabilities.total_availabilities, replace_shift_id, current_employee_id)
     old_cost = schedule.cost
@@ -49,7 +48,7 @@ def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # check if new worker wants to work additional shift, if not, use mutate_max
     if schedule.Workload.check_capacity(replace_shift_id, replace_employee_id):
 
-        if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule, gen_time_conflict_dict(schedule.shift_list)):
+        if ShiftConstrains.passed_hard_constraints(replace_shift_id, replace_employee_id, schedule, gen_time_conflict_dict(schedule.Workload.shift_list)):
             Fill.schedule_swap(replace_shift_id, replace_employee_id, schedule)
             buds = accept_change(schedule, old_cost, buds, T, shift_id=replace_shift_id, new_emp=replace_employee_id, old_emp=current_employee_id)            
             
@@ -103,7 +102,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
     '''
 
     # get the shortest shift the busy person is working
-    shortest_shift_id = sorted(schedule.shift_list, key=lambda x: x.duration)[0].id
+    shortest_shift_id = sorted(schedule.Workload.shift_list, key=lambda x: x.duration)[0].id
 
     # make sure we do not get stuck in recursive loop
     if shift_to_replace_id == shortest_shift_id:
@@ -114,7 +113,7 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
 
     # check if worker that will take over the shift, still wants to work additional shift
     if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
-        if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule, gen_time_conflict_dict(schedule.shift_list)):
+        if ShiftConstrains.passed_hard_constraints(shortest_shift_id, shortest_shift_employee_id, schedule, gen_time_conflict_dict(schedule.Workload.shift_list)):
 
             Fill.schedule_swap(shortest_shift_id, shortest_shift_employee_id, schedule)
 

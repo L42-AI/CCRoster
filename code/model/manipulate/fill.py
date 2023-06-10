@@ -22,10 +22,10 @@ class Fill:
     """ Main """
 
     def generate(self, employee_list: list[Employee], shift_list: list[Shift]):
-        schedule = Schedule(shift_list, Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
+        schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
         filled = 0
         while filled < len(schedule):
-            shift_id = get_random_shift(schedule.shift_list)
+            shift_id = get_random_shift(schedule.Workload.shift_list)
 
             if schedule[shift_id] is not None:
                 continue
@@ -87,7 +87,7 @@ class Greedy(Fill):
 
     def generate(self, employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
 
-        schedule = Schedule(shift_list, Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
+        schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
 
         filled = 0
         shift_id_list = [shift.id for shift in shift_list]
