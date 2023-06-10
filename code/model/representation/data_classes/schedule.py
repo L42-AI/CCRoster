@@ -6,27 +6,23 @@ from sqlalchemy import Column, Integer, DateTime
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.setup import Base
-from model.data.assign import shift_list
 
-class AbsSchedule(dict):
-    def __init__(self, Workload: Workload, set_schedule: dict[int, int] = None):
+class Schedule(dict):
+    def __init__(self, shift_list, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
+        self.shift_list = shift_list
         self.Workload = Workload
+        self.CurrentAvailabilities = CurrentAvailabilities
 
         if set_schedule is not None:
             for shift_id in set_schedule:
                 self[shift_id] = set_schedule[shift_id]
         else:
-            for shift in shift_list:
+            for shift in self.shift_list:
                 self[shift.id] = None
 
-class Schedule(AbsSchedule):
-    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
-        super().__init__(Workload, set_schedule)
-        self.CurrentAvailabilities = CurrentAvailabilities
-
-class Plant(AbsSchedule):
-    def __init__(self, Workload: Workload, cost: float, set_schedule: dict[int, int] = None):
-        super().__init__(Workload, set_schedule)
+class Plant(Schedule):
+    def __init__(self, shift_list, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, cost: float, set_schedule: dict[int, int] = None):
+        super().__init__(shift_list, Workload, CurrentAvailabilities, set_schedule)
 
         self.cost = cost
         self.fitness: float = None

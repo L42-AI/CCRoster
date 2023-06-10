@@ -1,16 +1,15 @@
-from model.representation.behaviour_classes.schedule_constants import time_conflict_dict
-from model.representation.data_classes.schedule import AbsSchedule
+from model.representation.data_classes.schedule import Schedule
 
 class ShiftConstrains:
 
     @staticmethod
-    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: dict[int, int]) -> bool:
+    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: dict[int, int], time_conflict_dict) -> bool:
         if ShiftConstrains.same_time(shift_id, employee_id, schedule, time_conflict_dict):
             return False
         return True
 
     @staticmethod
-    def same_time(shift_id: int, employee_id: int, Schedule: AbsSchedule, time_conflict_dict: dict[int, list[int]]) -> bool:
+    def same_time(shift_id: int, employee_id: int, Schedule: Schedule, time_conflict_dict: dict[int, list[int]]) -> bool:
         if employee_id is None:
             raise ValueError('No employee in the schedule')
 

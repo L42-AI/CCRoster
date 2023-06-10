@@ -3,20 +3,20 @@ import random
 
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import AbsSchedule, Plant
+from model.representation.data_classes.schedule import Schedule, Plant
 
-from model.representation.behaviour_classes.schedule_constants import standard_cost
 from model.manipulate.mutate import mutate
-from helpers import recursive_copy, id_employee, id_shift
+
+from helpers import recursive_copy
 
 class PPA:
-    def __init__(self, start_schedule: AbsSchedule, num_plants: int, num_gens: int, TEMPERATURE: float=.5) -> None:
+    def __init__(self, start_schedule: Schedule, num_plants: int, num_gens: int, standard_cost: float, TEMPERATURE: float=.5) -> None:
         self.Schedule = start_schedule
         self.standard_cost = standard_cost
         self.NUMBER_OF_PLANTS = num_plants
         self.NUMBER_OF_GENERATIONS = num_gens
-        self.id_employee = id_employee
-        self.id_shift = id_shift
+        self.id_employee = start_schedule.Workload.id_employee
+        self.id_shift = start_schedule.Workload.id_shift
 
     def grow(self, temperature: float) -> None:
         ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
@@ -89,7 +89,7 @@ class PPA:
         return plants
 
     @staticmethod
-    def gen_plants(schedule: AbsSchedule, number_plants: int, standard_cost: float) -> list[Plant]:
+    def gen_plants(schedule: Schedule, number_plants: int, standard_cost: float) -> list[Plant]:
         plants = []
         for _ in range(number_plants):
             plants.append(

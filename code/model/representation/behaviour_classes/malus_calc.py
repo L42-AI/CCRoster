@@ -1,9 +1,7 @@
 from collections import defaultdict
 
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import AbsSchedule
-
-from helpers import get_weeknumber, id_shift, id_employee
+from model.representation.data_classes.schedule import Schedule
 
 
 class MalusCalc:
@@ -42,14 +40,17 @@ class MalusCalc:
         a guaranteed working hours, those hours are 'free'
         """
 
-        employee_obj = id_employee[employee_id]
-        weeknumber = get_weeknumber(shift_id)
+        id_employee_dict = workload.id_employee
+        id_shift_dict = workload.id_shift
+
+        employee_obj = id_employee_dict[employee_id]
+        weeknumber = workload.get_weeknumber(shift_id)
         minimal_hours = employee_obj.get_minimal_hours()
-        hours = id_shift[shift_id].duration
+        hours = id_shift_dict[shift_id].duration
         wage = employee_obj.get_wage()
 
         # check if employee has obligated contract hours left
-        total_scheduled_duration = sum(id_shift[x].duration for x in workload[weeknumber] if x != skip_shift_id)
+        total_scheduled_duration = sum(id_shift_dict[x].duration for x in workload[weeknumber] if x != skip_shift_id)
         remaining_min_hours = minimal_hours - total_scheduled_duration if (minimal_hours - total_scheduled_duration) > 0 else 0
 
         # subtract those hours, which are part of generator.standard_cost, from working hours to avoid double counting
@@ -57,18 +58,22 @@ class MalusCalc:
 
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
     
-    def compute_cost(standard_cost: int, schedule: AbsSchedule) -> float:
+    def compute_cost(schedule: Schedule) -> float:
+        
+        id_employee_dict = schedule.Workload.id_employee
+        id_shift_dict = schedule.Workload.id_shift
+
         wage_costs = 0
 
         employee_duration = defaultdict(float)
         for shift_id in schedule:
-            employee_duration[schedule[shift_id]] += id_shift[shift_id].duration
+            employee_duration[schedule[shift_id]] += id_shift_dict[shift_id].duration
 
         for employee, duration in employee_duration.items():
-            employee_obj = id_employee[employee]
+            employee_obj = id_employee_dict[employee]
             wage_costs += max(duration - employee_obj.min_hours, 0) * employee_obj.get_wage()
 
-        return round(wage_costs + standard_cost, 2)
+        return round(wage_costs + schedule.Workload.standard_cost, 2)
 
 
         

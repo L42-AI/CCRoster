@@ -4,12 +4,10 @@ import math
 from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
 from model.representation.behaviour_classes.malus_calc import MalusCalc
 from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import AbsSchedule, Plant
+from model.representation.data_classes.schedule import Plant
 from model.manipulate.fill import Fill
-from model.representation.behaviour_classes.schedule_constants import total_availabilities, standard_cost
-from model.data.assign import shift_list
 
-from helpers import recursive_copy, id_employee, id_shift, get_random_employee, get_random_shift
+from helpers import recursive_copy, get_random_employee, get_random_shift
 
 """ MUTATE """
 
@@ -21,7 +19,7 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
 
     # buds will be the mutated schedules
     buds = []
-    old_cost = MalusCalc.compute_cost(standard_cost, schedule)
+    old_cost = MalusCalc.compute_cost(schedule)
     while len(buds) < 10:
         
         # copy the original schedule
@@ -32,9 +30,9 @@ def mutate(schedule: Plant, T: float) -> list[Plant]:
 
 def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
     # find a modification            
-    replace_shift_id = get_random_shift()
+    replace_shift_id = get_random_shift(schedule.shift_list)
     current_employee_id = schedule[replace_shift_id]
-    replace_employee_id = get_random_employee(replace_shift_id, current_employee_id)
+    replace_employee_id = get_random_employee(schedule.CurrentAvailabilities.total_availabilities, replace_shift_id, current_employee_id)
     old_cost = schedule.cost
 
     # check if new worker wants to work additional shift, if not, use mutate_max
@@ -53,12 +51,13 @@ def modification(buds: list[Plant], schedule: Plant, T: float) -> list[Plant]:
 def accept_change(bud_schedule: Plant, old_cost: int, buds: list, T: float, shift_id: int=None, new_emp: int=None, old_emp: int=None) -> list:
     ''' Method that evaluates if a mutated schedule will be accepted based on the new cost
         and a simulated annealing probability'''
+    
     if shift_id != None: # does not take into account 'free' hours
     #     # print(sum([self.id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id]), bud_schedule.Workload[new_emp][5])
     
         duration_old_emp, duration_new_emp = _billable_hours(shift_id, old_emp, new_emp, bud_schedule)
-        old_wage = id_employee[old_emp].wage
-        new_wage = id_employee[new_emp].wage
+        old_wage = bud_schedule.Workload.id_employee[old_emp].wage
+        new_wage = bud_schedule.Workload.id_employee[new_emp].wage
         cost_old_emp = old_wage * duration_old_emp
         cost_new_emp = new_wage * duration_new_emp
 
@@ -66,7 +65,7 @@ def accept_change(bud_schedule: Plant, old_cost: int, buds: list, T: float, shif
         bud_schedule.cost = old_cost - cost_old_emp + cost_new_emp
 
     else:
-        bud_schedule.cost = MalusCalc.compute_cost(standard_cost, bud_schedule)
+        bud_schedule.cost = MalusCalc.compute_cost(bud_schedule)
     
     # store the costs in bud_schedule
 
@@ -93,14 +92,14 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
     '''
 
     # get the shortest shift the busy person is working
-    shortest_shift_id = sorted(shift_list, key=lambda x: x.duration)[0].id
+    shortest_shift_id = sorted(schedule.shift_list, key=lambda x: x.duration)[0].id
 
     # make sure we do not get stuck in recursive loop
     if shift_to_replace_id == shortest_shift_id:
         return schedule
 
     # pick new employee to work the shortest shift
-    shortest_shift_employee_id = get_random_employee(shortest_shift_id, possible_employee_id)
+    shortest_shift_employee_id = get_random_employee(schedule.CurrentAvailabilities.total_availabilities, shortest_shift_id, possible_employee_id)
 
     # check if worker that will take over the shift, still wants to work additional shift
     if schedule.Workload.check_capacity(shortest_shift_id, shortest_shift_employee_id):
@@ -116,7 +115,11 @@ def mutate_max_workload(shift_to_replace_id: int, possible_employee_id: int, sch
 """ Helper methods """
 
 def _billable_hours(shift_id: int, old_emp: int, new_emp: int, bud_schedule: Plant):
-        duration = id_shift[shift_id].duration
-        duration_old_emp = max(0, duration - max(0, id_employee[old_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
-        duration_new_emp = max(0, duration - max(0, id_employee[new_emp].min_hours - sum([id_shift[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
+        
+        id_shift_dict = bud_schedule.Workload.id_shift
+        id_employee_dict = bud_schedule.Workload.id_employee
+
+        duration = id_shift_dict[shift_id].duration
+        duration_old_emp = max(0, duration - max(0, id_employee_dict[old_emp].min_hours - sum([id_shift_dict[id_].duration for x in bud_schedule.Workload[old_emp] for id_ in bud_schedule.Workload[old_emp][x]])))
+        duration_new_emp = max(0, duration - max(0, id_employee_dict[new_emp].min_hours - sum([id_shift_dict[id_].duration for x in bud_schedule.Workload[new_emp] for id_ in bud_schedule.Workload[new_emp][x] if id_ != shift_id])))
         return duration_old_emp, duration_new_emp

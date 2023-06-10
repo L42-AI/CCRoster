@@ -2,35 +2,35 @@ from model.model import Model
 from view.view import View
 from model.data.database import download
 
+from helpers import gen_id_dict
+
 class Presenter:
 
     def __init__(self, config) -> None:
         self.config = config
         self.shift_list, self.employee_list = self._retrieve_data(self.config)
-        self.id_employee_dict = {x.id : x for x in self.employee_list}
-        self.id_shift_dict = {x.id : x for x in self.shift_list}
 
     def get_schedule(self):
         return self._build_schedule(self.config)
     
     def print_schedule(self, schedule):
-        View.print_schedule(schedule, self.id_employee_dict, self.id_shift_dict)
+        View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
 
     def _retrieve_data(self, config):
         match config['datatype']:
             case 'offline':
                 return Model.get_offline_data()
             case 'online':
-                return download(config['session_id'])
+                return download(int(config['session_id']))
             case other:
                 raise ValueError(f"{config['datatype']} not valid! Choose from: 'offline' or 'online'")
 
     def _build_schedule(self, config):
         match config['runtype']:
             case 'random':
-                return Model.create_random_schedule()
+                return Model.gen_random_schedule(self.employee_list, self.shift_list)
             case 'greedy':
-                return Model.create_greedy_schedule(self.employee_list, self.shift_list)
+                return Model.gen_greedy_schedule(self.employee_list, self.shift_list)
             case 'propagate':
                 return Model.propagate(self.employee_list, self.shift_list, **config)
             case 'optimal':

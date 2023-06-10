@@ -1,12 +1,16 @@
 from model.representation.data_classes.employee import Employee
 
-from model.data.assign import employee_list
-from helpers import get_weeknumber, id_employee
+from helpers import get_standard_cost
 
 class Workload(dict):
 
-    def __init__(self, set_workload=None) -> None:
+    def __init__(self, employee_list, shift_list, set_workload=None) -> None:
         super().__init__(self)
+
+        self.id_employee = {x.id: x for x in employee_list}
+        self.id_shift = {x.id: x for x in shift_list}
+
+        self.standard_cost = get_standard_cost(employee_list)
 
         if set_workload is not None:
             self.copy_workload(set_workload)
@@ -30,10 +34,10 @@ class Workload(dict):
         returns True if the employee is allowed to work that shift given his/hers weekly max
         """
 
-        employee_obj = id_employee[employee_id]
+        employee_obj = self.id_employee[employee_id]
 
         # get the week and check how many shifts the person is working that week
-        weeknumber = get_weeknumber(shift_id)
+        weeknumber = self.get_weeknumber(shift_id)
 
         if employee_obj.get_week_max(weeknumber) > (len(self[employee_id][weeknumber])):
             return True
@@ -46,7 +50,7 @@ class Workload(dict):
         updates workload dictionary when an employee takes on a new shift
         """
         # get the week number of the shift
-        weeknumber = get_weeknumber(shift_id)
+        weeknumber = self.get_weeknumber(shift_id)
 
         if weeknumber not in self[employee_id]:
             self[employee_id] = {weeknumber: []}
@@ -56,3 +60,7 @@ class Workload(dict):
             self[employee_id][weeknumber].append(shift_id)
         elif employee_id != 10: # hardcoded for dummy employee!! remove after testing
             self[employee_id][weeknumber].remove(shift_id)
+    
+    def get_weeknumber(self, shift_id: int) -> int:
+        shift_obj = self.id_shift[shift_id]
+        return shift_obj.start.isocalendar()[1]
