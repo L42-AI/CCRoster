@@ -99,7 +99,7 @@ class Greedy(Fill):
                 continue
 
             if len(schedule.CurrentAvailabilities[shift_id][1]) < 1:
-                raise LookupError('No availabilities for shift!')
+                raise LookupError(f'No availabilities for shift id: {shift_id}!')
 
             weeknum = self.get_weeknumber(shift_id)
 

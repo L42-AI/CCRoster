@@ -17,8 +17,11 @@ class Presenter:
     def get_schedule(self) -> Schedule:
         return self._build_schedule(self.config)
     
-    def print_schedule(self, schedule: Schedule) -> None:
-        View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
+    def print_schedule(self, schedule: Schedule | None) -> None:
+        if schedule != None:
+            View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
+        else:
+            print('No Schedule!')
 
     def _retrieve_data(self, config: dict[str, str]) -> tuple[list[Shift], list[Employee]]:
         match config['datatype']:
