@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from model.data.assign import employee_list, shift_list
+from model.data.assign_mock import employee_list, shift_list
 
 from model.representation.data_classes.schedule import Schedule
 from model.representation.data_classes.employee import Employee
@@ -37,12 +37,12 @@ class Model:
 
     def optimal(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
         fail = 0
+        schedule = None
         for _ in tqdm(range(int(config['optimize_runs']))):
-            try:
-                schedule = Model._greedy(employee_list, shift_list)
-            except:
+            schedule = Model._greedy(employee_list, shift_list)
+            if any(schedule.values()) == None:
                 fail += 1
-        
+    
         fail_propotion = fail / 500
         print(fail_propotion)
 
@@ -50,6 +50,7 @@ class Model:
             return schedule
         return None
 
+    """ GENERATORS """
 
     def _greedy(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         G = Greedy(
