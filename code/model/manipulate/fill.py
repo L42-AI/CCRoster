@@ -89,7 +89,6 @@ class Greedy(Fill):
         filled = 0
         shift_id_list = [shift.id for shift in shift_list]
         while filled < len(schedule):
-            
             # print(schedule.CurrentAvailabilities[8])
             
             shift_id = sorted(shift_id_list, key=lambda x: len(schedule.CurrentAvailabilities[x][1]) if schedule.CurrentAvailabilities[x][0] == 0 else 999)[0]
@@ -98,19 +97,18 @@ class Greedy(Fill):
             if schedule[shift_id] is not None:
                 continue
 
-            if len(schedule.CurrentAvailabilities[shift_id][1]) < 1:
-                raise LookupError(f'No availabilities for shift id: {shift_id}!')
+            if len(schedule.CurrentAvailabilities[shift_id][1].keys()) < 1:
+                # print(f'No availabilities for shift id: {shift_id}!')
+                return schedule
 
             weeknum = self.get_weeknumber(shift_id)
 
             Greedy.compute_priority(employee_list, schedule, weeknum)
+            Greedy.set_weights(schedule, shift_id)
 
-            possible_employee_ids = schedule.CurrentAvailabilities[shift_id][1]
-            selected_employee_id = random.choice(tuple(possible_employee_ids))
-            
-            for employee_id in possible_employee_ids:
-                if self.id_employee_dict[employee_id].priority < self.id_employee_dict[selected_employee_id].priority:
-                    selected_employee_id = employee_id
+            possible_employee_ids = list(schedule.CurrentAvailabilities[shift_id][1].keys())
+            possible_employee_weights = list(schedule.CurrentAvailabilities[shift_id][1].values())
+            selected_employee_id = random.choices(possible_employee_ids, possible_employee_weights)[0]
             
             self.schedule_in(shift_id, selected_employee_id, schedule)
 
@@ -151,15 +149,17 @@ class Greedy(Fill):
         if added:
             for coliding_shift_id in coliding_shifts:
                 if employee_id in Schedule.CurrentAvailabilities[coliding_shift_id][1]:
-                    Schedule.CurrentAvailabilities[coliding_shift_id][1].remove(employee_id)
+                    Schedule.CurrentAvailabilities[coliding_shift_id][1].pop(employee_id)
         
             if max_hit:
                 for availability in Schedule.CurrentAvailabilities:
                     if employee_id in Schedule.CurrentAvailabilities[availability][1]:
-                        Schedule.CurrentAvailabilities[availability][1].remove(employee_id)
+                        Schedule.CurrentAvailabilities[availability][1].pop(employee_id)
         else:
+            # NEEDS TO BE DEPENDENT OF TOTAL AVAILABILITIES
             for availability in Schedule.CurrentAvailabilities:
                 if employee_id in Schedule.CurrentAvailabilities[availability][1]:
+                    print('readded')
                     Schedule.CurrentAvailabilities[availability][1].add(employee_id)
 
     @staticmethod
@@ -176,11 +176,11 @@ class Greedy(Fill):
             week_max = employee.get_week_max(weeknum)
             week_min = employee.min_hours
 
-            if weeknum in employee.availability:
-                availability_priority = (len(employee.availability[weeknum]) - week_max)
+            if weeknum in employee.availability_dict:
+                availability_priority = (len(employee.availability_dict[weeknum]) - week_max)
                 week_min_priority = (len(workload[weeknum]) - week_min)
                 week_max_priority = (week_max - len(workload[weeknum]))
-            
+
                 if availability_priority < 1:
                     availability_priority = -99
                 if week_min_priority < 0:
@@ -192,6 +192,12 @@ class Greedy(Fill):
             else:
                 employee.priority = 999
 
+    @staticmethod
+    def set_weights(Schedule: Schedule, shift_id: int):
+        new_weight = 1 / len(Schedule.CurrentAvailabilities[shift_id][1].keys())
+        for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
+            Schedule.CurrentAvailabilities[shift_id][1][employee_id] = new_weight
+    
     @staticmethod
     def update_highest_priority_list(employee_list: list[Employee]) -> None:
         return sorted(employee_list, key = lambda employee: employee.priority)
