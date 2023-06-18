@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from model.model import Model
 from view.view import View
 from model.data.database import download
@@ -14,9 +16,23 @@ class Presenter:
         self.config = config
         self.shift_list, self.employee_list = self._retrieve_data(self.config)
 
+    def get_multi_schedules(self) -> list[Schedule]:
+        if 'num_schedules' not in self.config:
+            raise NameError(f'num_schedules missing from config file')
+        
+        iterations = int(self.config['num_schedules'])
+
+        schedules = []
+        for _ in tqdm(range(iterations)):
+            schedules.append(self._build_schedule(self.config))
+        return schedules
+
     def get_schedule(self) -> Schedule:
         return self._build_schedule(self.config)
     
+    def graph_schedules(self, schedules: list[Schedule]):
+        View.graph_schedules(schedules)
+
     def print_schedule(self, schedule: Schedule | None) -> None:
         if schedule != None:
             View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
