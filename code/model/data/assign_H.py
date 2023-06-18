@@ -43,7 +43,10 @@ employee_list.append(Employee('Roos', ' ', [
     Availability(start=datetime(2023,5,27,0), end=datetime(2023,5,27,15,0)),
     ], {20:3, 21:3}, 1, 10, 1, [1], 'coffee_company'))
 
-employee_list.append(Employee('Lodewijk', ' ', [
+employee_list.append(Employee(
+    first_name='Lodewijk',
+    last_name=' ',
+    availability=[
     Availability(start=datetime(2023,5,15,0), end=datetime(2023,5,15,23,59)),
     Availability(start=datetime(2023,5,16,0), end=datetime(2023,5,16,23,59)),
     Availability(start=datetime(2023,5,17,0), end=datetime(2023,5,17,23,59)),
@@ -53,7 +56,15 @@ employee_list.append(Employee('Lodewijk', ' ', [
     Availability(start=datetime(2023,5,24,0), end=datetime(2023,5,24,23,59)),
     Availability(start=datetime(2023,5,25,0), end=datetime(2023,5,25,23,59)),
     Availability(start=datetime(2023,5,26,0), end=datetime(2023,5,26,23,59)),
-    ], {20:3, 21:3}, 1, 10, 1, [1], 'coffee_company'))
+    ],
+    maximum={20:3, 21:3},
+    min_hours=1,
+    wage=10,
+    level=1,
+    tasks=[1],
+    location='coffee_company'
+    )
+    )
 
 employee_list.append(Employee('Margot', ' ', [
     ], {20:2, 21:2}, 1, 10, 1, [1], 'coffee_company'))
@@ -74,6 +85,8 @@ employee_list.append(Employee('Alex', ' ', [
     Availability(start=datetime(2023,5,18,0), end=datetime(2023,5,18,23,59)),
     Availability(start=datetime(2023,5,19,0), end=datetime(2023,5,19,23,59)),
     Availability(start=datetime(2023,5,20,0), end=datetime(2023,5,20,23,59)),
+    Availability(start=datetime(2023,5,21,0), end=datetime(2023,5,21,23,59)),
+    Availability(start=datetime(2023,5,21,0), end=datetime(2023,5,21,23,59)),
     Availability(start=datetime(2023,5,21,0), end=datetime(2023,5,21,23,59)),
     Availability(start=datetime(2023,5,22,0), end=datetime(2023,5,22,23,59)),
     Availability(start=datetime(2023,5,23,0), end=datetime(2023,5,23,23,59)),

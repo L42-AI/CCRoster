@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import Column, Integer, DateTime
 
 from model.representation.data_classes.setup import Base
@@ -12,7 +14,7 @@ class Shift(Base):
     location = Column(Integer)
     task = Column(Integer)
 
-    def __init__(self, start, end, task, location) -> None:
+    def __init__(self, start: datetime.datetime, end: datetime.datetime, task: int, location: int) -> None:
         self.start = start
         self.end = end
         self.task = task
@@ -22,7 +24,7 @@ class Shift(Base):
     def __str__(self) -> str:
         start_time = self.start.strftime("%m-%d %H:%M")
         end_time = self.end.strftime("%m-%d %H:%M")
-        return f"Task {self.task}, {start_time} - {end_time}"
+        return f"ID:{self.id}, Time: {start_time} - {end_time}, Task: {self.task}, Weeknum:{self.start.isocalendar()[1]}"
     
     def get_id(self) -> int:
         if self.id == -999:

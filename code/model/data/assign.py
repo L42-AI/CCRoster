@@ -78,13 +78,13 @@ employee_list.append(Employee('Tamar', 'van der Zalm', [Availability(start=datet
                                                        Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
                                                         Availability(start=datetime(2023, 5,2,7), end=datetime(2023, 5,2,18,00))],
                                                         {5:2, 17:2, 18:2, 3:2}, 4, 50, 1, [1], 1)) # location 1 is coffee comp for development
-employee_list.append(Employee('Dumdum', 'Dummy', [Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                        Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
-                                                       Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
-                                                       Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
-                                                       Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
-                                                        Availability(start=datetime(2023, 5,2,7), end=datetime(2023, 5,2,18,00))],
-                                                        {5:2, 17:2, 18:2, 3:2}, 0, 100000, 1, [1], 1)) # location 1 is coffee comp for development
+# employee_list.append(Employee('Dumdum', 'Dummy', [Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
+#                                                         Availability(start=datetime(2023, 4,30,0), end=datetime(2023, 4,30,23,59)),
+#                                                        Availability(start=datetime(2023, 5,1,0), end=datetime(2023, 5,1,23,59)),
+#                                                        Availability(start=datetime(2023, 5,2,0), end=datetime(2023, 5,2,23,59)),
+#                                                        Availability(start=datetime(2023, 5,1,13), end=datetime(2023, 5,1,23,59)),
+#                                                         Availability(start=datetime(2023, 5,2,7), end=datetime(2023, 5,2,18,00))],
+#                                                         {5:2, 17:2, 18:2, 3:2}, 0, 100000, 1, [1], 1)) # location 1 is coffee comp for development
 
 
 # short shifts
