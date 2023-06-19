@@ -31,7 +31,7 @@ class Presenter:
         return self._build_schedule(self.config)
     
     def graph_schedules(self, schedules: list[Schedule]):
-        View.graph_schedules(schedules)
+        View.multi_color_barplot(schedules, ['red', 'green'])
 
     def print_schedule(self, schedule: Schedule | None) -> None:
         if schedule != None:
