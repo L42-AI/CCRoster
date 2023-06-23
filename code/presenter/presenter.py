@@ -2,13 +2,13 @@ from tqdm import tqdm
 
 from model.model import Model
 from view.view import View
-from model.data.database import download
+# from model.data.database import download
 
 from model.representation.data_classes.schedule import Schedule
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 
-from helpers import gen_id_dict
+from helpers import gen_id_dict, recursive_copy
 
 class Presenter:
 
@@ -31,20 +31,25 @@ class Presenter:
         return self._build_schedule(self.config)
     
     def graph_schedules(self, schedules: list[Schedule]):
-        View.multi_color_barplot(schedules, ['red', 'green'])
+        invalid_schedules, valid_schedules, shift_count_dict = Model.split_schedules(schedules)
+        View.print_success_rate(invalid_schedules, valid_schedules)
+
+        invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
+        valid_counts = Model.count_occupation(valid_schedules, recursive_copy(shift_count_dict))
+        View.plot_schedules(valid_counts, invalid_counts, ['red', 'green'])
 
     def print_schedule(self, schedule: Schedule | None) -> None:
         if schedule != None:
             View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
         else:
-            print('No Schedule!')
+            raise ValueError('No Schedule!')
 
     def _retrieve_data(self, config: dict[str, str]) -> tuple[list[Shift], list[Employee]]:
         match config['datatype']:
             case 'offline':
                 return Model.get_offline_data()
-            case 'online':
-                return download(int(config['session_id']))
+            # case 'online':
+            #     return download(int(config['session_id']))
             case other:
                 raise ValueError(f"{config['datatype']} not valid! Choose from:\n-'offline'\n-'online'")
 

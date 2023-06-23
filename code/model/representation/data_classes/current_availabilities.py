@@ -1,5 +1,7 @@
+from pprint import pprint
+
 class CurrentAvailabilities(dict):
-    def __init__(self, total_availabilities: dict[int, set[int]]):
+    def __init__(self, total_availabilities: dict[int, dict[int, int]]):
         self.total_availabilities = total_availabilities
 
         for shift_id, shift_availability in total_availabilities.items():

@@ -65,18 +65,23 @@ def recursive_copy(obj: object) -> object:
 
 
 
-def _possible_shift(workable_shift: Availability, employee: Employee, shift: Shift) -> bool:
+def _possible_shift(workable_shift: Availability, employee: Employee, shift: Shift) -> tuple[bool, int]:
 
     # Check time
-    if workable_shift.start > shift.start or workable_shift.end < shift.end:
-        return False
+    start_gap = shift.start - workable_shift.start
+    end_gap = workable_shift.end - shift.end
+
+    if not (start_gap.days or end_gap.days) == 0 :
+        return False, -999
+
+    closeness = start_gap.seconds + end_gap.seconds
 
     # Check task
     tasks_list = employee.get_tasks()
     for task in tasks_list:
         if task == shift.task:
-            return True
-    return False
+            return True, closeness
+    return False, -999
 
 def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[int]:
     """
@@ -84,15 +89,34 @@ def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[i
     for now it just returns a hardcoded list with availability
     """
 
-    availabilities = set()
+    availabilities = {}
     for employee in employee_list:
         for weeknum in employee.availability_dict:
             for workable_shift in employee.availability_dict[weeknum]:
 
-                if _possible_shift(workable_shift, employee, shift):
-                    availabilities.add(employee.id)
+                possibility = _possible_shift(workable_shift, employee, shift)
+                if possibility[0]:
+                    if employee.id not in availabilities:
+                        availabilities[employee.id] = possibility[1]
 
     return availabilities
 
 def gen_total_availabilities(employee_list: list[Employee], shift_list: list[Shift]) -> dict[int, set[int]]:
     return {shift.id: _employee_availability(shift, employee_list) for shift in shift_list}
+
+def compute_prob(score: float, total: float) -> float:
+    """
+    Normalize a score based on a part and a total.
+
+    Args:
+        score: The score to be normalized.
+        total: The total score.
+
+    Returns:
+        The normalized score.
+    """
+    if total == 0:
+        return 1.0
+
+    normalized_score = (score / total)
+    return normalized_score

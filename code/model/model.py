@@ -71,3 +71,38 @@ class Model:
             )
         
         return F.generate(employee_list, shift_list)
+
+    """ SCHEDULES PROCESSING """
+
+    def split_schedules(schedules: list[Schedule]) -> tuple[list[Schedule], list[Schedule]]:
+
+        shift_count_dict = {shift_id: {} for shift_id in schedules[0]}
+
+        valid_schedules = []
+        invalid_schedules = []
+
+        for schedule in schedules:
+
+            for shift_id, employee_id in schedule.items():
+                if employee_id not in shift_count_dict[shift_id]:
+                    shift_count_dict[shift_id][str(employee_id)] = 0
+
+            if Model._has_none_values(schedule):
+                invalid_schedules.append(schedule)
+            else:
+                valid_schedules.append(schedule)
+        
+        return invalid_schedules, valid_schedules, shift_count_dict
+
+    def count_occupation(schedules: list[Schedule], shift_count_dict: dict[int, dict[int, int]]) -> dict[int, dict[int, int]]:
+        for schedule in schedules:
+            for shift_id, employee_id in schedule.items():
+                shift_count_dict[shift_id][str(employee_id)] += 1
+
+        return shift_count_dict
+
+    def _has_none_values(data_dict: dict):
+        for value in data_dict.values():
+            if value is None:
+                return True
+        return False

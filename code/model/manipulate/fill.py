@@ -1,4 +1,6 @@
 import random
+from pprint import pprint
+
 
 from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
@@ -7,7 +9,7 @@ from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.shift import Shift
 
-from helpers import get_random_shift_id
+from helpers import get_random_shift_id, compute_prob
 
 """ Schedule manipulation """
 
@@ -101,10 +103,9 @@ class Greedy(Fill):
                 # print(f'No availabilities for shift id: {shift_id}!')
                 return schedule
 
-            weeknum = self.get_weeknumber(shift_id)
-
-            Greedy.compute_priority(employee_list, schedule, weeknum)
             Greedy.set_weights(schedule, shift_id)
+            # Greedy.compute_weights(schedule, shift_id)
+            # Greedy.compute_priority(employee_list, schedule, weeknum)
 
             possible_employee_ids = list(schedule.CurrentAvailabilities[shift_id][1].keys())
             possible_employee_weights = list(schedule.CurrentAvailabilities[shift_id][1].values())
@@ -160,7 +161,7 @@ class Greedy(Fill):
             for availability in Schedule.CurrentAvailabilities:
                 if employee_id in Schedule.CurrentAvailabilities[availability][1]:
                     print('readded')
-                    Schedule.CurrentAvailabilities[availability][1].add(employee_id)
+                    Schedule.CurrentAvailabilities[availability][1][employee_id] = 0
 
     @staticmethod
     def set_shift_occupation(Schedule: Schedule, shift_id: int, occupied: bool) -> None:
@@ -197,6 +198,16 @@ class Greedy(Fill):
         new_weight = 1 / len(Schedule.CurrentAvailabilities[shift_id][1].keys())
         for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
             Schedule.CurrentAvailabilities[shift_id][1][employee_id] = new_weight
+
+    @staticmethod
+    def compute_weights(Schedule: Schedule, shift_id: int):
+        availabilities = Schedule.CurrentAvailabilities.total_availabilities[shift_id]
+
+        total_closeness = sum(availabilities.values())
+
+        for employee_id, closeness in availabilities.items():
+            prob = compute_prob(closeness, total_closeness)
+            Schedule.CurrentAvailabilities[shift_id][1][employee_id] = prob
     
     @staticmethod
     def update_highest_priority_list(employee_list: list[Employee]) -> None:
