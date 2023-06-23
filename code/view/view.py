@@ -36,6 +36,8 @@ class View:
             None (displays the barplot).
         """
 
+        print(len(valid_counts))
+
         # Generate bar plots for each shift assignment count
         fig, axes = plt.subplots(3, 9, figsize=(16, 8))
         fig.tight_layout(pad=3.0)
@@ -44,7 +46,7 @@ class View:
         View._plot(axes, valid_counts, colors[1], bottom=invalid_counts)
         
         # Show the plot
-        plt.show()
+        # plt.show()
 
     def _plot(axes: np.ndarray, counts: dict[int, dict[int, int]], color: str, bottom: dict[int, dict[int, int]] = None):
         def calc_bottom(shift_id: int, bottom: dict[int, dict[int, int]]) -> list[int]:

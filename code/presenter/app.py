@@ -10,9 +10,9 @@ from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.availability import Availability
 from model.representation.data_classes.shift import Shift
 from model.data.database import download_employees, download_shifts
-from model.model import Generator
+from model.model import Model
 from view.view import View
-from presentor.presentor import Scheduler
+from presenter.presenter import Presenter
 from main_schedule import config_dev as config
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -196,7 +196,7 @@ def schedule():
 def generate_schedule():
     ''' generate a schedule'''
     _id = session['id']
-    S = Scheduler(Generator, View, _id)
+    S = Presenter(Model, View, _id)
     print(S.get_schedule(config))
 
     # for now do nothing with the schedule
