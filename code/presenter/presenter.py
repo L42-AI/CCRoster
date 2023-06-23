@@ -2,7 +2,7 @@ from tqdm import tqdm
 
 from model.model import Model
 from view.view import View
-# from model.data.database import download
+from model.data.database import download
 
 from model.representation.data_classes.schedule import Schedule
 from model.representation.data_classes.shift import Shift
@@ -48,8 +48,8 @@ class Presenter:
         match config['datatype']:
             case 'offline':
                 return Model.get_offline_data()
-            # case 'online':
-            #     return download(int(config['session_id']))
+            case 'online':
+                return download(int(config['session_id']))
             case other:
                 raise ValueError(f"{config['datatype']} not valid! Choose from:\n-'offline'\n-'online'")
 
