@@ -90,57 +90,16 @@ configurations = [
 
 
 config_dev = {
-    'runtype' : 'propagate',
+    'runtype' : 'greedy',
     'num_plants' : '100',
     'num_gens' : '5',
     'temperature' : '0.5',
 }
 
-import cProfile
-import pstats
-from io import StringIO
-
-def plot_results(session_id, dev=False):
-    presenter = Presenter(Generator, session_id)
-    fig, ax = plt.subplots()
-
-    data = []
-    for i, config in enumerate(configurations):
-        scores = []
-        for _ in range(30):
-            print(f'i: {i}, #: {_}')
-            schedule = presenter.get_schedule(config)
-            scores.append(schedule.cost)
-        
-        ax.hist(scores, alpha=0.4, label=f'PPA config{i+7}', bins=10)
-        data.extend([(f'PPA config{i+7}', score) for score in scores])
-
-    ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.xlabel('Cost')
-    plt.ylabel('Frequency')
-    plt.title('PPA Results')
-    plt.savefig('PPA_results.png')
-    plt.show()
-
-    # Store data in a CSV file
-    output_file = 'PPA_results.csv'
-    with open(output_file, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Configuration', 'Cost'])
-        writer.writerows(data)
-
-    print(f'Data exported to {output_file}.')
-        
-def run_once(session_id, dev=False):
-    if dev:
-        presenter= Presenter(Generator, session_id)
-        print(presenter.get_schedule(config_dev))
-    else:
-        presenter= Presenter(Generator, session_id)
-        print(presenter.get_schedule(configurations[1]))
+def main(session_id):
+    P = Presenter(session_id)
+    print(P.get_schedule(config_dev))
 
 if __name__ == "__main__":
-    NUMBER_OF_PLANTS = 300
-    NUMBER_OF_GENS = 20
     session_id = 1 # DEVELOPER DATA
-    run_once(session_id)
+    main(session_id)
