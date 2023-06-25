@@ -100,6 +100,7 @@ class Model:
                 shift_count_dict[shift_id][str(employee_id)] += 1
 
         return shift_count_dict
+    
 
     def _has_none_values(data_dict: dict):
         for value in data_dict.values():

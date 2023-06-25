@@ -36,10 +36,8 @@ class View:
             None (displays the barplot).
         """
 
-        print(len(valid_counts))
-
         # Generate bar plots for each shift assignment count
-        fig, axes = plt.subplots(3, 9, figsize=(16, 8))
+        fig, axes = plt.subplots(5, 10, figsize=(16, 8))
         fig.tight_layout(pad=3.0)
         
         View._plot(axes, invalid_counts, colors[0])
@@ -59,7 +57,7 @@ class View:
             
         
         for shift_id, shift_counts in counts.items():
-            ax: plt.Axes = axes[shift_id // 9, shift_id % 9]
+            ax: plt.Axes = axes[shift_id // 10, shift_id % 10]
             
             if bottom:
                 bar_bottom = calc_bottom(shift_id, bottom)

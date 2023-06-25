@@ -8,7 +8,7 @@ config = {
     'num_gens' : '5',
     'temperature' : '0.5',
     'optimize_runs' : '2000',
-    'num_schedules' : '100'
+    'num_schedules' : '1000'
 }
 
 def main(config):
