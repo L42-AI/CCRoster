@@ -1,0 +1,2 @@
+from presentor.app import app
+app.run(debug=True)

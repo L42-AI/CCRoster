@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+<!-- do not use the nav bar. You should not be able to go the the home screen if you still have to login:)-->>
+{% block navbar %}
+{% endblock %} 
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Include your custom CSS file here, if you have one -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="login-container">
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <input type="submit" value="Login">
+        </form>
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Create Account</a>
+    </div>
+</body>
+</html>
+{% endblock %}
