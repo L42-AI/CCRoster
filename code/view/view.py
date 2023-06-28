@@ -21,7 +21,7 @@ class View:
             return len(unique_elements)
 
         print('Success factor:', len(valid_schedules) / (len(valid_schedules) + len(invalid_schedules)))
-        print('Amount of unique arangements:', count_unique_elements(valid_schedules))
+        print('Amount of unique arrangements:', count_unique_elements(valid_schedules))
 
     def plot_schedules(valid_counts: dict[int, dict[int, int]], invalid_counts: dict[int, dict[int, int]], colors: list[str]):
         """
@@ -37,14 +37,14 @@ class View:
         """
 
         # Generate bar plots for each shift assignment count
-        fig, axes = plt.subplots(5, 10, figsize=(16, 8))
+        fig, axes = plt.subplots(3, 9, figsize=(16, 8))
         fig.tight_layout(pad=3.0)
         
         View._plot(axes, invalid_counts, colors[0])
         View._plot(axes, valid_counts, colors[1], bottom=invalid_counts)
         
         # Show the plot
-        # plt.show()
+        plt.show()
 
     def _plot(axes: np.ndarray, counts: dict[int, dict[int, int]], color: str, bottom: dict[int, dict[int, int]] = None):
         def calc_bottom(shift_id: int, bottom: dict[int, dict[int, int]]) -> list[int]:
@@ -57,7 +57,7 @@ class View:
             
         
         for shift_id, shift_counts in counts.items():
-            ax: plt.Axes = axes[shift_id // 10, shift_id % 10]
+            ax: plt.Axes = axes[shift_id // 9, shift_id % 9]
             
             if bottom:
                 bar_bottom = calc_bottom(shift_id, bottom)

@@ -1,5 +1,5 @@
 from tqdm import tqdm
-
+from pprint import pprint
 from model.model import Model
 from view.view import View
 from model.data.database import download
@@ -8,7 +8,7 @@ from model.representation.data_classes.schedule import Schedule
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 
-from helpers import gen_id_dict, recursive_copy
+from helpers import gen_id_dict, recursive_copy, gen_total_availabilities
 
 class Presenter:
 
@@ -21,17 +21,31 @@ class Presenter:
             raise NameError(f'num_schedules missing from config file')
         
         iterations = int(self.config['num_schedules'])
+        batches = int(iterations / 10)
+
+        self.config['weights'] = recursive_copy(gen_total_availabilities(self.employee_list, self.shift_list))
 
         schedules = []
-        for _ in tqdm(range(iterations)):
-            schedules.append(self._build_schedule(self.config))
+        print(f'Running {iterations} iterations in 10 batches')
+        for _ in tqdm(range(10)):
+            schedules_batch = []
+            for _ in range(batches):
+                schedule = self._build_schedule(self.config)
+
+                schedules_batch.append(schedule)
+                schedules.append(schedule)
+
+            valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules_batch)
+            valid_counts = Model.count_occupation(valid_schedules, recursive_copy(shift_count_dict))
+            invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
+            Model.compute_weights(valid_counts, invalid_counts, self.config['weights'])
         return schedules
 
     def get_schedule(self) -> Schedule:
         return self._build_schedule(self.config)
     
     def graph_schedules(self, schedules: list[Schedule]):
-        invalid_schedules, valid_schedules, shift_count_dict = Model.split_schedules(schedules)
+        valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules)
         View.print_success_rate(invalid_schedules, valid_schedules)
 
         invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
@@ -58,7 +72,7 @@ class Presenter:
             case 'random':
                 return Model.random(self.employee_list, self.shift_list)
             case 'greedy':
-                return Model.greedy(self.employee_list, self.shift_list)
+                return Model.greedy(self.employee_list, self.shift_list, self.config['weights'])
             case 'propagate':
                 return Model.propagate(self.employee_list, self.shift_list, config)
             case 'optimal':

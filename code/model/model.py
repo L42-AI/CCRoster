@@ -26,8 +26,8 @@ class Model:
     def random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._random(employee_list, shift_list)
 
-    def greedy(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
-        return Model._greedy(employee_list, shift_list)
+    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
+        return Model._greedy(employee_list, shift_list, weights)
 
     def propagate(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
         schedule = Model._random(employee_list, shift_list)
@@ -52,7 +52,7 @@ class Model:
 
     """ GENERATORS """
 
-    def _greedy(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
+    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
         G = Greedy(
             total_availabilities=recursive_copy(gen_total_availabilities(employee_list, shift_list)),
             time_conflict_dict=gen_time_conflict_dict(shift_list),
@@ -60,7 +60,7 @@ class Model:
             id_shift=gen_id_dict(shift_list)
             )
         
-        return G.generate(employee_list, shift_list)
+        return G.generate(employee_list, shift_list, weights)
     
     def _random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         F = Fill(
@@ -92,7 +92,7 @@ class Model:
             else:
                 valid_schedules.append(schedule)
         
-        return invalid_schedules, valid_schedules, shift_count_dict
+        return valid_schedules, invalid_schedules, shift_count_dict
 
     def count_occupation(schedules: list[Schedule], shift_count_dict: dict[int, dict[int, int]]) -> dict[int, dict[int, int]]:
         for schedule in schedules:
@@ -101,6 +101,15 @@ class Model:
 
         return shift_count_dict
     
+    def compute_weights(valid_counts, invalid_counts, weights):
+
+        for shift_id in valid_counts:
+            for employee_id in valid_counts[shift_id]:
+                if employee_id == 'None':
+                    continue
+                if employee_id not in weights[shift_id]:
+                    weights[shift_id][employee_id] = 1
+
 
     def _has_none_values(data_dict: dict):
         for value in data_dict.values():

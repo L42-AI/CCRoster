@@ -84,7 +84,7 @@ class Greedy(Fill):
 
     """ Main """
 
-    def generate(self, employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
+    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
 
         schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
 
