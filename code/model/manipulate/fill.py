@@ -84,7 +84,7 @@ class Greedy(Fill):
 
     """ Main """
 
-    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
+    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
 
         schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
 
@@ -103,9 +103,9 @@ class Greedy(Fill):
                 # print(f'No availabilities for shift id: {shift_id}!')
                 return schedule
 
-            Greedy.apply_weights(schedule, weights)
-            # Greedy.compute_weights(schedule, shift_id)
-            # Greedy.compute_priority(employee_list, schedule, weeknum)
+            if weights is not None:
+                # Greedy.reset_weights(schedule, shift_id)
+                Greedy.apply_weights(schedule, weights)
 
             possible_employee_ids = list(schedule.CurrentAvailabilities[shift_id][1].keys())
             possible_employee_weights = list(schedule.CurrentAvailabilities[shift_id][1].values())
@@ -203,13 +203,3 @@ class Greedy(Fill):
         for shift_id in Schedule.CurrentAvailabilities:
             for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
                 Schedule.CurrentAvailabilities[shift_id][1][employee_id] = weights[shift_id][employee_id]
-
-    @staticmethod
-    def compute_weights(Schedule: Schedule, shift_id: int):
-        availabilities = Schedule.CurrentAvailabilities.total_availabilities[shift_id]
-
-        total_closeness = sum(availabilities.values())
-
-        for employee_id, closeness in availabilities.items():
-            prob = compute_prob(closeness, total_closeness)
-            Schedule.CurrentAvailabilities[shift_id][1][employee_id] = prob

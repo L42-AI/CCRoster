@@ -26,7 +26,7 @@ class Model:
     def random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._random(employee_list, shift_list)
 
-    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
+    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
         return Model._greedy(employee_list, shift_list, weights)
 
     def propagate(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
@@ -50,9 +50,29 @@ class Model:
             return schedule
         return None
 
+    def multi_schedules(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> list[Schedule]:
+        if 'num_schedules' not in config:
+            raise NameError(f'num_schedules missing from config file')
+        
+        iterations = int(config['num_schedules'])
+        weights = recursive_copy(gen_total_availabilities(employee_list, shift_list))
+
+        schedules = []
+        print(f'Running {iterations} iterations in 10 batches')
+        for _ in tqdm(range(10)):
+            schedules_batch = []
+            for _ in range(int(iterations / 10)):
+                schedule = Model._greedy(employee_list, shift_list, weights)
+
+                schedules_batch.append(schedule)
+                schedules.append(schedule)
+
+            weights = Model.compute_weights(schedules_batch, recursive_copy(weights))
+        return schedules
+
     """ GENERATORS """
 
-    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
+    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
         G = Greedy(
             total_availabilities=recursive_copy(gen_total_availabilities(employee_list, shift_list)),
             time_conflict_dict=gen_time_conflict_dict(shift_list),

@@ -16,33 +16,18 @@ class Presenter:
         self.config = config
         self.shift_list, self.employee_list = self._retrieve_data(self.config)
 
-    def get_multi_schedules(self) -> list[Schedule]:
-        if 'num_schedules' not in self.config:
-            raise NameError(f'num_schedules missing from config file')
-        
-        iterations = int(self.config['num_schedules'])
-        batches = int(iterations / 10)
-
-        self.config['weights'] = recursive_copy(gen_total_availabilities(self.employee_list, self.shift_list))
-
-        schedules = []
-        print(f'Running {iterations} iterations in 10 batches')
-        for _ in tqdm(range(10)):
-            schedules_batch = []
-            for _ in range(batches):
-                schedule = self._build_schedule(self.config)
-
-                schedules_batch.append(schedule)
-                schedules.append(schedule)
-
-            self.config['weights'] = Model.compute_weights(schedules_batch, recursive_copy(self.config['weights']))
-        pprint(self.config['weights'])
-        return schedules
-
     def get_schedule(self) -> Schedule:
         return self._build_schedule(self.config)
     
+    def get_schedules(self) -> Schedule:
+        if self.config['runtype'] not in ['multi']:
+            raise ValueError(f"{self.config['datatype']} not valid! Choose from:\n-'multi'")
+        return Model.multi_schedules(self.employee_list, self.shift_list, self.config)
+    
     def graph_schedules(self, schedules: list[Schedule]):
+        if not isinstance(schedules, list):
+            raise IndexError('Schedules are not a list')
+        
         valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules)
         View.print_success_rate(invalid_schedules, valid_schedules)
 
@@ -70,7 +55,7 @@ class Presenter:
             case 'random':
                 return Model.random(self.employee_list, self.shift_list)
             case 'greedy':
-                return Model.greedy(self.employee_list, self.shift_list, config['weights'])
+                return Model.greedy(self.employee_list, self.shift_list)
             case 'propagate':
                 return Model.propagate(self.employee_list, self.shift_list, config)
             case 'optimal':
