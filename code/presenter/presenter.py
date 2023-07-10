@@ -35,10 +35,8 @@ class Presenter:
                 schedules_batch.append(schedule)
                 schedules.append(schedule)
 
-            valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules_batch)
-            valid_counts = Model.count_occupation(valid_schedules, recursive_copy(shift_count_dict))
-            invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
-            Model.compute_weights(valid_counts, invalid_counts, self.config['weights'])
+            self.config['weights'] = Model.compute_weights(schedules_batch, recursive_copy(self.config['weights']))
+        pprint(self.config['weights'])
         return schedules
 
     def get_schedule(self) -> Schedule:
@@ -72,7 +70,7 @@ class Presenter:
             case 'random':
                 return Model.random(self.employee_list, self.shift_list)
             case 'greedy':
-                return Model.greedy(self.employee_list, self.shift_list, self.config['weights'])
+                return Model.greedy(self.employee_list, self.shift_list, config['weights'])
             case 'propagate':
                 return Model.propagate(self.employee_list, self.shift_list, config)
             case 'optimal':

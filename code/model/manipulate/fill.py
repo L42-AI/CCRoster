@@ -9,7 +9,7 @@ from model.representation.data_classes.workload import Workload
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.shift import Shift
 
-from helpers import get_random_shift_id, compute_prob
+from helpers import get_random_shift_id, compute_prob, softmax_function
 
 """ Schedule manipulation """
 
@@ -84,7 +84,7 @@ class Greedy(Fill):
 
     """ Main """
 
-    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
+    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
 
         schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
 
@@ -103,7 +103,7 @@ class Greedy(Fill):
                 # print(f'No availabilities for shift id: {shift_id}!')
                 return schedule
 
-            Greedy.set_weights(schedule, shift_id)
+            Greedy.apply_weights(schedule, weights)
             # Greedy.compute_weights(schedule, shift_id)
             # Greedy.compute_priority(employee_list, schedule, weeknum)
 
@@ -194,10 +194,15 @@ class Greedy(Fill):
                 employee.priority = 999
 
     @staticmethod
-    def set_weights(Schedule: Schedule, shift_id: int):
+    def reset_weights(Schedule: Schedule, shift_id: int):
         new_weight = 1 / len(Schedule.CurrentAvailabilities[shift_id][1].keys())
         for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
             Schedule.CurrentAvailabilities[shift_id][1][employee_id] = new_weight
+
+    def apply_weights(Schedule: Schedule, weights: dict[int, dict[int, int]]):
+        for shift_id in Schedule.CurrentAvailabilities:
+            for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
+                Schedule.CurrentAvailabilities[shift_id][1][employee_id] = weights[shift_id][employee_id]
 
     @staticmethod
     def compute_weights(Schedule: Schedule, shift_id: int):
@@ -208,7 +213,3 @@ class Greedy(Fill):
         for employee_id, closeness in availabilities.items():
             prob = compute_prob(closeness, total_closeness)
             Schedule.CurrentAvailabilities[shift_id][1][employee_id] = prob
-    
-    @staticmethod
-    def update_highest_priority_list(employee_list: list[Employee]) -> None:
-        return sorted(employee_list, key = lambda employee: employee.priority)

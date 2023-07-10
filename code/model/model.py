@@ -9,7 +9,7 @@ from model.representation.data_classes.shift import Shift
 from model.manipulate.fill import Fill, Greedy
 from model.manipulate.PPA import PPA
 
-from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_total_availabilities
+from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_total_availabilities, softmax_function, improved_softmax_function
 
 class Model:
 
@@ -26,7 +26,7 @@ class Model:
     def random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._random(employee_list, shift_list)
 
-    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
+    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
         return Model._greedy(employee_list, shift_list, weights)
 
     def propagate(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
@@ -52,7 +52,7 @@ class Model:
 
     """ GENERATORS """
 
-    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, set[int]]) -> Schedule:
+    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]]) -> Schedule:
         G = Greedy(
             total_availabilities=recursive_copy(gen_total_availabilities(employee_list, shift_list)),
             time_conflict_dict=gen_time_conflict_dict(shift_list),
@@ -101,14 +101,29 @@ class Model:
 
         return shift_count_dict
     
-    def compute_weights(valid_counts, invalid_counts, weights):
-
-        for shift_id in valid_counts:
-            for employee_id in valid_counts[shift_id]:
-                if employee_id == 'None':
+    @staticmethod
+    def compute_weights(schedules: list[Schedule], weights):
+        valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules)
+        valid_counts = Model.count_occupation(valid_schedules, recursive_copy(shift_count_dict))
+        invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
+        
+        validity_rate = len(valid_schedules) / len(invalid_schedules)
+        for shift in valid_counts:
+            for employee in valid_counts[shift]:
+                if employee == 'None':
                     continue
-                if employee_id not in weights[shift_id]:
-                    weights[shift_id][employee_id] = 1
+                employee_validity_rate = valid_counts[shift][employee] / (valid_counts[shift][employee] + invalid_counts[shift][employee])
+                
+                weights[shift][int(employee)] = employee_validity_rate / validity_rate
+        
+        for shift in weights:
+            softmax_outputs = improved_softmax_function(list(weights[shift].values()))
+            for i, employee in enumerate(weights[shift]):
+                weights[shift][employee] = softmax_outputs[i]
+        
+        return weights
+
+
 
 
     def _has_none_values(data_dict: dict):

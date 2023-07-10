@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
@@ -80,7 +81,8 @@ def _possible_shift(workable_shift: Availability, employee: Employee, shift: Shi
     tasks_list = employee.get_tasks()
     for task in tasks_list:
         if task == shift.task:
-            return True, closeness
+            # return True, int((round(closeness / 10000, 0)))
+            return True, 1
     return False, -999
 
 def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[int]:
@@ -120,3 +122,62 @@ def compute_prob(score: float, total: float) -> float:
 
     normalized_score = (score / total)
     return normalized_score
+
+
+def softmax_function(lst):
+    """
+    Apply the softmax function to a list of floats.
+
+    Args:
+        lst (list): A list of floats.
+
+    Returns:
+        list: The softmax values of the input list.
+
+    """
+    # Convert the input list to a numpy array
+    arr = np.array(lst)
+
+    # Apply the softmax function
+    softmax_values = np.exp(arr) / np.sum(np.exp(arr))
+
+    # Return the softmax values as a list
+    return softmax_values.tolist()
+
+def improved_softmax_function(lst):
+    """
+    Apply the softmax function to a list of floats while handling zeros.
+
+    If the input list contains a zero at a specific index, the function will return
+    zero at the same index while softmaxing the rest of the values.
+
+    Args:
+        lst (list): A list of floats.
+
+    Returns:
+        list: The softmax values of the input list, with zeros preserved.
+
+    """
+    # Convert the input list to a numpy array
+    arr = np.array(lst)
+
+    # Find the indices of zeros in the input array
+    zero_indices = np.where(arr == 0)[0]
+
+    # Remove zeros from the array for softmax calculation
+    arr_without_zeros = np.delete(arr, zero_indices)
+
+    # Apply the softmax function to the array without zeros
+    softmax_values_without_zeros = np.exp(arr_without_zeros) / np.sum(np.exp(arr_without_zeros))
+
+    # Initialize the output array with zeros
+    output = np.zeros_like(arr)
+
+    # Assign softmax values to the corresponding indices in the output array
+    output_without_zeros = np.zeros_like(arr_without_zeros)
+    output_without_zeros[...] = softmax_values_without_zeros
+    output[np.delete(np.arange(len(arr)), zero_indices)] = output_without_zeros
+
+    # Return the output array as a list
+    return output.tolist()
+
