@@ -1,14 +1,10 @@
-from tqdm import tqdm
-from pprint import pprint
-from model.model import Model
-from view.view import View
+from model import Model
+from view import View
+
+from model.representation.data_classes import Schedule, Shift, Employee
 from model.data.database import download
 
-from model.representation.data_classes.schedule import Schedule
-from model.representation.data_classes.shift import Shift
-from model.representation.data_classes.employee import Employee
-
-from helpers import gen_id_dict, recursive_copy, gen_total_availabilities
+from helpers import gen_id_dict, recursive_copy
 
 class Presenter:
 
@@ -29,17 +25,17 @@ class Presenter:
             raise IndexError('Schedules are not a list')
         
         valid_schedules, invalid_schedules, shift_count_dict = Model.split_schedules(schedules)
-        View.print_success_rate(invalid_schedules, valid_schedules)
+        View.print_success_rate(valid_schedules, invalid_schedules)
 
-        invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
         valid_counts = Model.count_occupation(valid_schedules, recursive_copy(shift_count_dict))
+        invalid_counts = Model.count_occupation(invalid_schedules, recursive_copy(shift_count_dict))
         View.plot_schedules(valid_counts, invalid_counts, ['red', 'green'])
 
     def print_schedule(self, schedule: Schedule | None) -> None:
-        if schedule != None:
-            View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
-        else:
+        if schedule is None:
             raise ValueError('No Schedule!')
+        
+        View.print_schedule(schedule, gen_id_dict(self.employee_list), gen_id_dict(self.shift_list))
 
     def _retrieve_data(self, config: dict[str, str]) -> tuple[list[Shift], list[Employee]]:
         match config['datatype']:

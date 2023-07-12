@@ -2,12 +2,8 @@ import random
 from pprint import pprint
 
 
-from model.representation.behaviour_classes.shift_constraints import ShiftConstrains
-from model.representation.data_classes.current_availabilities import CurrentAvailabilities
-from model.representation.data_classes.schedule import Schedule
-from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.employee import Employee
-from model.representation.data_classes.shift import Shift
+from model.representation.behaviour_classes import ShiftConstrains
+from model.representation.data_classes import CurrentAvailabilities, Schedule, Workload, Employee, Shift
 
 from helpers import get_random_shift_id, compute_prob, softmax_function
 

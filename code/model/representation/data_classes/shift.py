@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy import Column, Integer, DateTime
 
-from model.representation.data_classes.setup import Base
+from model.representation.data_classes import Base
 
 
 class Shift(Base):

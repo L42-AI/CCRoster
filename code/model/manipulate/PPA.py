@@ -1,12 +1,9 @@
 from itertools import chain
 import random
 
-from model.representation.behaviour_classes.malus_calc import MalusCalc
-from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.schedule import Schedule, Plant
-from model.representation.data_classes.current_availabilities import CurrentAvailabilities
-
-from model.manipulate.mutate import mutate
+from model.representation.data_classes import CurrentAvailabilities, Workload, Schedule, Plant
+from model.representation.behaviour_classes import MalusCalc
+from model.manipulate import mutate
 
 from helpers import recursive_copy, gen_total_availabilities
 

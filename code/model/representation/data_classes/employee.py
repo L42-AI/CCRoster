@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, VARCHAR
 from sqlalchemy.orm import relationship
 
-from model.representation.data_classes.setup import Base
-from model.representation.data_classes.availability import Availability
+from model.representation.data_classes import Availability, Base
 
 
 class Task(Base):

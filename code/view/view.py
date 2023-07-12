@@ -3,16 +3,14 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from model.representation.data_classes.schedule import Schedule
-from model.representation.data_classes.employee import Employee
-from model.representation.data_classes.shift import Shift
+from model.representation.data_classes import Schedule, Employee, Shift
 
 class View:
     def print_schedule(schedule: Schedule, id_employee_dict: dict[int, Employee], id_shift_dict: dict[int, Shift]):
         for shift_id, employee_id in schedule.items():
             print(id_shift_dict.get(shift_id, None), id_employee_dict.get(employee_id, None))
 
-    def print_success_rate(invalid_schedules: list[Schedule], valid_schedules: list[Schedule]):
+    def print_success_rate(valid_schedules: list[Schedule], invalid_schedules: list[Schedule]):
         def count_unique_elements(lst):
             unique_elements = []
             for item in lst:

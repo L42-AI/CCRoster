@@ -2,12 +2,9 @@ from tqdm import tqdm
 
 from model.data.assign_mock import employee_list, shift_list
 
-from model.representation.data_classes.schedule import Schedule
-from model.representation.data_classes.employee import Employee
-from model.representation.data_classes.shift import Shift
+from model.representation.data_classes import Schedule, Employee, Shift
 
-from model.manipulate.fill import Fill, Greedy
-from model.manipulate.PPA import PPA
+from model.manipulate import PPA, Fill, Greedy
 
 from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_total_availabilities, softmax_function, improved_softmax_function
 

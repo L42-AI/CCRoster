@@ -1,4 +1,4 @@
-from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes import Schedule
 
 class ShiftConstrains:
 

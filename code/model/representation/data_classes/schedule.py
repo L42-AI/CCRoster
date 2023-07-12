@@ -3,9 +3,7 @@ import random
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime
-from model.representation.data_classes.current_availabilities import CurrentAvailabilities
-from model.representation.data_classes.workload import Workload
-from model.representation.data_classes.setup import Base
+from model.representation.data_classes import CurrentAvailabilities, Workload, Base
 
 class Schedule(dict):
     def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
