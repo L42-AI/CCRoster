@@ -1,14 +1,13 @@
 import random
+from typing import Any
 
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.availability import Availability
 
 
-def gen_id_dict(l: list[object]) -> dict[int, object]:
-    try:
-        l[0].id
-    except:
+def gen_id_dict(l: list[Any]) -> dict[int, Any]:
+    if not hasattr(l, 'id'):
         raise AttributeError('List contents have no ID attribute')
     
     return {x.id : x for x in l}
