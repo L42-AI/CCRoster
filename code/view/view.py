@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from model.representation.data_classes import Schedule, Employee, Shift
+from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.employee import Employee
+from model.representation.data_classes.shift import Shift
 
 class View:
     def print_schedule(schedule: Schedule, id_employee_dict: dict[int, Employee], id_shift_dict: dict[int, Shift]):

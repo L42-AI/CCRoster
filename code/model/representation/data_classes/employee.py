@@ -3,10 +3,8 @@ from sqlalchemy.orm import relationship
 
 from model.representation.data_classes.availability import Availability
 
-from sqlalchemy.ext.declarative import declarative_base
+from model.representation.data_classes.setup import Base
 
-
-Base = declarative_base()
 class Task(Base):
     __tablename__ = 'tasks'
 

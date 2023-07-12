@@ -3,12 +3,12 @@ from presenter.presenter import Presenter
 config = {
     'datatype' : 'offline',
     'session_id' : '1',
-    'runtype' : 'greedy',
+    'runtype' : 'multi',
     'num_plants' : '100',
     'num_gens' : '5',
     'temperature' : '0.5',
     'optimize_runs' : '2000',
-    'num_schedules' : '10000'
+    'num_schedules' : '100000'
 }
 
 def main(config):
