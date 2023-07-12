@@ -6,7 +6,9 @@ from datetime import datetime, timedelta
 import json
 import os
 
-from model.representation.data_classes import Availability, Employee, Shift
+from model.representation.data_classes.availability import Availability
+from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.employee import Employee
 
 from model.data.database import download_employees, download_shifts
 from model import Model

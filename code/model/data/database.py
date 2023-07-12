@@ -2,11 +2,15 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, and_
+from sqlalchemy.ext.declarative import declarative_base
 
-from model.representation.data_classes import Employee, Weekly_max, Task, Shift, Base
+from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.employee import Employee, Weekly_max, Task
 
 database_url = 'mysql+mysqlconnector://Jacob:wouterisdebestehuisgenoot@185.224.91.162:3308/rooster'
 
+
+Base = declarative_base()
 engine = create_engine(database_url)
 Base.metadata.create_all(engine)
 

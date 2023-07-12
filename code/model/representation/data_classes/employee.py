@@ -1,9 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, VARCHAR
 from sqlalchemy.orm import relationship
 
-from model.representation.data_classes import Availability, Base
+from model.representation.data_classes.availability import Availability
+
+from sqlalchemy.ext.declarative import declarative_base
 
 
+Base = declarative_base()
 class Task(Base):
     __tablename__ = 'tasks'
 
@@ -70,7 +73,7 @@ class Employee(Base):
         employee = {'first_name': self.first_name, 'last_name': self.last_name, 'level': self.level, 'location': self.location}
         return employee
 
-    def sort_availability(self, av: list[Availability]) -> dict[int, list[Availability]]:
+    def sort_availability(self, av: list) -> dict[int, list]:
         availability_dict = {}
         
         for availability in av:

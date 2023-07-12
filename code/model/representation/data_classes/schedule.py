@@ -3,7 +3,10 @@ import random
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime
-from model.representation.data_classes import CurrentAvailabilities, Workload, Base
+from sqlalchemy.ext.declarative import declarative_base
+
+from model.representation.data_classes.current_availabilities import CurrentAvailabilities
+from model.representation.data_classes.workload import Workload
 
 class Schedule(dict):
     def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
@@ -27,6 +30,7 @@ class Plant(Schedule):
         self.BUDS = 10 # number of buds this plant can have
         self.MUTATIONS = random.randint(1, 5)
 
+Base = declarative_base()
 class UploadSchedule(Base):
     __tablename__ = 'schedules'
 

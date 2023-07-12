@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from model.representation.data_classes import Schedule, Workload
+from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.workload import Workload
 
 
 class MalusCalc:

@@ -2,7 +2,9 @@ from tqdm import tqdm
 
 from model.data.assign_mock import employee_list, shift_list
 
-from model.representation.data_classes import Schedule, Employee, Shift
+from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.employee import Employee
 
 from model.manipulate import PPA, Fill, Greedy
 

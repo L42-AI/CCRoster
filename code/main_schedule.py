@@ -3,7 +3,7 @@ from presenter.presenter import Presenter
 config = {
     'datatype' : 'offline',
     'session_id' : '1',
-    'runtype' : 'multi',
+    'runtype' : 'greedy',
     'num_plants' : '100',
     'num_gens' : '5',
     'temperature' : '0.5',

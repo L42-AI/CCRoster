@@ -1,8 +1,9 @@
 import random
 import numpy as np
 
-from model.representation.data_classes import (
-    Availability, Employee, Shift)
+from model.representation.data_classes.availability import Availability
+from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.employee import Employee
 
 
 def gen_id_dict(l: list[object]) -> dict[int, object]:

@@ -1,7 +1,9 @@
-from model import Model
+from model.model import Model
 from view import View
 
-from model.representation.data_classes import Schedule, Shift, Employee
+from model.representation.data_classes.schedule import Schedule
+from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.employee import Employee
 from model.data.database import download
 
 from helpers import gen_id_dict, recursive_copy

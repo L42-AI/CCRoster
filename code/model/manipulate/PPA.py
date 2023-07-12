@@ -1,7 +1,10 @@
 from itertools import chain
 import random
 
-from model.representation.data_classes import CurrentAvailabilities, Workload, Schedule, Plant
+from model.representation.data_classes.current_availabilities import CurrentAvailabilities
+from model.representation.data_classes.workload import Workload
+from model.representation.data_classes.schedule import Schedule, Plant
+
 from model.representation.behaviour_classes import MalusCalc
 from model.manipulate import mutate
 

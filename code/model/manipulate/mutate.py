@@ -2,7 +2,9 @@ import random
 import math
 
 from model.representation.behaviour_classes import ShiftConstrains, MalusCalc
-from model.representation.data_classes import CurrentAvailabilities, Workload, Plant
+from model.representation.data_classes.current_availabilities import CurrentAvailabilities
+from model.representation.data_classes.workload import Workload
+from model.representation.data_classes.schedule import Plant
 from model.manipulate import Fill
 
 from helpers import recursive_copy, get_random_employee_id, get_random_shift_id, gen_total_availabilities, gen_time_conflict_dict
