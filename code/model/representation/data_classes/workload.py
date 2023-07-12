@@ -1,4 +1,4 @@
-from model.representation.data_classes.employee import Employee
+from model.representation.data_classes import Employee
 
 from helpers import get_standard_cost
 
