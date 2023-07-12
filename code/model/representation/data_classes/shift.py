@@ -1,9 +1,8 @@
 import datetime
 
 from sqlalchemy import Column, Integer, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from model.representation.data_classes.setup import Base
 
-Base = declarative_base()
 class Shift(Base):
     __tablename__ = 'shifts'
 

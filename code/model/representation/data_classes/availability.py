@@ -3,9 +3,8 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from sqlalchemy.ext.declarative import declarative_base
+from model.representation.data_classes.setup import Base
 
-Base = declarative_base()
 class Availability(Base):
     __tablename__ = 'availability'
 
