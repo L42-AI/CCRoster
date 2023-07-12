@@ -7,9 +7,6 @@ from model.representation.data_classes.availability import Availability
 
 
 def gen_id_dict(l: list[Any]) -> dict[int, Any]:
-    if not hasattr(l, 'id'):
-        raise AttributeError('List contents have no ID attribute')
-    
     return {x.id : x for x in l}
 
 def gen_time_conflict_dict(shift_list: list[Shift]) -> dict[int, set[int]]:
