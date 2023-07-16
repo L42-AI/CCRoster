@@ -17,7 +17,7 @@ class Presenter:
     def get_schedule(self) -> Schedule:
         return self._build_schedule(self.config)
     
-    def get_schedules(self) -> Schedule:
+    def get_schedules(self) -> list[Schedule]:
         if self.config['runtype'] not in ['multi']:
             raise ValueError(f"{self.config['datatype']} not valid! Choose from:\n-'multi'")
         return Model.multi_schedules(self.employee_list, self.shift_list, self.config)
@@ -48,7 +48,7 @@ class Presenter:
             case other:
                 raise ValueError(f"{config['datatype']} not valid! Choose from:\n-'offline'\n-'online'")
 
-    def _build_schedule(self, config: dict[str, str]) -> Schedule:
+    def _build_schedule(self, config: dict[str, str]) -> Schedule | None:
         match config['runtype']:
             case 'random':
                 return Model.random(self.employee_list, self.shift_list)

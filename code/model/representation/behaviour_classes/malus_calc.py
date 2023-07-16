@@ -14,7 +14,7 @@ class MalusCalc:
     #     return round(total_cost, 2)
     
     @staticmethod
-    def compute_replacement_factor(availabilities_dict: dict[int, set[int]]) -> float:
+    def compute_replacement_factor(availabilities_dict: dict[int, tuple[int, int]]) -> float:
 
         max_len_shift = sorted(availabilities_dict, key = lambda shift_id: len(availabilities_dict[shift_id][1]), reverse=True)[0]
         min_len_shift = sorted(availabilities_dict, key = lambda shift_id: len(availabilities_dict[shift_id][1]))[0]
@@ -58,6 +58,7 @@ class MalusCalc:
 
         return wage * billable_hours # Multiply duration with hourly wage to get total pay
     
+    @staticmethod
     def compute_cost(schedule: Schedule) -> float:
         
         id_employee_dict = schedule.Workload.id_employee

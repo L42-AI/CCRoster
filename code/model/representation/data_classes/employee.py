@@ -96,19 +96,19 @@ class Employee(Base):
     def get_level(self) -> int:
         return self.level
 
-    def get_tasks(self) -> int:
+    def get_tasks(self) -> list[int]:
         return self.tasks
 
     def get_week_max_dict(self) -> dict[int, int]:
         return self.weekly_max
 
-    def get_week_max(self, week) -> int:
+    def get_week_max(self, week) -> int | None:
         return self.weekly_max.get(week)
 
     def get_minimal_hours(self) -> int:
         return self.min_hours
 
-    def get_id(self) -> str:
+    def get_id(self) -> int:
         return self.id
 
     def __str__(self) -> str:

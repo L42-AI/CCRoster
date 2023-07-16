@@ -13,28 +13,33 @@ from helpers import recursive_copy, gen_id_dict, gen_time_conflict_dict, gen_tot
 class Model:
 
     """ DATABASE """
-
+    @staticmethod
     def get_offline_data() -> tuple[list[Shift], list[Employee]]:
         return shift_list, employee_list
     
+    @staticmethod
     def download(location_id: int) -> tuple[list[Shift], list[Employee]]:
         raise NotImplementedError
     
     """ SCHEDULE """
 
+    @staticmethod
     def random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         return Model._random(employee_list, shift_list)
 
-    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
+    @staticmethod
+    def greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] | None = None) -> Schedule:
         return Model._greedy(employee_list, shift_list, weights)
 
+    @staticmethod
     def propagate(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
         schedule = Model._random(employee_list, shift_list)
         # schedule = Model._greedy(employee_list, shift_list)
         P = PPA(schedule)
         return P.grow(config)
 
-    def optimal(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule:
+    @staticmethod
+    def optimal(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> Schedule | None:
         fail = 0
         schedule = None
         for _ in tqdm(range(int(config['optimize_runs']))):
@@ -49,6 +54,7 @@ class Model:
             return schedule
         return None
 
+    @staticmethod
     def multi_schedules(employee_list: list[Employee], shift_list: list[Shift], config: dict[str, str]) -> list[Schedule]:
         if 'num_schedules' not in config:
             raise NameError(f'num_schedules missing from config file')
@@ -71,7 +77,8 @@ class Model:
 
     """ GENERATORS """
 
-    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
+    @staticmethod
+    def _greedy(employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] | None = None) -> Schedule:
         G = Greedy(
             total_availabilities=recursive_copy(gen_total_availabilities(employee_list, shift_list)),
             time_conflict_dict=gen_time_conflict_dict(shift_list),
@@ -81,6 +88,7 @@ class Model:
         
         return G.generate(employee_list, shift_list, weights)
     
+    @staticmethod
     def _random(employee_list: list[Employee], shift_list: list[Shift]) -> Schedule:
         F = Fill(
             total_availabilities=recursive_copy(gen_total_availabilities(employee_list, shift_list)),
@@ -93,7 +101,8 @@ class Model:
 
     """ SCHEDULES PROCESSING """
 
-    def split_schedules(schedules: list[Schedule]) -> tuple[list[Schedule], list[Schedule]]:
+    @staticmethod
+    def split_schedules(schedules: list[Schedule]) -> tuple[list[Schedule], list[Schedule], dict[int, dict[str, int]]]:
 
         shift_count_dict = {shift_id: {} for shift_id in schedules[0]}
 
@@ -113,7 +122,8 @@ class Model:
         
         return valid_schedules, invalid_schedules, shift_count_dict
 
-    def count_occupation(schedules: list[Schedule], shift_count_dict: dict[int, dict[int, int]]) -> dict[int, dict[int, int]]:
+    @staticmethod
+    def count_occupation(schedules: list[Schedule], shift_count_dict: dict[int, dict[str, int]]) -> dict[int, dict[str, int]]:
         for schedule in schedules:
             for shift_id, employee_id in schedule.items():
                 shift_count_dict[shift_id][str(employee_id)] += 1
@@ -143,8 +153,7 @@ class Model:
         return weights
 
 
-
-
+    @staticmethod
     def _has_none_values(data_dict: dict):
         for value in data_dict.values():
             if value is None:

@@ -9,7 +9,7 @@ from model.representation.data_classes.current_availabilities import CurrentAvai
 from model.representation.data_classes.workload import Workload
 
 class Schedule(dict):
-    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] = None):
+    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, set_schedule: dict[int, int] | None = None):
         self.Workload = Workload
         self.CurrentAvailabilities = CurrentAvailabilities
 
@@ -21,12 +21,12 @@ class Schedule(dict):
                 self[shift.id] = None
 
 class Plant(Schedule):
-    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, cost: float, set_schedule: dict[int, int] = None):
+    def __init__(self, Workload: Workload, CurrentAvailabilities: CurrentAvailabilities, cost: float, set_schedule: dict[int, int] | None = None):
         super().__init__(Workload, CurrentAvailabilities, set_schedule)
 
         self.cost = cost
-        self.fitness: float = None
-        self.p: float = None
+        self.fitness: float | None = None
+        self.p: float | None = None
         self.BUDS = 10 # number of buds this plant can have
         self.MUTATIONS = random.randint(1, 5)
 

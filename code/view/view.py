@@ -8,10 +8,12 @@ from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.shift import Shift
 
 class View:
+    @staticmethod
     def print_schedule(schedule: Schedule, id_employee_dict: dict[int, Employee], id_shift_dict: dict[int, Shift]):
         for shift_id, employee_id in schedule.items():
             print(id_shift_dict.get(shift_id, None), id_employee_dict.get(employee_id, None))
 
+    @staticmethod
     def print_success_rate(valid_schedules: list[Schedule], invalid_schedules: list[Schedule]):
         def count_unique_elements(lst):
             unique_elements = []
@@ -23,6 +25,7 @@ class View:
         print('Success factor:', len(valid_schedules) / (len(valid_schedules) + len(invalid_schedules)))
         print('Amount of unique arrangements:', count_unique_elements(valid_schedules))
 
+    @staticmethod
     def plot_schedules(valid_counts: dict[int, dict[int, int]], invalid_counts: dict[int, dict[int, int]], colors: list[str]):
         """
         Generate a barplot with multiple colors within each bar based on data composition.
@@ -46,7 +49,8 @@ class View:
         # Show the plot
         plt.show()
 
-    def _plot(axes: np.ndarray, counts: dict[int, dict[int, int]], color: str, bottom: dict[int, dict[int, int]] = None):
+    @staticmethod
+    def _plot(axes: np.ndarray, counts: dict[int, dict[int, int]], color: str, bottom: dict[int, dict[int, int]] | None = None):
         def calc_bottom(shift_id: int, bottom: dict[int, dict[int, int]]) -> list[int]:
             if shift_id not in bottom:
                 return [0]
@@ -54,8 +58,7 @@ class View:
                 return [bottom[shift_id]]
             else:
                 return list(bottom[shift_id].values())
-            
-        
+
         for shift_id, shift_counts in counts.items():
             ax: plt.Axes = axes[shift_id // 9, shift_id % 9]
             

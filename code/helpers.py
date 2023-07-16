@@ -1,12 +1,13 @@
 import random
 import numpy as np
+from typing import Any
 
 from model.representation.data_classes.availability import Availability
 from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 
 
-def gen_id_dict(l: list[object]) -> dict[int, object]:
+def gen_id_dict(l: list[Any]) -> dict[int, Any]:
     try:
         l[0].id
     except:
@@ -49,7 +50,7 @@ def get_random_employee_id(total_availabilities: dict[int, set[int]], shift_id: 
 
     return random.choice(list(choices))
 
-def recursive_copy(obj: object) -> object:
+def recursive_copy(obj: Any) -> Any:
 
     if isinstance(obj, dict):
         return {k: recursive_copy(v) for k, v in obj.items()}
@@ -85,7 +86,7 @@ def _possible_shift(workable_shift: Availability, employee: Employee, shift: Shi
             return True, 1
     return False, -999
 
-def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[int]:
+def _employee_availability(shift: Shift, employee_list: list[Employee]) -> dict[int, int]:
     """
     this method is only used to develop the generator, later, the info will actually be downloaded
     for now it just returns a hardcoded list with availability
@@ -103,7 +104,7 @@ def _employee_availability(shift: Shift, employee_list: list[Employee]) -> set[i
 
     return availabilities
 
-def gen_total_availabilities(employee_list: list[Employee], shift_list: list[Shift]) -> dict[int, set[int]]:
+def gen_total_availabilities(employee_list: list[Employee], shift_list: list[Shift]) -> dict[int, dict[int, int]]:
     return {shift.id: _employee_availability(shift, employee_list) for shift in shift_list}
 
 def compute_prob(score: float, total: float) -> float:

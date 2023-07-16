@@ -16,7 +16,7 @@ class PPA:
         self.id_employee = start_schedule.Workload.id_employee
         self.id_shift = start_schedule.Workload.id_shift
 
-    def grow(self, config: dict[str, str]) -> None:
+    def grow(self, config: dict[str, str]) -> Plant:
         ''' this is the core of the PPA algo. If adjust mutations is not activated it appears to find faster and 
             more consistent results... But maybe for larger data it does not. Check with Haarlemmermeer data'''
         

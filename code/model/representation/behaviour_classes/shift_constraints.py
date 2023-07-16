@@ -3,7 +3,7 @@ from model.representation.data_classes.schedule import Schedule
 class ShiftConstrains:
 
     @staticmethod
-    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: dict[int, int], time_conflict_dict) -> bool:
+    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: Schedule, time_conflict_dict) -> bool:
         if ShiftConstrains.same_time(shift_id, employee_id, schedule, time_conflict_dict):
             return False
         return True

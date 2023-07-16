@@ -16,7 +16,7 @@ from helpers import get_random_shift_id, compute_prob, softmax_function
 
 class Fill:
 
-    def __init__(self, total_availabilities: dict[int, set[int]], time_conflict_dict: dict[int, set[int]], id_employee: dict[int, Employee], id_shift: dict[int, Shift]) -> None:
+    def __init__(self, total_availabilities: dict[int, dict[int, int]], time_conflict_dict: dict[int, set[int]], id_employee: dict[int, Employee], id_shift: dict[int, Shift]) -> None:
         self.total_availabilities = total_availabilities
         self.time_conflict_dict = time_conflict_dict
         self.id_employee_dict = id_employee
@@ -45,37 +45,36 @@ class Fill:
         return schedule
 
     """ Helpers """
-
+    @staticmethod
     def schedule_in(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
         ''' Places a worker in a shift in the schedule, while also updating his workload '''
         Schedule[shift_id] = employee_id
         Schedule.Workload.update(shift_id, employee_id, add=True)
 
+    @staticmethod
     def schedule_out(shift_id: int, Schedule: Schedule) -> None:
         ''' Removes a worker from a shift and updates the workload so the worker has room to work another shift'''
         employee_id = Schedule[shift_id]
         Schedule[shift_id] = None
         Schedule.Workload.update(shift_id, employee_id, add=False)
 
+    @staticmethod
     def schedule_swap(shift_id: int, employee_id: int, Schedule: Schedule) -> None:
         ''' Performs a swap in workers for a shift, updates the workload of both workers in the process'''
         Fill.schedule_out(shift_id, Schedule)
         Fill.schedule_in(shift_id, employee_id, Schedule)
 
-    def get_random_employee(self, shift_id: int, existing_employee: int = None) -> int:
+    def get_random_employee(self, shift_id: int, existing_employee: int | None = None) -> int:
         """
         returns an employee id
         """
 
-        if existing_employee != None:
-            choices = self.total_availabilities[shift_id] - {existing_employee}
-        else:
-            choices = self.total_availabilities[shift_id]
-        
-        if not choices:
+        choices = [emp for emp in self.total_availabilities[shift_id].keys() if emp != existing_employee]
+
+        if len(choices) == 0:
             raise ValueError("No available employees for shift")
 
-        return random.choice(list(choices))
+        return random.choice(choices)
 
     def get_weeknumber(self, shift_id: int) -> int:
         shift_obj = self.id_shift_dict[shift_id]
@@ -85,7 +84,7 @@ class Greedy(Fill):
 
     """ Main """
 
-    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] = None) -> Schedule:
+    def generate(self, employee_list: list[Employee], shift_list: list[Shift], weights: dict[int, dict[int, int]] | None = None) -> Schedule:
 
         schedule = Schedule(Workload(employee_list, shift_list), CurrentAvailabilities(self.total_availabilities))
 
@@ -172,34 +171,12 @@ class Greedy(Fill):
             Schedule.CurrentAvailabilities[shift_id][0] = 0
 
     @staticmethod
-    def compute_priority(employee_list: list[Employee], Schedule: Schedule, weeknum: int) -> None:
-        for employee in employee_list:
-            workload = Schedule.Workload[employee.id]
-            week_max = employee.get_week_max(weeknum)
-            week_min = employee.min_hours
-
-            if weeknum in employee.availability_dict:
-                availability_priority = (len(employee.availability_dict[weeknum]) - week_max)
-                week_min_priority = (len(workload[weeknum]) - week_min)
-                week_max_priority = (week_max - len(workload[weeknum]))
-
-                if availability_priority < 1:
-                    availability_priority = -99
-                if week_min_priority < 0:
-                    week_min_priority = -150
-                if week_max_priority < 1:
-                    week_max_priority = -99
-                
-                employee.priority = availability_priority + week_min_priority - week_max_priority
-            else:
-                employee.priority = 999
-
-    @staticmethod
     def reset_weights(Schedule: Schedule, shift_id: int):
         new_weight = 1 / len(Schedule.CurrentAvailabilities[shift_id][1].keys())
         for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
             Schedule.CurrentAvailabilities[shift_id][1][employee_id] = new_weight
 
+    @staticmethod
     def apply_weights(Schedule: Schedule, weights: dict[int, dict[int, int]]):
         for shift_id in Schedule.CurrentAvailabilities:
             for employee_id in Schedule.CurrentAvailabilities[shift_id][1]:
