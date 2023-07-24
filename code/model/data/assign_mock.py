@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from model.representation.data_classes.availability import Availability
-from model.representation.data_classes.shift import Shift
+from model.representation.data_classes.shift import Shift, ShiftType
 from model.representation.data_classes.employee import Employee
 
 employee_list: list[Employee] = []
@@ -64,122 +64,122 @@ employee_list.append(Employee('7', ' ', [
 shift_list.append(Shift(
     start=datetime(2023, 5, 29, 9),
     end=datetime(2023, 5, 29, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 29, 13),
     end=datetime(2023, 5, 29, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 29, 13),
     end=datetime(2023, 5, 29, 15),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 29, 15),
     end=datetime(2023, 5, 29, 17),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 """ DINSDAG """
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 30, 9),
     end=datetime(2023, 5, 30, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 30, 13),
     end=datetime(2023, 5, 30, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 30, 15),
     end=datetime(2023, 5, 30, 17),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 """ WOENSDAG """
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 31, 9),
     end=datetime(2023, 5, 31, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 31, 13),
     end=datetime(2023, 5, 31, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 31, 11),
     end=datetime(2023, 5, 31, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 5, 31, 13),
     end=datetime(2023, 5, 31, 15),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 """ DONDERDAG """
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 1, 13),
     end=datetime(2023, 6, 1, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 1, 11),
     end=datetime(2023, 6, 1, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 1, 13),
     end=datetime(2023, 6, 1, 15),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 1, 15),
     end=datetime(2023, 6, 1, 17),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 """ VRIJDAG """
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 2, 9),
     end=datetime(2023, 6, 2, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 2, 13),
     end=datetime(2023, 6, 2, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 2, 11),
     end=datetime(2023, 6, 2, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 2, 15),
     end=datetime(2023, 6, 2, 17),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 """ ZATERDAG """
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 3, 9),
     end=datetime(2023, 6, 3, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 3, 13),
     end=datetime(2023, 6, 3, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 3, 11),
     end=datetime(2023, 6, 3, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 
 """ ZONDAG """
@@ -187,17 +187,17 @@ shift_list.append(Shift(
 shift_list.append(Shift(
     start=datetime(2023, 6, 4, 9),
     end=datetime(2023, 6, 4, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.OPEN.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 4, 13),
     end=datetime(2023, 6, 4, 18),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.REGULAR.value))
 
 shift_list.append(Shift(
     start=datetime(2023, 6, 4, 11),
     end=datetime(2023, 6, 4, 13),
-    task=1, location=1))
+    task=1, location=1, shift_type=ShiftType.CLOSE.value))
 
 for id_, employee in enumerate(employee_list):
     employee.id = id_

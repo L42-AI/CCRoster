@@ -1,7 +1,13 @@
 import datetime
+from enum import Enum, auto
 
 from sqlalchemy import Column, Integer, DateTime
 from model.representation.data_classes.setup import Base
+
+class ShiftType(Enum):
+    REGULAR = 0
+    OPEN = 1
+    CLOSE = 2
 
 class Shift(Base):
     __tablename__ = 'shifts'
@@ -11,12 +17,14 @@ class Shift(Base):
     end = Column(DateTime)
     location = Column(Integer)
     task = Column(Integer)
+    shift_type = Column(Integer)
 
-    def __init__(self, start: datetime.datetime, end: datetime.datetime, task: int, location: int) -> None:
+    def __init__(self, start: datetime.datetime, end: datetime.datetime, task: int, location: int, shift_type: int) -> None:
         self.start = start
         self.end = end
         self.task = task
         self.location = location
+        self.shift_type = shift_type
         self.duration = (self.end - self.start).total_seconds() / 3600
 
     def __str__(self) -> str:
