@@ -11,10 +11,10 @@ from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 
 from model.data.database import download_employees, download_shifts
-from model import Model
-from view import View
+from model.model import Model
+from view.view import View
 from presenter.presenter import Presenter
-from main_schedule import config_dev as config
+from main_schedule import config
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
