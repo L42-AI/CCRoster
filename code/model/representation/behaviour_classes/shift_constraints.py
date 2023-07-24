@@ -4,6 +4,12 @@ from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.schedule import Schedule
 
+class ShiftConstrainsHelpers:
+    @staticmethod
+    def is_within_one_day(dt1: datetime, dt2: datetime) -> bool:
+        # Check if the two datetimes are within one day of each other
+        return abs((dt1 - dt2).total_seconds()) <= 86400  # 86400 seconds in a day
+
 class ShiftConstrains:
 
     @staticmethod
@@ -68,7 +74,7 @@ class ShiftConstrains:
                 if match_shift.start.day == shift.start.day:
                     continue
 
-                if not ShiftConstrains.is_within_one_day(match_shift.start, shift.start):
+                if not ShiftConstrainsHelpers.is_within_one_day(match_shift.start, shift.start):
                     continue
 
                 if employee_id != schedule.get(match_shift.id):
@@ -93,22 +99,21 @@ class ShiftConstrains:
         for shift_id, employee_id in schedule.items():
             scheduled_shift = id_shift[shift_id]
 
-            if not ShiftConstrains.is_within_one_day(scheduled_shift.start, new_shift.start):
+            if not ShiftConstrainsHelpers.is_within_one_day(scheduled_shift.start, new_shift.start):
                 continue
             
             if id_shift[shift_id].shift_type != new_shift.shift_type:
                 continue
 
-            if employee_id == new_employee_id and scheduled_shift.start.day != new_shift.start.day:
-                return True
+            if employee_id != new_employee_id:
+                continue
+
+            if scheduled_shift.start.day == new_shift.start.day:
+                continue
+
+            return True
+        return False
             
-
-    @staticmethod
-    def is_within_one_day(dt1: datetime, dt2: datetime) -> bool:
-        # Check if the two datetimes are within one day of each other
-        return abs((dt1 - dt2).total_seconds()) <= 86400  # 86400 seconds in a day
-
-
     @staticmethod
     def passed_hard_constraints(shift_id: int, employee_id: int, schedule: Schedule, time_conflict_dict) -> bool:
         if ShiftConstrains.same_time(shift_id, employee_id, schedule, time_conflict_dict):
