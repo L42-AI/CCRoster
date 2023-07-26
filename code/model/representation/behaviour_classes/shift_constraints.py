@@ -4,42 +4,29 @@ from model.representation.data_classes.shift import Shift
 from model.representation.data_classes.employee import Employee
 from model.representation.data_classes.schedule import Schedule
 
-class ShiftConstrainsHelpers:
+class ShiftConstraintsHelpers:
     @staticmethod
     def is_within_one_day(dt1: datetime, dt2: datetime) -> bool:
         # Check if the two datetimes are within one day of each other
         return abs((dt1 - dt2).total_seconds()) <= 86400  # 86400 seconds in a day
 
-class ShiftConstrains:
+
+
+class SoftShiftConstraints:
+    """ Include all methods that deal with softcontraints """
 
     @staticmethod
-    def soft_constraints_score() -> float:
-        score = 1
-        return score
+    def passed_recurrance_check(existing_shift: Shift, new_shift: Shift, existing_employee_id: int, new_employee_id: int) -> bool:
+        if ShiftConstraintsHelpers.is_within_one_day(existing_shift.start, new_shift.start):
+            return False
+        elif existing_shift.shift_type != new_shift.shift_type:
+            return False
+        elif existing_employee_id != new_employee_id:
+            return False
+        elif existing_shift.start.day == new_shift.start.day:
+            return False
+        return True
     
-    @staticmethod
-    def print_shift_recurrence_counts(schedule: Schedule, id_shift: dict[int, Shift], id_employee: dict[int, Employee]):
-        """
-        Print the shift recurrence counts for each employee in a human-readable format.
-        """
-
-        recurrence_counts = ShiftConstrains.count_shift_recurrences(schedule, id_shift)
-
-        print("Shift Recurrence Counts:")
-        for employee_id, counts in recurrence_counts.items():
-            employee_name = id_employee.get(employee_id, "Unknown Employee")
-            type_1_count = counts.get("type_1", 0)
-            type_2_count = counts.get("type_2", 0)
-
-            print(f"Employee ID: {employee_id}, Employee Name: {employee_name}")
-            print(f"  Type 1 Shifts Recurrence Count: {type_1_count}")
-            print(f"  Type 2 Shifts Recurrence Count: {type_2_count}")
-            print("------------------------")
-
-    @staticmethod
-    def warn_for_shift_recurrence() -> None:
-        print('This change causes a shift reocurrance')
-
     @staticmethod
     def count_shift_recurrences(schedule: Schedule, id_shift: dict[int, Shift]) -> dict[int, dict[str, int]]:
         """
@@ -68,24 +55,13 @@ class ShiftConstrains:
             for shift_id in all_shifts:
                 match_shift = id_shift[shift_id]
 
-                if match_shift.shift_type != shift.shift_type:
-                    continue
-
-                if match_shift.start.day == shift.start.day:
-                    continue
-
-                if not ShiftConstrainsHelpers.is_within_one_day(match_shift.start, shift.start):
-                    continue
-
-                if employee_id != schedule.get(match_shift.id):
-                    continue
-
-                employee_recurrences[employee_id][f"type_{dict_type}"] += 1
+                if SoftShiftConstraints.passed_recurrance_check(shift, match_shift, employee_id, schedule.get(match_shift.id)):
+                    employee_recurrences[employee_id][f"type_{dict_type}"] += 1
 
         return employee_recurrences
 
     @staticmethod
-    def _creates_shift_reoccurance(new_shift_id: int, new_employee_id: int, schedule: Schedule, id_employee: dict[int, Employee], id_shift: dict[int, Shift]) -> bool:
+    def creates_shift_reoccurance(new_shift_id: int, new_employee_id: int, schedule: Schedule, id_shift: dict[int, Shift]) -> bool:
         """
         Check if schedule change causes shift reoccurance
         """
@@ -99,27 +75,12 @@ class ShiftConstrains:
         for shift_id, employee_id in schedule.items():
             scheduled_shift = id_shift[shift_id]
 
-            if not ShiftConstrainsHelpers.is_within_one_day(scheduled_shift.start, new_shift.start):
-                continue
-            
-            if id_shift[shift_id].shift_type != new_shift.shift_type:
-                continue
-
-            if employee_id != new_employee_id:
-                continue
-
-            if scheduled_shift.start.day == new_shift.start.day:
-                continue
-
+            if SoftShiftConstraints.passed_recurrance_check(scheduled_shift, new_shift, employee_id, new_employee_id):
+                return False
             return True
-        return False
-            
-    @staticmethod
-    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: Schedule, time_conflict_dict) -> bool:
-        if ShiftConstrains.same_time(shift_id, employee_id, schedule, time_conflict_dict):
-            return False
-        return True
-
+        
+class HardShiftConstraints:
+    
     @staticmethod
     def same_time(shift_id: int, employee_id: int, Schedule: Schedule, time_conflict_dict: dict[int, list[int]]) -> bool:
         if employee_id is None:
@@ -132,3 +93,40 @@ class ShiftConstrains:
 
         return False
 
+class ShiftConstraints:
+
+    @staticmethod
+    def soft_constraints_score(schedule: Schedule, id_shift: dict[int, Shift], id_employee: dict[int, Employee]) -> float:
+        recurrence_counts = SoftShiftConstraints.count_shift_recurrences(schedule, id_shift)
+        for employee_id, recurrance_dict in recurrence_counts.items():
+            employee = id_employee[employee_id]
+            NotImplemented
+    
+    @staticmethod
+    def print_shift_recurrence_counts(schedule: Schedule, id_shift: dict[int, Shift], id_employee: dict[int, Employee]):
+        """
+        Print the shift recurrence counts for each employee in a human-readable format.
+        """
+
+        recurrence_counts = SoftShiftConstraints.count_shift_recurrences(schedule, id_shift)
+
+        print("Shift Recurrence Counts:")
+        for employee_id, counts in recurrence_counts.items():
+            employee_name = id_employee.get(employee_id, "Unknown Employee")
+            type_1_count = counts.get("type_1", 0)
+            type_2_count = counts.get("type_2", 0)
+
+            print(f"Employee ID: {employee_id}, Employee Name: {employee_name}")
+            print(f"  Type 1 Shifts Recurrence Count: {type_1_count}")
+            print(f"  Type 2 Shifts Recurrence Count: {type_2_count}")
+            print("------------------------")
+
+    @staticmethod
+    def warn_for_shift_recurrence() -> None:
+        print('This change causes a shift reocurrance')
+            
+    @staticmethod
+    def passed_hard_constraints(shift_id: int, employee_id: int, schedule: Schedule, time_conflict_dict) -> bool:
+        if HardShiftConstraints.same_time(shift_id, employee_id, schedule, time_conflict_dict):
+            return False
+        return True

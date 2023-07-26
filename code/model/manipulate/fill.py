@@ -2,7 +2,7 @@ import random
 from pprint import pprint
 
 
-from model.representation.behaviour_classes import ShiftConstrains
+from model.representation.behaviour_classes import ShiftConstraints
 
 from model.representation.data_classes.current_availabilities import CurrentAvailabilities
 from model.representation.data_classes.schedule import Schedule
@@ -37,7 +37,7 @@ class Fill:
             # check if new worker wants to work additional shift, if not, use mutate_max
             if schedule.Workload.check_capacity(shift_id, employee_id):
 
-                if ShiftConstrains.passed_hard_constraints(shift_id, employee_id, schedule, self.time_conflict_dict):
+                if ShiftConstraints.passed_hard_constraints(shift_id, employee_id, schedule, self.time_conflict_dict):
                     Fill.schedule_in(shift_id, employee_id, schedule)
                     filled += 1
                     continue
@@ -113,7 +113,7 @@ class Greedy(Fill):
             
             self.schedule_in(shift_id, selected_employee_id, schedule)
 
-            if not ShiftConstrains.passed_hard_constraints(shift_id, selected_employee_id, schedule, self.time_conflict_dict):
+            if not ShiftConstraints.passed_hard_constraints(shift_id, selected_employee_id, schedule, self.time_conflict_dict):
                 self.schedule_out(shift_id, schedule)
             else:
                 filled += 1
